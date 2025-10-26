@@ -13,6 +13,7 @@ Also will need a menu functionality that just displays the current color seen.
 #include "MenuManager.h"
 #include "PinDefinitions.h"
 #include "ColorHelper.h"
+#include "ScaleManager.h"
 
 // Button debouncing helper
 struct ButtonHelper {
@@ -60,6 +61,9 @@ MenuManager menu(tft);
 // Color sensor setup
 ColorHelper colorSensor(true); // Enable normalization
 
+// Scale manager setup
+ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
+
 // Encoder state variables
 int lastEncoderA = HIGH;
 int lastEncoderB = HIGH;
@@ -73,16 +77,6 @@ ButtonHelper auxBtn(AUX_BTN);
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting up...");
-  
-  // Initialize external LED on D14 and blink 4 times to show we're alive
-  pinMode(14, OUTPUT);  // D14 = GPIO14 for external LED
-  for (int i = 0; i < 4; i++) {
-    digitalWrite(14, HIGH);
-    delay(200);
-    digitalWrite(14, LOW);
-    delay(200);
-  }
-  Serial.println("LED blink test complete");
   
   // Initialize SPI with custom pins
   Serial.println("Initializing SPI...");
@@ -245,16 +239,22 @@ void loop() {
       Serial.print("Detected color: ");
       Serial.println(detectedColor);
       
-      // Update menu with current color for troubleshoot display
-      menu.updateCurrentColor(detectedColor);
+      // Generate MIDI note based on detected color
+      uint8_t midiNote = scaleManager.colorToMIDINote(detectedColor);
+      Serial.print("MIDI Note: ");
+      Serial.println(midiNote);
       
-      // Re-render if we're in troubleshoot menu to show updated color
+      // Update menu with current color and MIDI note for troubleshoot display
+      menu.updateCurrentColor(detectedColor);
+      menu.updateCurrentMIDINote(midiNote);
+      
+      // Re-render if we're in troubleshoot menu to show updated info
       if (menu.currentMenu == TROUBLESHOOT_MENU) {
         menu.render();
       }
       
-      // You can add MIDI generation logic here based on detectedColor
-      // For example: generateMIDINote(detectedColor);
+      // TODO: Send actual MIDI message here
+      // For example: sendMIDINote(midiNote, velocity);
     }
     
     lastColorTime = currentTime;

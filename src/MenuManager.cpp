@@ -26,6 +26,10 @@ void MenuManager::updateCurrentColor(const char* color) {
     currentDetectedColor = String(color);
 }
 
+void MenuManager::updateCurrentMIDINote(uint8_t midiNote) {
+    currentMIDINote = midiNote;
+}
+
 // Text centering helper functions
 void MenuManager::centerTextAt(int y, String text, int textSize) {
     tft.setTextSize(textSize);
@@ -178,15 +182,24 @@ void MenuManager::render() {
         tft.drawLine(centerX, 40, centerX, 240, TFT_WHITE); // Vertical divider
         tft.drawLine(0, centerY, 320, centerY, TFT_WHITE);  // Horizontal divider
         
-        // Quadrant 1 (top-left): Current Color
+        // Quadrant 1 (top-left): Current Color and MIDI Note
         tft.setTextSize(1);
         tft.setTextColor(TFT_YELLOW);
         tft.setCursor(10, 50);
-        tft.print("Current Color:");
+        tft.print("Color:");
         tft.setTextSize(2);
         tft.setTextColor(TFT_GREEN);
-        tft.setCursor(10, 70);
+        tft.setCursor(10, 65);
         tft.print(currentDetectedColor);
+        
+        tft.setTextSize(1);
+        tft.setTextColor(TFT_YELLOW);
+        tft.setCursor(10, 90);
+        tft.print("MIDI Note:");
+        tft.setTextSize(2);
+        tft.setTextColor(TFT_CYAN);
+        tft.setCursor(10, 105);
+        tft.print(currentMIDINote);
         
         // Quadrant 2 (top-right): Reserved for future use
         tft.setTextSize(1);

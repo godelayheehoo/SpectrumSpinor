@@ -76,9 +76,11 @@ public:
     
     // Current detected color for troubleshoot menu
     String currentDetectedColor = "unknown";
+    uint8_t currentMIDINote = 60;
     
-    // Update current color (called from main.cpp)
+    // Update current color and MIDI note (called from main.cpp)
     void updateCurrentColor(const char* color);
+    void updateCurrentMIDINote(uint8_t midiNote);
     
 
 };

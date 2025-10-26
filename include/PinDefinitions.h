@@ -13,3 +13,7 @@
 #define ENCODER_B  33
 #define ENCODER_BTN 25
 #define AUX_BTN    26
+
+// Color sensor pins (TCS34725)
+#define COLOR_SENSOR_SDA 15
+#define COLOR_SENSOR_SCL 27

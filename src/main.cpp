@@ -1,8 +1,18 @@
+/*
+TODO:
+- when we have multiple rings and sensors, we'll replace each number in the menu grid with the assigned letter.
+The current working letter will be in the top left color, aux button will cycle through them.
+
+- Way down the road, we need to work in a way to auto-calibrate, or at least speed up the process.
+Maybe a menu called "calibrate colors" and then have calibrate orange, calibrate blue, etc.
+Also will need a menu functionality that just displays the current color seen.
+*/
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 #include <SPI.h>
 #include "MenuManager.h"
 #include "PinDefinitions.h"
+#include "ColorHelper.h"
 
 // Button debouncing helper
 struct ButtonHelper {
@@ -46,6 +56,9 @@ struct ButtonHelper {
 // Display setup - TFT_eSPI uses User_Setup.h for pin configuration
 TFT_eSPI tft = TFT_eSPI();
 MenuManager menu(tft);
+
+// Color sensor setup
+ColorHelper colorSensor(true); // Enable normalization
 
 // Encoder state variables
 int lastEncoderA = HIGH;
@@ -136,6 +149,14 @@ void setup() {
   
   Serial.println("Display and encoder initialized");
   
+  // Initialize color sensor
+  Serial.println("Initializing color sensor...");
+  if (colorSensor.begin()) {
+    Serial.println("Color sensor ready");
+  } else {
+    Serial.println("Color sensor initialization failed - continuing without it");
+  }
+  
   // Initial menu render
   menu.render();
 }
@@ -193,7 +214,9 @@ MenuButton readButtons() {
 
 void loop() {
   static unsigned long lastPollTime = 0;
+  static unsigned long lastColorTime = 0;
   const unsigned long pollInterval = 10; // Poll every 10ms
+  const unsigned long colorInterval = 500; // Check color every 500ms
   
   unsigned long currentTime = millis();
   
@@ -213,5 +236,27 @@ void loop() {
     }
     
     lastPollTime = currentTime;
+  }
+  
+  // Periodic color detection
+  if (currentTime - lastColorTime >= colorInterval) {
+    if (colorSensor.isAvailable()) {
+      const char* detectedColor = colorSensor.getCurrentColor();
+      Serial.print("Detected color: ");
+      Serial.println(detectedColor);
+      
+      // Update menu with current color for troubleshoot display
+      menu.updateCurrentColor(detectedColor);
+      
+      // Re-render if we're in troubleshoot menu to show updated color
+      if (menu.currentMenu == TROUBLESHOOT_MENU) {
+        menu.render();
+      }
+      
+      // You can add MIDI generation logic here based on detectedColor
+      // For example: generateMIDINote(detectedColor);
+    }
+    
+    lastColorTime = currentTime;
   }
 }

@@ -1,0 +1,40 @@
+#pragma once
+#include <Arduino.h>
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
+#include "PinDefinitions.h"
+
+class ColorHelper {
+public:
+    ColorHelper(bool normalizeReadings = true);
+    
+    // Initialize the color sensor
+    bool begin();
+    
+    // Get the currently detected color name
+    const char* getCurrentColor();
+    
+    // Get raw color readings
+    void getRawData(uint16_t* r, uint16_t* g, uint16_t* b, uint16_t* c);
+    
+    // Get normalized color readings (0.0 - 1.0)
+    void getNormalizedData(float* r, float* g, float* b);
+    
+    // Check if sensor is available
+    bool isAvailable() const;
+    
+private:
+    Adafruit_TCS34725 tcs;
+    bool normalize;
+    bool sensorAvailable;
+    
+    // Internal color database access
+    void* getColorDatabase(int& numColors);
+    
+    // Find nearest color match
+    const char* findNearestColor(float r, float g, float b);
+    
+    // Calculate Euclidean distance between colors
+    float calculateColorDistance(float r1, float g1, float b1, 
+                               float r2, float g2, float b2);
+};

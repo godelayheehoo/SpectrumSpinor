@@ -18,7 +18,8 @@ extern const MenuHandlers menuHandlersTable[];
 
 enum MenuState {
     MAIN_MENU,
-    MIDI_GRID_MENU
+    MIDI_GRID_MENU,
+    TROUBLESHOOT_MENU
 };
 
 enum MenuButton {
@@ -51,6 +52,12 @@ public:
     void gridMenuEncoderButton();
     void gridMenuAuxButton();
     
+    // Handler functions for TROUBLESHOOT_MENU
+    void troubleshootMenuCW();
+    void troubleshootMenuCCW();
+    void troubleshootMenuEncoderButton();
+    void troubleshootMenuAuxButton();
+    
 
 
     MenuState currentMenu;
@@ -66,6 +73,12 @@ public:
     
     // Active MIDI channel (1-16)
     int activeMIDIChannelA = 1;
+    
+    // Current detected color for troubleshoot menu
+    String currentDetectedColor = "unknown";
+    
+    // Update current color (called from main.cpp)
+    void updateCurrentColor(const char* color);
     
 
 };

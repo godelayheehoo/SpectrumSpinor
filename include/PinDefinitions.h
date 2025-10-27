@@ -1,12 +1,16 @@
 #pragma once
 
-// Display pins
-// Note: SCL=18 (SCLK), SDA=23 (MOSI), CS tied to GND
-#define TFT_CS     -1   // CS tied to GND, so not controlled by ESP32
-#define TFT_RST    -1   // Not connected (use -1 to disable)
-#define TFT_DC     2    // DC pin
-#define TFT_SCLK   18   // SCL = SPI Clock
-#define TFT_MOSI   23   // SDA = SPI Data (MOSI)
+// Display pins - SH1106 I2C OLED
+#define OLED_SDA   21   // I2C Data
+#define OLED_SCL   22   // I2C Clock
+#define OLED_RESET -1   // Reset pin not used
+
+// Legacy TFT pins (commented out for reference)
+// #define TFT_CS     -1   // CS tied to GND, so not controlled by ESP32
+// #define TFT_RST    -1   // Not connected (use -1 to disable)
+// #define TFT_DC     2    // DC pin
+// #define TFT_SCLK   18   // SCL = SPI Clock
+// #define TFT_MOSI   23   // SDA = SPI Data (MOSI)
 
 // Encoder pins
 #define ENCODER_A  32

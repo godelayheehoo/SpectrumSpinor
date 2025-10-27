@@ -8,8 +8,9 @@ Maybe a menu called "calibrate colors" and then have calibrate orange, calibrate
 Also will need a menu functionality that just displays the current color seen.
 */
 #include <Arduino.h>
-#include <TFT_eSPI.h>
-#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH110X.h>
 #include "MenuManager.h"
 #include "PinDefinitions.h"
 #include "ColorHelper.h"
@@ -61,9 +62,9 @@ struct ButtonHelper {
   }
 };
 
-// Display setup - TFT_eSPI uses User_Setup.h for pin configuration
-TFT_eSPI tft = TFT_eSPI();
-MenuManager menu(tft);
+// Display setup - SH1106 OLED
+Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+MenuManager menu(display);
 
 // Color sensor setup
 ColorHelper colorSensor(true); // Enable normalization
@@ -97,13 +98,13 @@ void midiPanic(){
   }
 }
 
-void resetTFT() {
-  Serial.println("Starting TFT hardware reset...");
-  tft.writecommand(0x01);  // Software reset command
-  delay(50);               // Minimal delay for reset to complete
-  tft.init();              // Re-initialize the display
-  menu.render();           // Redraw the UI
-  Serial.println("TFT reset complete");
+void resetOLED() {
+  Serial.println("Starting OLED reset...");
+  display.clearDisplay();      // Clear the display buffer
+  display.display();           // Send clear buffer to display
+  delay(50);                   // Minimal delay
+  menu.render();               // Redraw the UI
+  Serial.println("OLED reset complete");
 }
 
 void setup() {
@@ -113,13 +114,53 @@ void setup() {
   Serial.println("Setting up MIDI...");
   MIDIserial.begin(MIDI_BAUD_RATE, SERIAL_8N1, MIDI_IN_PIN, MIDI_OUT_PIN);
   
-  // Initialize SPI with custom pins
-  Serial.println("Initializing SPI...");
-  SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);  // SCK, MISO, MOSI, SS
-  Serial.println("SPI initialized");
+  // Initialize I2C for OLED display
+  Serial.println("Initializing I2C for display...");
+  Wire.begin(OLED_SDA, OLED_SCL);
+  Serial.println("I2C initialized");
   
 
-  tft.init();
+  if (!display.begin(OLED_I2C_ADDRESS)) {
+    Serial.println("SH1106G allocation failed");
+    while (1);
+  }
+
+  // OLED Test Functions - comment out when not needed
+  Serial.println("Running OLED tests...");
+  
+  // Test 1: Fill screen with white/black
+  display.clearDisplay();
+  display.fillScreen(OLED_WHITE);
+  display.display();
+  delay(500);
+  display.clearDisplay();
+  display.display();
+  delay(500);
+  
+  // Test 2: Draw some shapes
+  display.clearDisplay();
+  display.drawRect(10, 10, 50, 25, OLED_WHITE);
+  display.fillCircle(80, 32, 15, OLED_WHITE);
+  display.drawLine(0, 0, 127, 63, OLED_WHITE);
+  display.display();
+  delay(1000);
+  
+  // Test 3: Text rendering
+  display.clearDisplay();
+  display.setTextColor(OLED_WHITE);
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("OLED Test");
+  display.setTextSize(1);
+  display.println("Small text");
+  display.println("Line 3");
+  display.display();
+  delay(2000);
+  
+  // Clear screen for normal operation
+  display.clearDisplay();
+  display.display();
+  Serial.println("OLED tests complete");
 
   delay(2000);
   

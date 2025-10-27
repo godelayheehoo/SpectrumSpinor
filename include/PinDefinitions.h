@@ -14,6 +14,13 @@
 #define ENCODER_BTN 25
 #define AUX_BTN    26
 
+// Panic button
+#define PANIC_BTN  4
+
 // Color sensor pins (TCS34725)
 #define COLOR_SENSOR_SDA 15
 #define COLOR_SENSOR_SCL 27
+
+// MIDI pins
+#define MIDI_OUT_PIN 17
+#define MIDI_IN_PIN -1 // Not used

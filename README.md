@@ -1,4 +1,4 @@
-# ColorWheel ESP32 Project
+# SpectrumSpinor ESP32 Project
 
 This project implements a menu-driven interface on an ESP32 with a ST7789 TFT display and rotary encoder input.
 
@@ -80,7 +80,7 @@ The project features a table-driven menu system with the following menus:
 This project uses PlatformIO. To build:
 
 ```bash
-cd colorwheel
+cd spectrum_spinor
 pio run
 ```
 

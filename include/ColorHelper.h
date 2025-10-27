@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include "Adafruit_TCS34725.h"
 #include "PinDefinitions.h"
+#include "ColorEnum.h"
 
 class ColorHelper {
 public:
@@ -11,7 +12,10 @@ public:
     // Initialize the color sensor
     bool begin();
     
-    // Get the currently detected color name
+    // Get the currently detected color enum (EFFICIENT!)
+    Color getCurrentColorEnum();
+    
+    // Get the currently detected color name (for backwards compatibility)
     const char* getCurrentColor();
     
     // Get raw color readings
@@ -31,7 +35,10 @@ private:
     // Internal color database access
     void* getColorDatabase(int& numColors);
     
-    // Find nearest color match
+    // Find nearest color match (returns enum - EFFICIENT!)
+    Color findNearestColorEnum(float r, float g, float b);
+    
+    // Find nearest color match (returns string - for backwards compatibility)
     const char* findNearestColor(float r, float g, float b);
     
     // Calculate Euclidean distance between colors

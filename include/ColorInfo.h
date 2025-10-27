@@ -17,9 +17,10 @@ ColorCenter green = {15202, 35000, 13116, "green"};
 ColorCenter red = {47706, 11395, 9411, "red"};
 ColorCenter purple = {26269, 19172, 20256, "purple"};
 ColorCenter brown = {34588, 20049, 9354, "brown"};
+ColorCenter white = {24491, 24725, 13963, "white"};
 
 // Static color database
 static ColorCenter colorDatabase[] = {
-    pink, orange, blue, yellow, green, red, purple, brown
+    pink, orange, blue, yellow, green, red, purple, brown, white
 };
 static const int numColorDatabase = sizeof(colorDatabase) / sizeof(colorDatabase[0]);

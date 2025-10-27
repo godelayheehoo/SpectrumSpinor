@@ -1,24 +1,27 @@
 #include "ScaleManager.h"
-#include <string.h>
+#include "ColorEnum.h"
 
-// Color names in order from ColorInfo.h
-static const char* colorNames[] = {
-    "pink", "orange", "blue", "yellow", "green", "red", "purple", "brown"
-};
-static const int numColors = sizeof(colorNames) / sizeof(colorNames[0]);
+// Special MIDI note value for white (background) color - indicates "turn off notes"
+const uint8_t MIDI_NOTE_OFF = 0;  // Use note 0 on invalid channel, or we could use 255 as a special flag
 
 // Major scale intervals (semitones from root)
-// C=0, D=2, E=4, F=5, G=7, A=9, B=11, C(next)=12
+// Maps to Color enum order: PINK, ORANGE, BLUE, YELLOW, GREEN, RED, PURPLE, BROWN, WHITE
+// C=0, D=2, E=4, F=5, G=7, A=9, B=11, C(next)=12, WHITE=special
 static const uint8_t majorScaleOffsets[] = {
-    0, 2, 4, 5, 7, 9, 11, 12  // Maps to: C, D, E, F, G, A, B, C
+    0, 2, 4, 5, 7, 9, 11, 12, MIDI_NOTE_OFF  // Maps to: C, D, E, F, G, A, B, C, OFF
 };
 
 ScaleManager::ScaleManager(ScaleType initialScale, uint8_t initialOctave, uint8_t initialRootNote)
     : currentScale(initialScale), baseOctave(initialOctave), rootNote(initialRootNote) {
 }
 
-uint8_t ScaleManager::colorToMIDINote(const char* colorName) {
-    int colorIndex = getColorIndex(colorName);
+uint8_t ScaleManager::colorToMIDINote(Color color) {
+    // Special case: WHITE color means "turn off notes"
+    if (color == Color::WHITE) {
+        return MIDI_NOTE_OFF;  // Special value indicating note-off
+    }
+    
+    int colorIndex = colorToIndex(color);
     
     if (colorIndex == -1) {
         // Unknown color, return root note as default
@@ -26,6 +29,12 @@ uint8_t ScaleManager::colorToMIDINote(const char* colorName) {
     }
     
     uint8_t offset = getScaleOffset(colorIndex);
+    
+    // For white, offset will be MIDI_NOTE_OFF, so return it directly
+    if (offset == MIDI_NOTE_OFF) {
+        return MIDI_NOTE_OFF;
+    }
+    
     uint8_t midiNote = rootNote + offset;
     
     // Ensure we stay within valid MIDI range (0-127)
@@ -34,6 +43,20 @@ uint8_t ScaleManager::colorToMIDINote(const char* colorName) {
     }
     
     return midiNote;
+}
+
+// Backwards compatibility method - less efficient due to string comparison
+uint8_t ScaleManager::colorToMIDINote(const char* colorName) {
+    // Convert string to enum first, then use efficient enum method
+    for (uint8_t i = 0; i < getColorCount(); i++) {
+        Color color = indexToColor(i);
+        if (strcmp(colorToString(color), colorName) == 0) {
+            return colorToMIDINote(color);
+        }
+    }
+    
+    // Unknown color, return root note as default
+    return rootNote;
 }
 
 void ScaleManager::setScale(ScaleType scale) {
@@ -73,17 +96,12 @@ const char* ScaleManager::getScaleName() const {
     }
 }
 
-int ScaleManager::getColorIndex(const char* colorName) {
-    for (int i = 0; i < numColors; i++) {
-        if (strcmp(colorNames[i], colorName) == 0) {
-            return i;
-        }
-    }
-    return -1; // Color not found
+bool ScaleManager::isNoteOffColor(Color color) const {
+    return color == Color::WHITE;
 }
 
 uint8_t ScaleManager::getScaleOffset(int colorIndex) {
-    if (colorIndex < 0 || colorIndex >= numColors) {
+    if (colorIndex < 0 || colorIndex >= getColorCount()) {
         return 0; // Default to root note
     }
     

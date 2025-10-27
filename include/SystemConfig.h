@@ -1,0 +1,2 @@
+//MIDI
+#define MIDI_BAUD_RATE 31250

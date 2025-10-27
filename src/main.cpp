@@ -14,6 +14,13 @@ Also will need a menu functionality that just displays the current color seen.
 #include "PinDefinitions.h"
 #include "ColorHelper.h"
 #include "ScaleManager.h"
+#include "ColorEnum.h"
+#include <MIDI.h>
+#include "SystemConfig.h"
+
+// MIDI setup
+HardwareSerial MIDIserial(1);
+MIDI_CREATE_INSTANCE(HardwareSerial, MIDIserial, MIDI);
 
 // Button debouncing helper
 struct ButtonHelper {
@@ -73,64 +80,47 @@ const unsigned long debounceDelay = 50;
 // Button helpers
 ButtonHelper encoderBtn(ENCODER_BTN);
 ButtonHelper auxBtn(AUX_BTN);
+ButtonHelper panicBtn(PANIC_BTN);
+
+// Script States
+Color currentColorA = Color::UNKNOWN;
+
+//function prototypes
+MenuButton readButtons();
+MenuButton readEncoder();
+
+//helper functions
+void midiPanic(){
+  // Send All Notes Off message on all channels
+  for (uint8_t channel = 1; channel <= 16; channel++) {
+    MIDI.sendControlChange(123, 0, channel); // 123 = All Notes Off
+  }
+}
+
+void resetTFT() {
+  Serial.println("Starting TFT hardware reset...");
+  tft.writecommand(0x01);  // Software reset command
+  delay(50);               // Minimal delay for reset to complete
+  tft.init();              // Re-initialize the display
+  menu.render();           // Redraw the UI
+  Serial.println("TFT reset complete");
+}
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Starting up...");
+
+  Serial.println("Setting up MIDI...");
+  MIDIserial.begin(MIDI_BAUD_RATE, SERIAL_8N1, MIDI_IN_PIN, MIDI_OUT_PIN);
   
   // Initialize SPI with custom pins
   Serial.println("Initializing SPI...");
   SPI.begin(TFT_SCLK, -1, TFT_MOSI, TFT_CS);  // SCK, MISO, MOSI, SS
   Serial.println("SPI initialized");
   
-  // Try different initialization approaches
-  Serial.println("Trying display init approach 1...");
+
   tft.init();
-  delay(100);
-  
-  // Serial.println("Trying display init approach 2...");
-  // tft.init(240, 240);  // Try square format
-  // delay(100);
-  
-  // Serial.println("Trying display init approach 3...");
-  // tft.init(135, 240);  // Try different common size
-  // delay(100);
-  
-  // Set rotation and try both inversion states
-  tft.setRotation(1); // Landscape mode (320x240)
-  Serial.println("Rotation set");
-  
-  // Try both inversion states
-  Serial.println("Trying inversion false...");
-  tft.invertDisplay(false);
-  delay(100);
-  
-  Serial.println("Trying inversion true...");
-  tft.invertDisplay(true);
-  delay(100);
-  
-  Serial.println("Back to inversion false...");
-  tft.invertDisplay(false);
-  
-  // Simple display test - fill with different colors
-  Serial.println("Testing display colors...");
-  tft.fillScreen(TFT_RED);
-  delay(1000);
-  tft.fillScreen(TFT_GREEN);
-  delay(1000);
-  tft.fillScreen(TFT_BLUE);
-  delay(1000);
-  tft.fillScreen(TFT_BLACK);
-  
-  // Draw a simple test pattern
-  tft.drawRect(10, 10, 50, 50, TFT_WHITE);
-  tft.fillCircle(160, 120, 30, TFT_YELLOW);
-  tft.setTextColor(TFT_WHITE);
-  tft.setTextSize(2);
-  tft.setCursor(20, 200);
-  tft.print("TEST");
-  
-  Serial.println("Display test pattern drawn");
+
   delay(2000);
   
   // Initialize encoder pins
@@ -154,6 +144,77 @@ void setup() {
   // Initial menu render
   menu.render();
 }
+
+void loop() {
+  static unsigned long lastPollTime = 0;
+  static unsigned long lastColorTime = 0;
+  const unsigned long pollInterval = 10; // Poll every 10ms
+  const unsigned long colorInterval = 500; // Check color every 500ms
+  
+  unsigned long currentTime = millis();
+  
+  if (currentTime - lastPollTime >= pollInterval) {
+    // Check for encoder rotation
+    MenuButton encoderInput = readEncoder();
+    if (encoderInput != BUTTON_NONE) {
+      menu.handleInput(encoderInput);
+      menu.render();
+    }
+    
+    // Check for button presses
+    MenuButton buttonInput = readButtons();
+    if (buttonInput != BUTTON_NONE) {
+      menu.handleInput(buttonInput);
+      menu.render();
+    }
+    
+    lastPollTime = currentTime;
+  }
+
+  //panic button handling
+  if (panicBtn.isPressed()){
+    Serial.println("Panic!");
+    midiPanic();
+    resetTFT();
+  }
+
+  // Periodic color detection
+  if (currentTime - lastColorTime >= colorInterval) {
+    if (colorSensor.isAvailable()) {
+      // Use efficient enum-based color detection
+      Color detectedColor = colorSensor.getCurrentColorEnum();
+      
+      if (detectedColor != Color::UNKNOWN && detectedColor != currentColorA) {
+        Serial.print("Detected color: ");
+        Serial.println(colorToString(detectedColor));
+        
+        // Generate MIDI note based on detected color (efficient!)
+        uint8_t midiNote = scaleManager.colorToMIDINote(detectedColor);
+        Serial.print("MIDI Note: ");
+        Serial.println(midiNote);
+        
+        // Update menu with current color and MIDI note for troubleshoot display
+        menu.updateCurrentColor(colorToString(detectedColor));
+        menu.updateCurrentMIDINote(midiNote);
+        
+        // Re-render if we're in troubleshoot menu to show updated info
+        if (menu.currentMenu == TROUBLESHOOT_MENU) {
+          menu.render();
+        }
+        
+        // TODO: Send actual MIDI message here
+        // For example: sendMIDINote(midiNote, velocity);
+        currentColorA = detectedColor;
+      }
+      else if (detectedColor == Color::UNKNOWN) {
+        Serial.println("No valid color detected");
+      } 
+    }
+    
+    lastColorTime = currentTime;
+  }
+}
+
 
 MenuButton readEncoder() {
   unsigned long currentTime = millis();
@@ -204,59 +265,4 @@ MenuButton readButtons() {
   }
   
   return BUTTON_NONE;
-}
-
-void loop() {
-  static unsigned long lastPollTime = 0;
-  static unsigned long lastColorTime = 0;
-  const unsigned long pollInterval = 10; // Poll every 10ms
-  const unsigned long colorInterval = 500; // Check color every 500ms
-  
-  unsigned long currentTime = millis();
-  
-  if (currentTime - lastPollTime >= pollInterval) {
-    // Check for encoder rotation
-    MenuButton encoderInput = readEncoder();
-    if (encoderInput != BUTTON_NONE) {
-      menu.handleInput(encoderInput);
-      menu.render();
-    }
-    
-    // Check for button presses
-    MenuButton buttonInput = readButtons();
-    if (buttonInput != BUTTON_NONE) {
-      menu.handleInput(buttonInput);
-      menu.render();
-    }
-    
-    lastPollTime = currentTime;
-  }
-  
-  // Periodic color detection
-  if (currentTime - lastColorTime >= colorInterval) {
-    if (colorSensor.isAvailable()) {
-      const char* detectedColor = colorSensor.getCurrentColor();
-      Serial.print("Detected color: ");
-      Serial.println(detectedColor);
-      
-      // Generate MIDI note based on detected color
-      uint8_t midiNote = scaleManager.colorToMIDINote(detectedColor);
-      Serial.print("MIDI Note: ");
-      Serial.println(midiNote);
-      
-      // Update menu with current color and MIDI note for troubleshoot display
-      menu.updateCurrentColor(detectedColor);
-      menu.updateCurrentMIDINote(midiNote);
-      
-      // Re-render if we're in troubleshoot menu to show updated info
-      if (menu.currentMenu == TROUBLESHOOT_MENU) {
-        menu.render();
-      }
-      
-      // TODO: Send actual MIDI message here
-      // For example: sendMIDINote(midiNote, velocity);
-    }
-    
-    lastColorTime = currentTime;
-  }
 }

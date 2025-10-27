@@ -54,15 +54,27 @@ void ColorHelper::getNormalizedData(float* r, float* g, float* b) {
     }
 }
 
-const char* ColorHelper::getCurrentColor() {
+Color ColorHelper::getCurrentColorEnum() {
     if (!sensorAvailable) {
-        return "no sensor";
+        return Color::UNKNOWN;
     }
     
     float r, g, b;
     getNormalizedData(&r, &g, &b);
     
-    return findNearestColor(r, g, b);
+    return findNearestColorEnum(r, g, b);
+}
+
+const char* ColorHelper::getCurrentColor() {
+    if (!sensorAvailable) {
+        return "no sensor";
+    }
+    
+    Color color = getCurrentColorEnum();
+    if (color == Color::UNKNOWN) {
+        return "unknown";
+    }
+    return colorToString(color);
 }
 
 void* ColorHelper::getColorDatabase(int& numColors) {
@@ -70,8 +82,8 @@ void* ColorHelper::getColorDatabase(int& numColors) {
     return colorDatabase;
 }
 
-const char* ColorHelper::findNearestColor(float r, float g, float b) {
-    const char* nearestColor = "unknown";
+Color ColorHelper::findNearestColorEnum(float r, float g, float b) {
+    Color nearestColor = Color::UNKNOWN;
     float minDistance = 1e9f;
     
     for (int i = 0; i < numColorDatabase; i++) {
@@ -84,11 +96,16 @@ const char* ColorHelper::findNearestColor(float r, float g, float b) {
         
         if (distance < minDistance) {
             minDistance = distance;
-            nearestColor = colorDatabase[i].name;
+            nearestColor = indexToColor(i);
         }
     }
     
     return nearestColor;
+}
+
+const char* ColorHelper::findNearestColor(float r, float g, float b) {
+    Color color = findNearestColorEnum(r, g, b);
+    return colorToString(color);
 }
 
 float ColorHelper::calculateColorDistance(float r1, float g1, float b1, 

@@ -1,5 +1,6 @@
 #pragma once
-#include <TFT_eSPI.h>
+#include <Adafruit_SH110X.h>
+#include "SystemConfig.h"
 
 class MenuManager;
 
@@ -27,12 +28,13 @@ enum MenuButton {
     CW,
     CCW,
     ENCODER_BUTTON,
-    AUX_BUTTON
+    CON_BUTTON,
+    BAK_BUTTON
 };
 
 class MenuManager {
 public:
-    MenuManager(TFT_eSPI& display);
+    MenuManager(Adafruit_SH1106G& display);
     void render();
     void handleInput(MenuButton btn);
     
@@ -61,18 +63,20 @@ public:
 
 
     MenuState currentMenu;
-    TFT_eSPI& tft;
+    Adafruit_SH1106G& display;
     
     // Main menu selection
     int mainMenuSelectedIdx = 0;
     int mainMenuScrollIdx = 0;
     static const int MAIN_MENU_VISIBLE_ITEMS = 5;
     
-    // Grid menu selection (0 = "...", 1-16 = numbers)
-    int gridSelectedIdx = 0;
+    // Grid menu selection (1-16 = numbers, no "..." anymore)
+    int gridSelectedIdx = 1;
     
     // Active MIDI channel (1-16)
     int activeMIDIChannelA = 1;
+
+    byte velocityA = 127; // Default velocity for notes
     
     // Current detected color for troubleshoot menu
     String currentDetectedColor = "unknown";

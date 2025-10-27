@@ -16,14 +16,15 @@
 #define ENCODER_A  32
 #define ENCODER_B  33
 #define ENCODER_BTN 25
-#define AUX_BTN    26
+#define CON_BTN    26 //switch to CON button
+#define BAK_BTN    14
 
 // Panic button
 #define PANIC_BTN  4
 
-// Color sensor pins (TCS34725)
-#define COLOR_SENSOR_SDA 15
-#define COLOR_SENSOR_SCL 27
+// Color sensor pins (TCS34725) - using same I2C bus as OLED
+#define COLOR_SENSOR_SDA 21  // Same as OLED_SDA
+#define COLOR_SENSOR_SCL 22  // Same as OLED_SCL
 
 // MIDI pins
 #define MIDI_OUT_PIN 17

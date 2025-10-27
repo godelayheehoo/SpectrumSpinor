@@ -10,8 +10,8 @@ ColorHelper::ColorHelper(bool normalizeReadings)
 }
 
 bool ColorHelper::begin() {
-    // Initialize I2C with the pins defined in PinDefinitions.h
-    Wire.begin(COLOR_SENSOR_SDA, COLOR_SENSOR_SCL);
+    // Don't re-initialize Wire - assume it's already been set up by main.cpp
+    // The color sensor will use the same I2C bus as the OLED display
     
     if (tcs.begin()) {
         sensorAvailable = true;
@@ -20,6 +20,7 @@ bool ColorHelper::begin() {
     } else {
         sensorAvailable = false;
         Serial.println("ERROR: TCS34725 color sensor not found - check wiring!");
+        Serial.println("Make sure sensor is connected to SDA=21, SCL=22");
         return false;
     }
 }

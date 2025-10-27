@@ -1,11 +1,10 @@
 #include "MenuManager.h"
 
-// Screen constants
-#define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT 240
-#define MARGIN_TOP 10
-#define MARGIN_LEFT 10
-#define MARGIN_BOTTOM 10
+// Legacy screen constants (now defined in SystemConfig.h)
+// Keeping these for any remaining references until layout is updated
+#define MARGIN_TOP 2
+#define MARGIN_LEFT 2
+#define MARGIN_BOTTOM 2
 #define USABLE_WIDTH (SCREEN_WIDTH - 2 * MARGIN_LEFT)
 #define USABLE_HEIGHT (SCREEN_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM)
 #define CENTER_X(width) (MARGIN_LEFT + (USABLE_WIDTH - width) / 2)
@@ -19,7 +18,7 @@ const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::troubleshootMenuCW, &MenuManager::troubleshootMenuCCW, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuAuxButton }, // TROUBLESHOOT_MENU
 };
 
-MenuManager::MenuManager(TFT_eSPI& display) : tft(display), currentMenu(MAIN_MENU) {
+MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(MAIN_MENU) {
 }
 
 void MenuManager::updateCurrentColor(const char* color) {
@@ -32,42 +31,51 @@ void MenuManager::updateCurrentMIDINote(uint8_t midiNote) {
 
 // Text centering helper functions
 void MenuManager::centerTextAt(int y, String text, int textSize) {
-    tft.setTextSize(textSize);
+    display.setTextSize(textSize);
     
-    // Get text dimensions using TFT_eSPI API
-    int w = tft.textWidth(text);
-    int h = tft.fontHeight();
+    // Get text dimensions using Adafruit_GFX API
+    int16_t x1, y1;
+    uint16_t w, h;
+    display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
     
     // Calculate center X position
-    int x = CENTER_X(w);
+    int x = (SCREEN_WIDTH - w) / 2;
     
-    tft.setCursor(x, y);
-    tft.print(text);
+    display.setCursor(x, y);
+    display.print(text);
 }
 
 void MenuManager::centerTextInContent(String text, int textSize) {
-    tft.setTextSize(textSize);
+    display.setTextSize(textSize);
     
-    // Get text dimensions using TFT_eSPI API
-    int w = tft.textWidth(text);
-    int h = tft.fontHeight();
+    // Get text dimensions using Adafruit_GFX API
+    int16_t x1, y1;
+    uint16_t w, h;
+    display.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
     
-    // Calculate center position within usable content area
-    int x = MARGIN_LEFT + (USABLE_WIDTH - w) / 2;
-    int y = MARGIN_TOP + (USABLE_HEIGHT - h) / 2;
+    // Calculate center position within screen
+    int x = (SCREEN_WIDTH - w) / 2;
+    int y = (SCREEN_HEIGHT - h) / 2;
     
-    tft.setCursor(x, y);
-    tft.print(text);
+    display.setCursor(x, y);
+    display.print(text);
 }
 
 void MenuManager::handleInput(MenuButton btn) {
+    // Handle back button first (works in all menus)
+    if (btn == BAK_BUTTON) {
+        // Back button always returns to main menu
+        currentMenu = MAIN_MENU;
+        return;
+    }
+    
     // Map button to handler index
     int handlerIdx = -1;
     switch (btn) {
         case CW: handlerIdx = 0; break;
         case CCW: handlerIdx = 1; break;
         case ENCODER_BUTTON: handlerIdx = 2; break;
-        case AUX_BUTTON: handlerIdx = 3; break;
+        case CON_BUTTON: handlerIdx = 3; break;
         default: return; // Unknown button
     }
     
@@ -89,139 +97,107 @@ void MenuManager::handleInput(MenuButton btn) {
 
 void MenuManager::render() {
     if (currentMenu == MAIN_MENU) {
-        tft.fillScreen(TFT_BLACK);
-        tft.setTextSize(2);
-        tft.setTextColor(TFT_WHITE);
-        tft.setCursor(10, 10);
-        tft.print("Main Menu");
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setTextColor(OLED_WHITE);
+        display.setCursor(0, 0);
+        display.print("Main Menu");
         
         // Menu item 1: Grid View
-        tft.setCursor(20, 50);
+        display.setCursor(10, 20);
         if (mainMenuSelectedIdx == 0) {
-            tft.setTextColor(TFT_BLACK, TFT_WHITE);
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
         } else {
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
+            display.setTextColor(OLED_WHITE);
         }
-        tft.print("Grid View");
+        display.print("Grid View");
         
         // Menu item 2: Troubleshoot
-        tft.setCursor(20, 80);
+        display.setCursor(10, 35);
         if (mainMenuSelectedIdx == 1) {
-            tft.setTextColor(TFT_BLACK, TFT_WHITE);
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
         } else {
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
+            display.setTextColor(OLED_WHITE);
         }
-        tft.print("Troubleshoot");
+        display.print("Troubleshoot");
+        
+        display.display(); // Send buffer to screen
         
     } else if (currentMenu == MIDI_GRID_MENU) {
-        tft.fillScreen(TFT_BLACK);
-        tft.setTextSize(2);
+        display.clearDisplay();
+        display.setTextSize(1);
         
-        // "..." in top left corner with highlighting
-        tft.setCursor(10, 10);
-        if (gridSelectedIdx == 0) {
-            tft.setTextColor(TFT_BLACK, TFT_WHITE); // Inverted colors for highlight
-        } else {
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        }
-        tft.print("...");
-        
-        // Draw 4x4 grid of numbers 1-16
-        int gridStartX = 50;
-        int gridStartY = 50;
-        int cellWidth = 60;
-        int cellHeight = 40;
+        // Draw 4x4 grid of MIDI channels 1-16
+        const int cellWidth = 30;
+        const int cellHeight = 14;
+        const int startX = 2;
+        const int startY = 2;
         
         for (int i = 0; i < 16; i++) {
             int row = i / 4;
             int col = i % 4;
-            int x = gridStartX + col * cellWidth;
-            int y = gridStartY + row * cellHeight;
+            int x = startX + col * cellWidth;
+            int y = startY + row * cellHeight;
+            int channel = i + 1;
             
-            bool isSelected = (gridSelectedIdx == i + 1);
-            bool isActiveChannel = (activeMIDIChannelA == i + 1);
+            bool isSelected = (gridSelectedIdx == channel);
+            bool isActiveChannel = (activeMIDIChannelA == channel);
             
-            // Draw cell with highlighting
+            // Draw cell border
+            display.drawRect(x, y, cellWidth, cellHeight, OLED_WHITE);
+            
+            // Handle selection highlighting first
             if (isSelected) {
-                // Fill background for selected cell (white when highlighted)
-                tft.fillRect(x, y, cellWidth, cellHeight, TFT_WHITE);
-                tft.setTextColor(TFT_BLACK);
-            } else if (isActiveChannel) {
-                // Fill background for active channel (green when not highlighted)
-                tft.fillRect(x, y, cellWidth, cellHeight, TFT_GREEN);
-                tft.setTextColor(TFT_BLACK);
-            } else {
-                // Normal cell
-                tft.drawRect(x, y, cellWidth, cellHeight, TFT_WHITE);
-                tft.setTextColor(TFT_WHITE);
+                // Fill background with white for selection highlighting
+                display.fillRect(x + 1, y + 1, cellWidth - 2, cellHeight - 2, OLED_WHITE);
             }
             
-            // Draw number centered in cell
-            String numStr = String(i + 1);
-            int w = tft.textWidth(numStr);
-            int h = tft.fontHeight();
-            
-            int textX = x + (cellWidth - w) / 2;
-            int textY = y + (cellHeight - h) / 2;
-            
-            tft.setCursor(textX, textY);
-            tft.print(numStr);
+            if (isActiveChannel) {
+                // Draw big X for active channel
+                uint16_t xColor = isSelected ? OLED_BLACK : OLED_WHITE; // Black X if selected, white X if not
+                display.drawLine(x + 2, y + 2, x + cellWidth - 3, y + cellHeight - 3, xColor);
+                display.drawLine(x + cellWidth - 3, y + 2, x + 2, y + cellHeight - 3, xColor);
+            } else {
+                // Draw channel number
+                display.setCursor(x + cellWidth/2 - 6, y + cellHeight/2 - 4);
+                if (isSelected) {
+                    display.setTextColor(OLED_BLACK); // Black text on white background
+                } else {
+                    display.setTextColor(OLED_WHITE); // White text on black background
+                }
+                display.print(channel);
+            }
         }
+        
+        display.display(); // Send buffer to screen
+        
     } else if (currentMenu == TROUBLESHOOT_MENU) {
-        tft.fillScreen(TFT_BLACK);
-        tft.setTextSize(2);
+        display.clearDisplay();
+        display.setTextSize(1);
         
         // "..." in top left corner
-        tft.setCursor(10, 10);
-        tft.setTextColor(TFT_BLACK, TFT_WHITE); // Always highlighted for return
-        tft.print("...");
+        display.setCursor(0, 0);
+        display.setTextColor(OLED_BLACK, OLED_WHITE); // Always highlighted for return
+        display.print("...");
         
-        // Draw quadrant dividers
-        int centerX = 320 / 2;
-        int centerY = 240 / 2;
-        tft.drawLine(centerX, 40, centerX, 240, TFT_WHITE); // Vertical divider
-        tft.drawLine(0, centerY, 320, centerY, TFT_WHITE);  // Horizontal divider
+        // Simplified troubleshoot display for OLED
+        display.setTextColor(OLED_WHITE);
+        display.setCursor(0, 15);
+        display.print("Troubleshoot");
         
-        // Quadrant 1 (top-left): Current Color and MIDI Note
-        tft.setTextSize(1);
-        tft.setTextColor(TFT_YELLOW);
-        tft.setCursor(10, 50);
-        tft.print("Color:");
-        tft.setTextSize(2);
-        tft.setTextColor(TFT_GREEN);
-        tft.setCursor(10, 65);
-        tft.print(currentDetectedColor);
+        // Current Color and MIDI Note (simplified for OLED)
+        display.setCursor(0, 25);
+        display.print("Color: ");
+        display.print(currentDetectedColor);
         
-        tft.setTextSize(1);
-        tft.setTextColor(TFT_YELLOW);
-        tft.setCursor(10, 90);
-        tft.print("MIDI Note:");
-        tft.setTextSize(2);
-        tft.setTextColor(TFT_CYAN);
-        tft.setCursor(10, 105);
-        tft.print(currentMIDINote);
+        display.setCursor(0, 35);
+        display.print("MIDI: ");
+        display.print(currentMIDINote);
         
-        // Quadrant 2 (top-right): Reserved for future use
-        tft.setTextSize(1);
-        tft.setTextColor(TFT_CYAN);
-        tft.setCursor(centerX + 10, 50);
-        tft.print("Quad 2:");
-        tft.setCursor(centerX + 10, 70);
-        tft.print("Reserved");
+        display.setCursor(0, 45);
+        display.print("Status: OK");
         
-        // Quadrant 3 (bottom-left): Reserved for future use
-        tft.setTextColor(TFT_MAGENTA);
-        tft.setCursor(10, centerY + 10);
-        tft.print("Quad 3:");
-        tft.setCursor(10, centerY + 30);
-        tft.print("Reserved");
-        
-        // Quadrant 4 (bottom-right): Reserved for future use
-        tft.setTextColor(TFT_RED);
-        tft.setCursor(centerX + 10, centerY + 10);
-        tft.print("Quad 4:");
-        tft.setCursor(centerX + 10, centerY + 30);
-        tft.print("Reserved");
+        display.display(); // Send buffer to screen
     }
 }
 
@@ -249,7 +225,7 @@ void MenuManager::mainMenuCCW() {
 void MenuManager::mainMenuEncoderButton() {
     if (mainMenuSelectedIdx == 0) {
         currentMenu = MIDI_GRID_MENU;
-        gridSelectedIdx = 0; // Start with "..." highlighted
+        gridSelectedIdx = 1; // Start with channel 1 selected
     } else if (mainMenuSelectedIdx == 1) {
         currentMenu = TROUBLESHOOT_MENU;
     }
@@ -261,28 +237,29 @@ void MenuManager::mainMenuAuxButton() {
 
 // GRID_MENU
 void MenuManager::gridMenuCW() {
-    // Navigate forward: 0("...") -> 1 -> 2 -> ... -> 16 -> 0("...")
-    gridSelectedIdx = (gridSelectedIdx + 1) % 17;
-}
-
-void MenuManager::gridMenuCCW() {
-    // Navigate backward: 0("...") -> 16 -> 15 -> ... -> 1 -> 0("...")
-    gridSelectedIdx = (gridSelectedIdx - 1 + 17) % 17;
-}
-
-void MenuManager::gridMenuEncoderButton() {
-    // If a MIDI channel is selected (not "..."), set it as active
-    if (gridSelectedIdx >= 1 && gridSelectedIdx <= 16) {
-        activeMIDIChannelA = gridSelectedIdx;
-    } else if (gridSelectedIdx == 0) {
-        // If "..." is selected, return to main menu
-        currentMenu = MAIN_MENU;
+    // Navigate forward: 1 -> 2 -> ... -> 16 -> 1 (wrap around)
+    gridSelectedIdx++;
+    if (gridSelectedIdx > 16) {
+        gridSelectedIdx = 1;
     }
 }
 
+void MenuManager::gridMenuCCW() {
+    // Navigate backward: 16 -> 15 -> ... -> 1 -> 16 (wrap around)
+    gridSelectedIdx--;
+    if (gridSelectedIdx < 1) {
+        gridSelectedIdx = 16;
+    }
+}
+
+void MenuManager::gridMenuEncoderButton() {
+    // Set selected channel as active MIDI channel
+    activeMIDIChannelA = gridSelectedIdx;
+}
+
 void MenuManager::gridMenuAuxButton() {
-    // Return to main menu
-    currentMenu = MAIN_MENU;
+    // Aux button functionality (if needed)
+    // For now, do nothing - back button handles menu navigation
 }
 
 // TROUBLESHOOT_MENU

@@ -1,0 +1,31 @@
+// I2C Scanner - add this function to main.cpp for debugging
+void scanI2C() {
+  Serial.println("Scanning I2C bus...");
+  byte deviceCount = 0;
+  
+  for (byte address = 1; address < 127; address++) {
+    Wire.beginTransmission(address);
+    byte error = Wire.endTransmission();
+    
+    if (error == 0) {
+      Serial.print("I2C device found at address 0x");
+      if (address < 16) Serial.print("0");
+      Serial.print(address, HEX);
+      Serial.print(" (");
+      Serial.print(address);
+      Serial.println(")");
+      deviceCount++;
+    }
+  }
+  
+  if (deviceCount == 0) {
+    Serial.println("No I2C devices found");
+  } else {
+    Serial.print("Found ");
+    Serial.print(deviceCount);
+    Serial.println(" I2C devices");
+  }
+}
+
+// Call scanI2C() in setup() after Wire.begin() to see what's detected
+// Expected: 0x3C (OLED) and 0x29 (TCS34725)

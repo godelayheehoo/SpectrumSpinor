@@ -80,7 +80,8 @@ const unsigned long debounceDelay = 50;
 
 // Button helpers
 ButtonHelper encoderBtn(ENCODER_BTN);
-ButtonHelper auxBtn(AUX_BTN);
+ButtonHelper conBtn(CON_BTN);
+ButtonHelper bakBtn(BAK_BTN);
 ButtonHelper panicBtn(PANIC_BTN);
 
 // Script States
@@ -216,7 +217,7 @@ void loop() {
   if (panicBtn.isPressed()){
     Serial.println("Panic!");
     midiPanic();
-    resetTFT();
+    resetOLED();
   }
 
   // Periodic color detection
@@ -229,14 +230,17 @@ void loop() {
         Serial.print("Detected color: ");
         Serial.println(colorToString(detectedColor));
         
+        uint8_t oldMidiNote = currentColorA != Color::UNKNOWN ? scaleManager.colorToMIDINote(currentColorA) : ScaleManager::MIDI_NOTE_OFF;
+        MIDI.sendNoteOff(oldMidiNote, 0, menu.activeMIDIChannelA); // Note off on channel 1
         // Generate MIDI note based on detected color (efficient!)
-        uint8_t midiNote = scaleManager.colorToMIDINote(detectedColor);
+        uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
         Serial.print("MIDI Note: ");
-        Serial.println(midiNote);
+        Serial.println(newMidiNote);
+        MIDI.sendNoteOn(newMidiNote, menu.velocityA, menu.activeMIDIChannelA); // Note on with velocity 127 on channel 1
         
         // Update menu with current color and MIDI note for troubleshoot display
         menu.updateCurrentColor(colorToString(detectedColor));
-        menu.updateCurrentMIDINote(midiNote);
+        menu.updateCurrentMIDINote(newMidiNote);
         
         // Re-render if we're in troubleshoot menu to show updated info
         if (menu.currentMenu == TROUBLESHOOT_MENU) {
@@ -300,9 +304,15 @@ MenuButton readButtons() {
   }
   
   // Check aux button
-  if (auxBtn.isPressed()) {
+  if (conBtn.isPressed()) {
     Serial.println("Aux button pressed");
-    return AUX_BUTTON;
+    return CON_BUTTON;
+  }
+  
+  // Check back button
+  if (bakBtn.isPressed()) {
+    Serial.println("Back button pressed");
+    return BAK_BUTTON;
   }
   
   return BUTTON_NONE;

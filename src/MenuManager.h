@@ -32,11 +32,17 @@ enum MenuButton {
     BAK_BUTTON
 };
 
+// Function pointer type for MIDI ALL NOTES OFF callback
+typedef void (*AllNotesOffCallback)(uint8_t channel);
+
 class MenuManager {
 public:
     MenuManager(Adafruit_SH1106G& display);
     void render();
     void handleInput(MenuButton btn);
+    
+    // Set callback for sending ALL NOTES OFF
+    void setAllNotesOffCallback(AllNotesOffCallback callback);
     
     // Text centering helper functions
     void centerTextAt(int y, String text, int textSize = 2);
@@ -74,7 +80,7 @@ public:
     int gridSelectedIdx = 1;
     
     // Active MIDI channel (1-16)
-    int activeMIDIChannelA = 1;
+    int activeMIDIChannelA = 3; // Default to channel 3
 
     byte velocityA = 127; // Default velocity for notes
     
@@ -86,5 +92,8 @@ public:
     void updateCurrentColor(const char* color);
     void updateCurrentMIDINote(uint8_t midiNote);
     
+private:
+    // Callback for sending ALL NOTES OFF messages
+    AllNotesOffCallback allNotesOffCallback = nullptr;
 
 };

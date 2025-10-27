@@ -173,29 +173,43 @@ void MenuManager::render() {
         
     } else if (currentMenu == TROUBLESHOOT_MENU) {
         display.clearDisplay();
+        
+        // Draw 2x2 grid for troubleshooting
+        int gridCols = 2;
+        int gridRows = 2;
+        int cellWidth = SCREEN_WIDTH / gridCols;
+        int cellHeight = SCREEN_HEIGHT / gridRows;
+        
+        // Draw grid lines
+        for (int i = 1; i < gridCols; i++) {
+            int x = i * cellWidth;
+            display.drawLine(x, 0, x, SCREEN_HEIGHT - 1, OLED_WHITE);
+        }
+        for (int i = 1; i < gridRows; i++) {
+            int y = i * cellHeight;
+            display.drawLine(0, y, SCREEN_WIDTH - 1, y, OLED_WHITE);
+        }
+        
+        // Cell 0 (top-left): Show detected color
         display.setTextSize(1);
-        
-        // "..." in top left corner
-        display.setCursor(0, 0);
-        display.setTextColor(OLED_BLACK, OLED_WHITE); // Always highlighted for return
-        display.print("...");
-        
-        // Simplified troubleshoot display for OLED
         display.setTextColor(OLED_WHITE);
-        display.setCursor(0, 15);
-        display.print("Troubleshoot");
         
-        // Current Color and MIDI Note (simplified for OLED)
-        display.setCursor(0, 25);
-        display.print("Color: ");
+        // Center the color text in the first cell
+        int cellCenterX = cellWidth / 2;
+        int cellCenterY = cellHeight / 2;
+        
+        // Calculate text position to center it
+        int16_t x1, y1;
+        uint16_t textWidth, textHeight;
+        display.getTextBounds(currentDetectedColor, 0, 0, &x1, &y1, &textWidth, &textHeight);
+        
+        int textX = cellCenterX - (textWidth / 2);
+        int textY = cellCenterY - (textHeight / 2);
+        
+        display.setCursor(textX, textY);
         display.print(currentDetectedColor);
         
-        display.setCursor(0, 35);
-        display.print("MIDI: ");
-        display.print(currentMIDINote);
-        
-        display.setCursor(0, 45);
-        display.print("Status: OK");
+        // Cells 1, 2, 3 are empty for now (future expansion)
         
         display.display(); // Send buffer to screen
     }
@@ -253,6 +267,11 @@ void MenuManager::gridMenuCCW() {
 }
 
 void MenuManager::gridMenuEncoderButton() {
+    // Send ALL NOTES OFF to current channel before switching
+    if (allNotesOffCallback != nullptr) {
+        allNotesOffCallback(activeMIDIChannelA);
+    }
+    
     // Set selected channel as active MIDI channel
     activeMIDIChannelA = gridSelectedIdx;
 }
@@ -279,5 +298,10 @@ void MenuManager::troubleshootMenuEncoderButton() {
 void MenuManager::troubleshootMenuAuxButton() {
     // Return to main menu
     currentMenu = MAIN_MENU;
+}
+
+// Set the callback function for ALL NOTES OFF
+void MenuManager::setAllNotesOffCallback(AllNotesOffCallback callback) {
+    allNotesOffCallback = callback;
 }
 

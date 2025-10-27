@@ -99,6 +99,13 @@ void midiPanic(){
   }
 }
 
+void sendAllNotesOff(uint8_t channel) {
+  // Send All Notes Off message to specific channel
+  MIDI.sendControlChange(123, 0, channel); // 123 = All Notes Off
+  Serial.print("Sent ALL NOTES OFF to channel ");
+  Serial.println(channel);
+}
+
 void resetOLED() {
   Serial.println("Starting OLED reset...");
   display.clearDisplay();      // Clear the display buffer
@@ -133,10 +140,10 @@ void setup() {
   display.clearDisplay();
   display.fillScreen(OLED_WHITE);
   display.display();
-  delay(500);
+  delay(50);
   display.clearDisplay();
   display.display();
-  delay(500);
+  delay(50);
   
   // Test 2: Draw some shapes
   display.clearDisplay();
@@ -144,7 +151,7 @@ void setup() {
   display.fillCircle(80, 32, 15, OLED_WHITE);
   display.drawLine(0, 0, 127, 63, OLED_WHITE);
   display.display();
-  delay(1000);
+  delay(100);
   
   // Test 3: Text rendering
   display.clearDisplay();
@@ -156,14 +163,14 @@ void setup() {
   display.println("Small text");
   display.println("Line 3");
   display.display();
-  delay(2000);
+  delay(200);
   
   // Clear screen for normal operation
   display.clearDisplay();
   display.display();
   Serial.println("OLED tests complete");
 
-  delay(2000);
+  delay(200);
   
   // Initialize encoder pins
   pinMode(ENCODER_A, INPUT_PULLUP);
@@ -182,6 +189,9 @@ void setup() {
   } else {
     Serial.println("Color sensor initialization failed - continuing without it");
   }
+  
+  // Set up MIDI callback for MenuManager
+  menu.setAllNotesOffCallback(sendAllNotesOff);
   
   // Initial menu render
   menu.render();
@@ -234,10 +244,20 @@ void loop() {
         MIDI.sendNoteOff(oldMidiNote, 0, menu.activeMIDIChannelA); // Note off on channel 1
         // Generate MIDI note based on detected color (efficient!)
         uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
-        Serial.print("MIDI Note: ");
-        Serial.println(newMidiNote);
-        MIDI.sendNoteOn(newMidiNote, menu.velocityA, menu.activeMIDIChannelA); // Note on with velocity 127 on channel 1
+        byte currentChannelA;
+        if(detectedColor==Color::WHITE){
+          currentChannelA=0;
+        }
+        else{
+          currentChannelA = menu.activeMIDIChannelA;
+        }
         
+        Serial.print("MIDI Note: ");
+        Serial.print(newMidiNote);
+        Serial.print(" @ Channel");
+        Serial.println(currentChannelA);
+        MIDI.sendNoteOn(newMidiNote, menu.velocityA, currentChannelA); // Note on with velocity 127 on channel 1
+
         // Update menu with current color and MIDI note for troubleshoot display
         menu.updateCurrentColor(colorToString(detectedColor));
         menu.updateCurrentMIDINote(newMidiNote);

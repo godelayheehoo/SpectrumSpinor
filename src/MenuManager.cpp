@@ -225,13 +225,10 @@ void MenuManager::render() {
             // Draw sensor label in top-right corner of each cell with box
             display.setTextSize(1);
             display.setTextColor(OLED_WHITE);
-            int labelX = cellX + cellWidth - 12;
+            int labelX = cellX + cellWidth - 8;
             int labelY = cellY + 2;
             
-            // Draw small box around label
-            display.drawRect(labelX - 2, labelY - 1, 10, 9, OLED_WHITE);
-            
-            // Draw label letter
+            // Draw label letter (no box)
             display.setCursor(labelX, labelY);
             display.print(sensorLabels[cellIndex]);
             

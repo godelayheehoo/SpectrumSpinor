@@ -229,11 +229,17 @@ void setup() {
 void loop() {
   static unsigned long lastPollTime = 0;
   static unsigned long lastColorTime = 0;
-  const unsigned long pollInterval = 10; // Poll every 10ms
-  const unsigned long colorInterval = 500; // Check color every 500ms
+  static unsigned long lastSensorSettleTime = 0;
+  static uint8_t currentSensorIndex = 0;
+  static bool sensorSettling = false;
+  
+  const unsigned long pollInterval = 5; // Poll every 5ms for better responsiveness
+  const unsigned long colorInterval = 200; // Check colors more frequently (200ms)
+  const unsigned long settleTime = 2; // Reduced settle time
   
   unsigned long currentTime = millis();
   
+  // High priority: Always check for user input first
   if (currentTime - lastPollTime >= pollInterval) {
     // Check for encoder rotation
     MenuButton encoderInput = readEncoder();
@@ -252,195 +258,116 @@ void loop() {
     lastPollTime = currentTime;
   }
 
-  //panic button handling
+  //panic button handling (high priority)
   if (panicBtn.isPressed()){
     Serial.println("Panic!");
     midiPanic();
     resetOLED();
   }
 
-  // Periodic color detection (using I2C multiplexer)
+  // Non-blocking color detection with sensor cycling
   if (currentTime - lastColorTime >= colorInterval) {
-
-    // Select sensor A (channel 0) on the multiplexer
-    tcaSelect(0);
-    delay(5); // small settle time
-    
-    if (colorSensor.isAvailable()) {
-      // Use efficient enum-based color detection
-      Color detectedColor = colorSensor.getCurrentColorEnum();
-      
-      if (detectedColor != Color::UNKNOWN && detectedColor != currentColorA) {
-        Serial.print("Sensor A - Detected color: ");
-        Serial.println(colorToString(detectedColor));
-        
-        uint8_t oldMidiNote = currentColorA != Color::UNKNOWN ? scaleManager.colorToMIDINote(currentColorA) : ScaleManager::MIDI_NOTE_OFF;
-        MIDI.sendNoteOff(oldMidiNote, 0, menu.activeMIDIChannelA); // Note off on channel 1
-        // Generate MIDI note based on detected color (efficient!)
-        uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
-        byte currentChannelA;
-        if(detectedColor==Color::WHITE){
-          currentChannelA=0;
-        }
-        else{
-          currentChannelA = menu.activeMIDIChannelA;
-        }
-        
-        Serial.print("MIDI Note: ");
-        Serial.print(newMidiNote);
-        Serial.print(" @ Channel");
-        Serial.println(currentChannelA);
-        MIDI.sendNoteOn(newMidiNote, menu.velocityA, currentChannelA); // Note on with velocity 127 on channel 1
-
-        // Update menu with current color and MIDI note for troubleshoot display
-        menu.updateCurrentColorA(colorToString(detectedColor));
-        menu.updateCurrentMIDINoteA(newMidiNote);
-        
-        // Re-render if we're in troubleshoot menu to show updated info
-        if (menu.currentMenu == TROUBLESHOOT_MENU) {
-          menu.render();
-        }
-        
-        currentColorA = detectedColor;
-      }
-      else if (detectedColor == Color::UNKNOWN) {
-        Serial.println("Sensor A - No valid color detected");
-      } 
+    // Start sensor settling if not already settling
+    if (!sensorSettling) {
+      tcaSelect(currentSensorIndex);
+      lastSensorSettleTime = currentTime;
+      sensorSettling = true;
+      return; // Exit loop to allow other operations
     }
     
-    // Sensor B (channel 1) on the multiplexer
-    tcaSelect(1);
-    delay(5); // small settle time
-    
-    if (colorSensor.isAvailable()) {
-      Color detectedColor = colorSensor.getCurrentColorEnum();
-      
-      if (detectedColor != Color::UNKNOWN && detectedColor != currentColorB) {
-        Serial.print("Sensor B - Detected color: ");
-        Serial.println(colorToString(detectedColor));
+    // Check if sensor has settled
+    if (currentTime - lastSensorSettleTime >= settleTime) {
+      // Process current sensor
+      if (colorSensor.isAvailable()) {
+        Color detectedColor = colorSensor.getCurrentColorEnum();
+        Color* currentColorPtr = nullptr;
+        String sensorName = "";
+        uint8_t activeMIDIChannel = 1;
+        uint8_t velocity = 127;
         
-        uint8_t oldMidiNote = currentColorB != Color::UNKNOWN ? scaleManager.colorToMIDINote(currentColorB) : ScaleManager::MIDI_NOTE_OFF;
-        MIDI.sendNoteOff(oldMidiNote, 0, menu.activeMIDIChannelB);
-        
-        uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
-        byte currentChannelB;
-        if(detectedColor==Color::WHITE){
-          currentChannelB=0;
+        // Determine which sensor we're processing
+        switch (currentSensorIndex) {
+          case 0:
+            currentColorPtr = &currentColorA;
+            sensorName = "Sensor A";
+            activeMIDIChannel = menu.activeMIDIChannelA;
+            velocity = menu.velocityA;
+            break;
+          case 1:
+            currentColorPtr = &currentColorB;
+            sensorName = "Sensor B";
+            activeMIDIChannel = menu.activeMIDIChannelB;
+            velocity = menu.velocityB;
+            break;
+          case 2:
+            currentColorPtr = &currentColorC;
+            sensorName = "Sensor C";
+            activeMIDIChannel = menu.activeMIDIChannelC;
+            velocity = menu.velocityC;
+            break;
+          case 3:
+            currentColorPtr = &currentColorD;
+            sensorName = "Sensor D";
+            activeMIDIChannel = menu.activeMIDIChannelD;
+            velocity = menu.velocityD;
+            break;
         }
-        else{
-          currentChannelB = menu.activeMIDIChannelB;
-        }
-        Serial.print("MIDI Note: ");
-        Serial.print(newMidiNote);
-        Serial.print(" @ Channel");
-        Serial.println(currentChannelB);
-        MIDI.sendNoteOn(newMidiNote, menu.velocityB, currentChannelB);
-
-        menu.updateCurrentColorB(colorToString(detectedColor));
-        menu.updateCurrentMIDINoteB(newMidiNote);
         
-        if (menu.currentMenu == TROUBLESHOOT_MENU) {
-          menu.render();
+        // Process color change if detected and valid
+        if (detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
+          // Send note off for previous color
+          uint8_t oldMidiNote = *currentColorPtr != Color::UNKNOWN ? scaleManager.colorToMIDINote(*currentColorPtr) : ScaleManager::MIDI_NOTE_OFF;
+          MIDI.sendNoteOff(oldMidiNote, 0, activeMIDIChannel);
+          
+          // Send note on for new color
+          uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
+          byte currentChannel = (detectedColor == Color::WHITE) ? 0 : activeMIDIChannel;
+          MIDI.sendNoteOn(newMidiNote, velocity, currentChannel);
+          
+          // Update menu display
+          switch (currentSensorIndex) {
+            case 0:
+              menu.updateCurrentColorA(colorToString(detectedColor));
+              menu.updateCurrentMIDINoteA(newMidiNote);
+              break;
+            case 1:
+              menu.updateCurrentColorB(colorToString(detectedColor));
+              menu.updateCurrentMIDINoteB(newMidiNote);
+              break;
+            case 2:
+              menu.updateCurrentColorC(colorToString(detectedColor));
+              menu.updateCurrentMIDINoteC(newMidiNote);
+              break;
+            case 3:
+              menu.updateCurrentColorD(colorToString(detectedColor));
+              menu.updateCurrentMIDINoteD(newMidiNote);
+              break;
+          }
+          
+          // Update troubleshoot display if active (less frequent)
+          static unsigned long lastTroubleshootUpdate = 0;
+          if (menu.currentMenu == TROUBLESHOOT_MENU && 
+              (currentTime - lastTroubleshootUpdate) > 100) { // Update display max every 100ms
+            menu.render();
+            lastTroubleshootUpdate = currentTime;
+          }
+          
+          *currentColorPtr = detectedColor;
         }
-        
-        currentColorB = detectedColor;
       }
-      else if (detectedColor == Color::UNKNOWN) {
-        Serial.println("Sensor B - No valid color detected");
-      } 
-    }
-
-    // Sensor C (channel 2) on the multiplexer
-    tcaSelect(2);
-    delay(5); // small settle time
-    
-    if (colorSensor.isAvailable()) {
-      Color detectedColor = colorSensor.getCurrentColorEnum();
       
-      if (detectedColor != Color::UNKNOWN && detectedColor != currentColorC) {
-        Serial.print("Sensor C - Detected color: ");
-        Serial.println(colorToString(detectedColor));
-        
-        uint8_t oldMidiNote = currentColorC != Color::UNKNOWN ? scaleManager.colorToMIDINote(currentColorC) : ScaleManager::MIDI_NOTE_OFF;
-        MIDI.sendNoteOff(oldMidiNote, 0, menu.activeMIDIChannelC);
-        
-        uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
-        byte currentChannelC;
-        if(detectedColor==Color::WHITE){
-          currentChannelC=0;
-        }
-        else{
-          currentChannelC = menu.activeMIDIChannelC;
-        }
-        Serial.print("MIDI Note: ");
-        Serial.print(newMidiNote);
-        Serial.print(" @ Channel");
-        Serial.println(currentChannelC);
-        MIDI.sendNoteOn(newMidiNote, menu.velocityC, currentChannelC);
-
-        menu.updateCurrentColorC(colorToString(detectedColor));
-        menu.updateCurrentMIDINoteC(newMidiNote);
-        
-        if (menu.currentMenu == TROUBLESHOOT_MENU) {
-          menu.render();
-        }
-        
-        currentColorC = detectedColor;
-      }
-      else if (detectedColor == Color::UNKNOWN) {
-        Serial.println("Sensor C - No valid color detected");
-      } 
-    }
-
-    // Sensor D (channel 3) on the multiplexer
-    tcaSelect(3);
-    delay(5); // small settle time
-    
-    if (colorSensor.isAvailable()) {
-      Color detectedColor = colorSensor.getCurrentColorEnum();
+      // Move to next sensor
+      currentSensorIndex = (currentSensorIndex + 1) % 4;
+      sensorSettling = false;
       
-      if (detectedColor != Color::UNKNOWN && detectedColor != currentColorD) {
-        Serial.print("Sensor D - Detected color: ");
-        Serial.println(colorToString(detectedColor));
-        
-        uint8_t oldMidiNote = currentColorD != Color::UNKNOWN ? scaleManager.colorToMIDINote(currentColorD) : ScaleManager::MIDI_NOTE_OFF;
-        MIDI.sendNoteOff(oldMidiNote, 0, menu.activeMIDIChannelD);
-        
-        uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
-        byte currentChannelD;
-        if(detectedColor==Color::WHITE){
-          currentChannelD=0;
-        }
-        else{
-          currentChannelD = menu.activeMIDIChannelD;
-        }
-        Serial.print("MIDI Note: ");
-        Serial.print(newMidiNote);
-        Serial.print(" @ Channel");
-        Serial.println(currentChannelD);
-        MIDI.sendNoteOn(newMidiNote, menu.velocityD, currentChannelD);
-
-        menu.updateCurrentColorD(colorToString(detectedColor));
-        menu.updateCurrentMIDINoteD(newMidiNote);
-        
-        if (menu.currentMenu == TROUBLESHOOT_MENU) {
-          menu.render();
-        }
-        
-        currentColorD = detectedColor;
+      // If we've cycled through all sensors, reset timer
+      if (currentSensorIndex == 0) {
+        tcaDisableAll(); // Disable multiplexer after full cycle
+        lastColorTime = currentTime;
       }
-      else if (detectedColor == Color::UNKNOWN) {
-        Serial.println("Sensor D - No valid color detected");
-      } 
     }
-    
-    // Disable all multiplexer channels after reading
-    tcaDisableAll();
-    
-    lastColorTime = currentTime;
   }
 }
-
 
 MenuButton readEncoder() {
   unsigned long currentTime = millis();

@@ -454,18 +454,17 @@ void MenuManager::gridMenuBackButton() {
 
 // TROUBLESHOOT_MENU
 void MenuManager::troubleshootMenuCW() {
-    // Encoder rotation does nothing in troubleshoot mode
+    // Encoder rotation does nothing in troubleshoot menu
 }
 
 void MenuManager::troubleshootMenuCCW() {
-    // Encoder rotation does nothing in troubleshoot mode
+    // Encoder rotation does nothing in troubleshoot menu
 }
 
 void MenuManager::troubleshootMenuEncoderButton() {
     // Encoder button cycles troubleshoot modes: 0 (colors) -> 1 (RGB) -> 0
     int oldMode = troubleshootMode;
     troubleshootMode = (troubleshootMode + 1) % 2;
-    
     // If we just switched to RGB mode, request current RGB readings
     if (oldMode == 0 && troubleshootMode == 1) {
         requestRGBUpdate = true;
@@ -473,8 +472,7 @@ void MenuManager::troubleshootMenuEncoderButton() {
 }
 
 void MenuManager::troubleshootMenuConButton() {
-    // CON button returns to main menu
-    currentMenu = MAIN_MENU;
+    // Confirm button does nothing in troubleshoot menu
 }
 
 void MenuManager::troubleshootMenuBackButton() {

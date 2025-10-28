@@ -49,10 +49,13 @@ public:
     MenuManager(Adafruit_SH1106G& display);
     void render();
     void handleInput(MenuButton btn);
-    
+
+    // RGB update flag for troubleshoot mode
+    bool requestRGBUpdate = true;
+
     // Set callback for sending ALL NOTES OFF
     void setAllNotesOffCallback(AllNotesOffCallback callback);
-    
+
     // Text centering helper functions
     void centerTextAt(int y, String text, int textSize = 2);
     void centerTextInContent(String text, int textSize = 2);
@@ -117,7 +120,6 @@ public:
     
     // Troubleshoot mode: 0 = color names, 1 = RGB values
     int troubleshootMode = 0;
-    bool requestRGBUpdate = false; // Flag to request RGB readings when switching to mode 1
     
     // Current detected colors for troubleshoot menu
     String currentDetectedColorA = "unknown";

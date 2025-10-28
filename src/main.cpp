@@ -417,6 +417,32 @@ void loop() {
     }
   }
   
+  // Handle RGB update request for all sensors when switching to troubleshoot mode 1
+  if (menu.requestRGBUpdate && menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1) {
+    Serial.println("Force updating RGB for all sensors...");
+    
+    // Update RGB for all four sensors
+    for (int sensorIdx = 0; sensorIdx < 4; sensorIdx++) {
+      tcaSelect(sensorIdx);
+      delay(5); // Brief settling time
+      
+      uint16_t r, g, b, c;
+      colorSensor.getRawData(&r, &g, &b, &c);
+      
+      // Update RGB values in menu
+      switch (sensorIdx) {
+        case 0: menu.updateCurrentRGBA(r, g, b, c); break;
+        case 1: menu.updateCurrentRGBB(r, g, b, c); break;
+        case 2: menu.updateCurrentRGBC(r, g, b, c); break;
+        case 3: menu.updateCurrentRGBD(r, g, b, c); break;
+      }
+    }
+    
+    // Clear the flag and restore current sensor
+    menu.requestRGBUpdate = false;
+    tcaSelect(currentSensorIndex);
+  }
+
   // Keep panic button as polling since it's hardware-debounced
   if (currentTime - lastPollTime >= pollInterval) {
     lastPollTime = currentTime;
@@ -448,9 +474,6 @@ void loop() {
         String sensorName = "";
         uint8_t activeMIDIChannel = 1;
         uint8_t velocity = 127;
-        
-        // Check if RGB update is requested (when switching to troubleshoot mode 1)
-        bool forceRGBUpdate = menu.requestRGBUpdate;
         
         // Determine which sensor we're processing
         switch (currentSensorIndex) {
@@ -509,9 +532,9 @@ void loop() {
         }
 #endif
         
-        // Update RGB values if in troubleshoot mode 1 (RGB display) and color changed OR force update requested
+        // Update RGB values if in troubleshoot mode 1 (RGB display) and color changed
         if (menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1 && 
-            ((detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) || forceRGBUpdate)) {
+            detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
           uint16_t r, g, b, c;
           colorSensor.getRawData(&r, &g, &b, &c);
           
@@ -521,11 +544,6 @@ void loop() {
             case 1: menu.updateCurrentRGBB(r, g, b, c); break;
             case 2: menu.updateCurrentRGBC(r, g, b, c); break;
             case 3: menu.updateCurrentRGBD(r, g, b, c); break;
-          }
-          
-          // Clear the force update flag if it was set
-          if (forceRGBUpdate) {
-            menu.requestRGBUpdate = false;
           }
         }
         

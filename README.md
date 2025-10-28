@@ -46,25 +46,37 @@ The project features a table-driven menu system optimized for the OLED display:
 
 ### Main Menu
 - **Grid View**: Access MIDI channel selection
-- **Troubleshoot**: View current color detection and system status
+- **Troubleshoot**: View current color detection and system status (default on startup)
+- **Calibration**: Access sensor calibration options
 - Navigate with rotary encoder (CW/CCW)
 - Select with encoder button
-- Back button returns to previous menu
+- **Back button**: Always returns to main menu from any submenu
 
 ### MIDI Grid Menu  
 - 4x4 grid showing MIDI channels 1-16
 - Currently selected channel highlighted with white background
-- Active MIDI channel marked with "X"
+- Active MIDI channel for current sensor marked with "X"
+- **Active sensor indicator**: Shows A, B, C, or D in top-right corner
 - When active channel is selected: shows white background with black X
 - Navigate with encoder rotation (CW/CCW wraps around 1-16)
-- **CON button**: Confirms selection and sets active MIDI channel
+- **Encoder button**: Cycles through active sensors A → B → C → D → A
+- **CON button (Confirm)**: Sets selected channel as MIDI channel for active sensor
 - **Back button**: Returns to main menu
 - Automatically sends ALL NOTES OFF to previous channel when switching
 
-### Troubleshoot Menu
-- 2x2 grid layout for system diagnostics
-- Top-left cell shows currently detected color
-- Other cells reserved for future diagnostics
+### Troubleshoot Menu (Default Startup Menu)
+- 2x2 grid layout showing all four sensors (A, B, C, D)
+- **Two display modes:**
+  - **Mode 0 (Default)**: Shows color names for each sensor
+  - **Mode 1**: Shows RGB values (R:#### G:#### B:####) for each sensor
+- **Encoder CW/CCW**: Switch between display modes
+- **Encoder/CON/Back buttons**: Return to main menu
+- Real-time updates showing current sensor readings
+
+### Calibration Menu
+- Lists all four sensors: "Sensor A", "Sensor B", "Sensor C", "Sensor D"
+- Navigate with encoder rotation (CW/CCW)
+- **Encoder/CON buttons**: Enter calibration for selected sensor (future implementation)
 - **Back button**: Returns to main menu
 
 ## Color Detection & MIDI
@@ -95,26 +107,31 @@ The system continuously monitors the color sensor and generates MIDI notes:
 
 ✅ **Completed:**
 - ESP32 project structure with PlatformIO
-- SH1106 OLED display integration (Adafruit_SH110X library)
-- TCS34725 color sensor integration with shared I2C bus
-- Rotary encoder and multi-button input handling
-- Complete menu navigation system with table-driven handlers
-- MIDI channel grid with visual selection and active channel display
-- Real-time color detection and MIDI note generation
+- SH1106 OLED display integration (Adafruit_SH110X library)  
+- TCS34725 color sensor integration with I2C multiplexer (TCA9548A)
+- **Four-sensor system**: Full support for sensors A, B, C, D on multiplexer channels 0-3
+- Rotary encoder with interrupt-based input handling
+- Multi-button input with interrupt debouncing (encoder, confirm, back, panic buttons)
+- **Complete menu navigation system** with table-driven handlers:
+  - **MIDI Grid**: Per-sensor channel assignment with active sensor switching
+  - **Troubleshoot**: Dual-mode display (color names / RGB values) for all sensors  
+  - **Calibration**: Menu framework for future sensor calibration
+- **Multi-sensor MIDI generation**: Independent channel assignment per sensor
+- Real-time color detection and MIDI note generation for all four sensors
 - Color enum system (PINK, RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE)
 - Scale management system for color-to-MIDI conversion
 - ALL NOTES OFF functionality when changing channels
-- Button debouncing and non-blocking input polling
-- Troubleshooting interface with 2x2 diagnostic grid
+- **Advanced troubleshooting**: Live RGB value monitoring with encoder mode switching
+- **Interrupt-based input system**: Responsive encoder/button handling with proper debouncing
 
 🔄 **In Progress:**
-- Menu system refinements and additional diagnostic displays
+- Sensor calibration implementation (menu framework complete)
 
 📋 **Planned:**
 - Stepper motor integration for disk rotation
 - Scale/mode selection menus (Major, Minor, etc.)
-- Color calibration interface
-- Multi-ring support with multiple sensors
+- Individual sensor calibration (Set Dark, Set White, Set Color X)
+- Multi-ring support coordination
 - Auto-calibration functionality
 
 ## Building

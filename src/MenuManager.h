@@ -21,7 +21,8 @@ extern const MenuHandlers menuHandlersTable[];
 enum MenuState {
     MAIN_MENU,
     MIDI_GRID_MENU,
-    TROUBLESHOOT_MENU
+    TROUBLESHOOT_MENU,
+    CALIBRATION_MENU
 };
 
 enum MenuButton {
@@ -31,6 +32,13 @@ enum MenuButton {
     ENCODER_BUTTON,
     CON_BUTTON,
     BAK_BUTTON
+};
+
+enum ActiveSensor {
+    SENSOR_A,
+    SENSOR_B,
+    SENSOR_C,
+    SENSOR_D
 };
 
 // Function pointer type for MIDI ALL NOTES OFF callback
@@ -70,6 +78,13 @@ public:
     void troubleshootMenuConButton();
     void troubleshootMenuBackButton();
     
+    // Handler functions for CALIBRATION_MENU
+    void calibrationMenuCW();
+    void calibrationMenuCCW();
+    void calibrationMenuEncoderButton();
+    void calibrationMenuConButton();
+    void calibrationMenuBackButton();
+    
 
 
     MenuState currentMenu;
@@ -83,6 +98,12 @@ public:
     // Grid menu selection (1-16 = numbers, no "..." anymore)
     int gridSelectedIdx = 1;
     
+    // Active MIDI Grid Sensor (A, B, C, or D) - which sensor we're configuring
+    ActiveSensor activeMIDIGridSensor = SENSOR_A; // Default to sensor A
+    
+    // Calibration menu selection (0-3 = A, B, C, D)
+    int calibrationSelectedIdx = 0; // Default to sensor A
+    
     // Active MIDI channels (1-16) for each sensor
     int activeMIDIChannelA = 3; // Default to channel 3
     int activeMIDIChannelB = 2; // Default to channel 2
@@ -94,11 +115,21 @@ public:
     byte velocityC = 127; // Default velocity for notes
     byte velocityD = 127; // Default velocity for notes
     
+    // Troubleshoot mode: 0 = color names, 1 = RGB values
+    int troubleshootMode = 0;
+    bool requestRGBUpdate = false; // Flag to request RGB readings when switching to mode 1
+    
     // Current detected colors for troubleshoot menu
     String currentDetectedColorA = "unknown";
     String currentDetectedColorB = "unknown";
     String currentDetectedColorC = "unknown";
     String currentDetectedColorD = "unknown";
+    
+    // Current RGB values for troubleshoot menu (mode 1)
+    uint16_t currentRGBA[4] = {0}; // R,G,B,C for sensor A
+    uint16_t currentRGBB[4] = {0}; // R,G,B,C for sensor B  
+    uint16_t currentRGBC[4] = {0}; // R,G,B,C for sensor C
+    uint16_t currentRGBD[4] = {0}; // R,G,B,C for sensor D
     
     // Current MIDI notes for each sensor
     uint8_t currentMIDINoteA = 60;
@@ -116,6 +147,16 @@ public:
     void updateCurrentMIDINoteB(uint8_t midiNote);
     void updateCurrentMIDINoteC(uint8_t midiNote);
     void updateCurrentMIDINoteD(uint8_t midiNote);
+    
+    // Update RGB values for troubleshoot mode 1
+    void updateCurrentRGBA(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+    void updateCurrentRGBB(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+    void updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+    void updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+    
+    // Helper functions for working with active sensor
+    int* getActiveSensorMIDIChannel(); // Returns pointer to the active sensor's MIDI channel
+    void setActiveSensorMIDIChannel(int channel); // Sets the MIDI channel for the active sensor
     
 private:
     // Callback for sending ALL NOTES OFF messages

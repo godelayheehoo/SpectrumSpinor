@@ -6,6 +6,8 @@ The current working letter will be in the top left color, aux button will cycle 
 - Way down the road, we need to work in a way to auto-calibrate, or at least speed up the process.
 Maybe a menu called "calibrate colors" and then have calibrate orange, calibrate blue, etc.
 Also will need a menu functionality that just displays the current color seen.
+
+- Improve encoder turns. 
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -106,11 +108,15 @@ MenuButton readButtons();
 MenuButton readEncoder();
 
 // Interrupt Service Routines (ISRs) - Must be fast and minimal!
+#ifdef TROUBLESHOOT
 // Debug counter for ISR calls
 volatile int encoderISRCounter = 0;
+#endif
 
 void IRAM_ATTR encoderISR() {
+#ifdef TROUBLESHOOT
   encoderISRCounter++; // Count ISR calls for debugging
+#endif
   
   static int lastState = 0;
   
@@ -277,17 +283,25 @@ void setup() {
   
   Serial.println("Display and encoder initialized");
   
-  // Initialize color sensor through I2C multiplexer
-  Serial.println("Initializing color sensor on I2C multiplexer...");
+  // Initialize color sensors through I2C multiplexer
+  Serial.println("Initializing color sensors on I2C multiplexer...");
   
-  // Select channel 0 for sensor A
-  tcaSelect(0);
-  delay(10); // small settle time
-  
-  if (colorSensor.begin()) {
-    Serial.println("Color sensor A ready on mux channel 0");
-  } else {
-    Serial.println("Color sensor A initialization failed - continuing without it");
+  // Initialize all 4 sensors (channels 0-3)
+  for (int channel = 0; channel < 4; channel++) {
+    tcaSelect(channel);
+    delay(50); // Longer settle time for initialization
+    
+    if (colorSensor.begin()) {
+      Serial.print("Color sensor ");
+      Serial.print((char)('A' + channel));
+      Serial.print(" ready on mux channel ");
+      Serial.println(channel);
+    } else {
+      Serial.print("Color sensor ");
+      Serial.print((char)('A' + channel));
+      Serial.print(" initialization failed on channel ");
+      Serial.println(channel);
+    }
   }
   
   // Disable all channels for now
@@ -321,7 +335,6 @@ void loop() {
   if (encoderCWFlag && (currentTime - lastEncoderAction > encoderDebounceDelay)) {
     encoderCWFlag = false;
     lastEncoderAction = currentTime;
-    Serial.println("Interrupt: Encoder CW");
     menu.handleInput(CW);
     menu.render();
   }
@@ -329,11 +342,11 @@ void loop() {
   if (encoderCCWFlag && (currentTime - lastEncoderAction > encoderDebounceDelay)) {
     encoderCCWFlag = false;
     lastEncoderAction = currentTime;
-    Serial.println("Interrupt: Encoder CCW");
     menu.handleInput(CCW);
     menu.render();
   }
   
+#ifdef TROUBLESHOOT
   // Debug: Print ISR call count and flag counts periodically
   static unsigned long lastDebugTime = 0;
   static int cwCount = 0, ccwCount = 0;
@@ -358,6 +371,7 @@ void loop() {
     ccwCount = 0;
     lastDebugTime = currentTime;
   }
+#endif
   
   // Check button flags set by interrupts with toggle debouncing
   static bool ignoreNextEncoderButton = false;
@@ -372,7 +386,6 @@ void loop() {
       // Ignore this trigger
     } else {
       ignoreNextEncoderButton = true;
-      Serial.println("Interrupt: Encoder button");
       menu.handleInput(ENCODER_BUTTON);
       menu.render();
     }
@@ -386,7 +399,6 @@ void loop() {
       // Ignore this trigger
     } else {
       ignoreNextConButton = true;
-      Serial.println("Interrupt: Con button");
       menu.handleInput(CON_BUTTON);
       menu.render();
     }
@@ -400,7 +412,6 @@ void loop() {
       // Ignore this trigger
     } else {
       ignoreNextBackButton = true;
-      Serial.println("Interrupt: Back button");
       menu.handleInput(BAK_BUTTON);
       menu.render();
     }
@@ -438,6 +449,9 @@ void loop() {
         uint8_t activeMIDIChannel = 1;
         uint8_t velocity = 127;
         
+        // Check if RGB update is requested (when switching to troubleshoot mode 1)
+        bool forceRGBUpdate = menu.requestRGBUpdate;
+        
         // Determine which sensor we're processing
         switch (currentSensorIndex) {
           case 0:
@@ -464,6 +478,55 @@ void loop() {
             activeMIDIChannel = menu.activeMIDIChannelD;
             velocity = menu.velocityD;
             break;
+        }
+        
+#ifdef TROUBLESHOOT
+        // Debug: Print sensor readings periodically with raw values
+        static unsigned long lastDebugPrint = 0;
+        if (currentTime - lastDebugPrint > 2000) { // Every 2 seconds
+          uint16_t r, g, b, c;
+          colorSensor.getRawData(&r, &g, &b, &c);
+          
+          Serial.print(sensorName);
+          Serial.print(": ");
+          Serial.print(colorToString(detectedColor));
+          Serial.print(" (R:");
+          Serial.print(r);
+          Serial.print(" G:");
+          Serial.print(g);
+          Serial.print(" B:");
+          Serial.print(b);
+          Serial.print(" C:");
+          Serial.print(c);
+          Serial.print(")");
+          
+          if (currentSensorIndex == 3) { // Print newline after sensor D
+            Serial.println();
+            lastDebugPrint = currentTime;
+          } else {
+            Serial.print(" | ");
+          }
+        }
+#endif
+        
+        // Update RGB values if in troubleshoot mode 1 (RGB display) and color changed OR force update requested
+        if (menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1 && 
+            ((detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) || forceRGBUpdate)) {
+          uint16_t r, g, b, c;
+          colorSensor.getRawData(&r, &g, &b, &c);
+          
+          // Update RGB values in menu for troubleshoot mode
+          switch (currentSensorIndex) {
+            case 0: menu.updateCurrentRGBA(r, g, b, c); break;
+            case 1: menu.updateCurrentRGBB(r, g, b, c); break;
+            case 2: menu.updateCurrentRGBC(r, g, b, c); break;
+            case 3: menu.updateCurrentRGBD(r, g, b, c); break;
+          }
+          
+          // Clear the force update flag if it was set
+          if (forceRGBUpdate) {
+            menu.requestRGBUpdate = false;
+          }
         }
         
         // Process color change if detected and valid

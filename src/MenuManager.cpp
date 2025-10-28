@@ -16,9 +16,10 @@ const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::mainMenuCW, &MenuManager::mainMenuCCW, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuConButton, &MenuManager::mainMenuBackButton }, // MAIN_MENU
     { &MenuManager::gridMenuCW, &MenuManager::gridMenuCCW, &MenuManager::gridMenuEncoderButton, &MenuManager::gridMenuConButton, &MenuManager::gridMenuBackButton }, // GRID_MENU
     { &MenuManager::troubleshootMenuCW, &MenuManager::troubleshootMenuCCW, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuConButton, &MenuManager::troubleshootMenuBackButton }, // TROUBLESHOOT_MENU
+    { &MenuManager::calibrationMenuCW, &MenuManager::calibrationMenuCCW, &MenuManager::calibrationMenuEncoderButton, &MenuManager::calibrationMenuConButton, &MenuManager::calibrationMenuBackButton }, // CALIBRATION_MENU
 };
 
-MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(MAIN_MENU) {
+MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(TROUBLESHOOT_MENU) {
 }
 
 void MenuManager::updateCurrentColorA(const char* color) {
@@ -51,6 +52,22 @@ void MenuManager::updateCurrentMIDINoteC(uint8_t midiNote) {
 
 void MenuManager::updateCurrentMIDINoteD(uint8_t midiNote) {
     currentMIDINoteD = midiNote;
+}
+
+void MenuManager::updateCurrentRGBA(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
+    currentRGBA[0] = r; currentRGBA[1] = g; currentRGBA[2] = b; currentRGBA[3] = c;
+}
+
+void MenuManager::updateCurrentRGBB(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
+    currentRGBB[0] = r; currentRGBB[1] = g; currentRGBB[2] = b; currentRGBB[3] = c;
+}
+
+void MenuManager::updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
+    currentRGBC[0] = r; currentRGBC[1] = g; currentRGBC[2] = b; currentRGBC[3] = c;
+}
+
+void MenuManager::updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
+    currentRGBD[0] = r; currentRGBD[1] = g; currentRGBD[2] = b; currentRGBD[3] = c;
 }
 
 // Text centering helper functions
@@ -140,17 +157,43 @@ void MenuManager::render() {
         }
         display.print("Troubleshoot");
         
+        // Menu item 3: Calibration
+        display.setCursor(10, 50);
+        if (mainMenuSelectedIdx == 2) {
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
+        } else {
+            display.setTextColor(OLED_WHITE);
+        }
+        display.print("Calibration");
+        
         display.display(); // Send buffer to screen
         
     } else if (currentMenu == MIDI_GRID_MENU) {
         display.clearDisplay();
         display.setTextSize(1);
         
-        // Draw 4x4 grid of MIDI channels 1-16
-        const int cellWidth = 30;
+        // Draw 4x4 grid of MIDI channels 1-16 (narrower to make room for sensor indicator)
+        const int cellWidth = 22; // Reduced from 30 to 22
         const int cellHeight = 14;
         const int startX = 2;
         const int startY = 2;
+        
+        // Draw active MIDI grid sensor in top right corner
+        display.setTextSize(2);
+        display.setTextColor(OLED_WHITE);
+        display.setCursor(SCREEN_WIDTH - 20, 5); // Position in top right
+        
+        // Convert enum to character for display
+        char sensorChar;
+        switch (activeMIDIGridSensor) {
+            case SENSOR_A: sensorChar = 'A'; break;
+            case SENSOR_B: sensorChar = 'B'; break;
+            case SENSOR_C: sensorChar = 'C'; break;
+            case SENSOR_D: sensorChar = 'D'; break;
+            default: sensorChar = 'A'; break;
+        }
+        display.print(sensorChar);
+        display.setTextSize(1); // Reset text size for grid
         
         for (int i = 0; i < 16; i++) {
             int row = i / 4;
@@ -160,7 +203,18 @@ void MenuManager::render() {
             int channel = i + 1;
             
             bool isSelected = (gridSelectedIdx == channel);
-            bool isActiveChannel = (activeMIDIChannelA == channel);
+            
+            // Determine which channel is active based on current sensor selection
+            int currentActiveMIDIChannel;
+            switch (activeMIDIGridSensor) {
+                case SENSOR_A: currentActiveMIDIChannel = activeMIDIChannelA; break;
+                case SENSOR_B: currentActiveMIDIChannel = activeMIDIChannelB; break;
+                case SENSOR_C: currentActiveMIDIChannel = activeMIDIChannelC; break;
+                case SENSOR_D: currentActiveMIDIChannel = activeMIDIChannelD; break;
+                default: currentActiveMIDIChannel = activeMIDIChannelA; break;
+            }
+            
+            bool isActiveChannel = (currentActiveMIDIChannel == channel);
             
             // Draw cell border
             display.drawRect(x, y, cellWidth, cellHeight, OLED_WHITE);
@@ -232,16 +286,82 @@ void MenuManager::render() {
             display.setCursor(labelX, labelY);
             display.print(sensorLabels[cellIndex]);
             
-            // Center the color text in the cell
-            int16_t x1, y1;
-            uint16_t textWidth, textHeight;
-            display.getTextBounds(sensorColors[cellIndex], 0, 0, &x1, &y1, &textWidth, &textHeight);
+            if (troubleshootMode == 0) {
+                // Mode 0: Color names (centered)
+                String displayText = sensorColors[cellIndex];
+                int16_t x1, y1;
+                uint16_t textWidth, textHeight;
+                display.getTextBounds(displayText, 0, 0, &x1, &y1, &textWidth, &textHeight);
+                
+                int textX = cellCenterX - (textWidth / 2);
+                int textY = cellCenterY - (textHeight / 2);
+                
+                display.setCursor(textX, textY);
+                display.print(displayText);
+            } else {
+                // Mode 1: RGB values in three rows (no labels, drop C value)
+                uint16_t* rgbValues = nullptr;
+                switch (cellIndex) {
+                    case 0: rgbValues = currentRGBA; break;
+                    case 1: rgbValues = currentRGBB; break;
+                    case 2: rgbValues = currentRGBC; break;
+                    case 3: rgbValues = currentRGBD; break;
+                }
+                if (rgbValues) {
+                    // Display RGB values in three rows, centered in cell
+                    String rValue = String(rgbValues[0]);
+                    String gValue = String(rgbValues[1]);
+                    String bValue = String(rgbValues[2]);
+                    
+                    // Calculate starting Y position for three rows
+                    int lineHeight = 10; // Approximate height of text size 1
+                    int startY = cellCenterY - lineHeight;
+                    
+                    // R value (top row)
+                    int16_t x1, y1;
+                    uint16_t textWidth, textHeight;
+                    display.getTextBounds(rValue, 0, 0, &x1, &y1, &textWidth, &textHeight);
+                    display.setCursor(cellCenterX - (textWidth / 2), startY);
+                    display.print(rValue);
+                    
+                    // G value (middle row)
+                    display.getTextBounds(gValue, 0, 0, &x1, &y1, &textWidth, &textHeight);
+                    display.setCursor(cellCenterX - (textWidth / 2), startY + lineHeight);
+                    display.print(gValue);
+                    
+                    // B value (bottom row)
+                    display.getTextBounds(bValue, 0, 0, &x1, &y1, &textWidth, &textHeight);
+                    display.setCursor(cellCenterX - (textWidth / 2), startY + (2 * lineHeight));
+                    display.print(bValue);
+                } else {
+                    // Fallback if no RGB data
+                    display.setCursor(cellCenterX - 6, cellCenterY);
+                    display.print("N/A");
+                }
+            }
+        }
+        
+        display.display(); // Send buffer to screen
+        
+    } else if (currentMenu == CALIBRATION_MENU) {
+        display.clearDisplay();
+        display.setTextSize(1);
+        
+        // Sensor options: A, B, C, D (no title, start from top to fit all 4)
+        const char* sensorNames[4] = {"A", "B", "C", "D"};
+        
+        for (int i = 0; i < 4; i++) {
+            display.setCursor(10, 5 + (i * 15)); // Start at y=5 instead of y=20
             
-            int textX = cellCenterX - (textWidth / 2);
-            int textY = cellCenterY - (textHeight / 2);
+            // Highlight selected sensor
+            if (calibrationSelectedIdx == i) {
+                display.setTextColor(OLED_BLACK, OLED_WHITE);
+            } else {
+                display.setTextColor(OLED_WHITE);
+            }
             
-            display.setCursor(textX, textY);
-            display.print(sensorColors[cellIndex]);
+            display.print("Sensor ");
+            display.print(sensorNames[i]);
         }
         
         display.display(); // Send buffer to screen
@@ -252,7 +372,7 @@ void MenuManager::render() {
 
 // MAIN_MENU
 void MenuManager::mainMenuCW() {
-    if (mainMenuSelectedIdx < 1) { // Now we have 2 items (0-1)
+    if (mainMenuSelectedIdx < 2) { // Now we have 3 items (0-2)
         mainMenuSelectedIdx++;
         if (mainMenuSelectedIdx > mainMenuScrollIdx + MAIN_MENU_VISIBLE_ITEMS - 1) {
             mainMenuScrollIdx = mainMenuSelectedIdx - MAIN_MENU_VISIBLE_ITEMS + 1;
@@ -275,6 +395,8 @@ void MenuManager::mainMenuEncoderButton() {
         gridSelectedIdx = 1; // Start with channel 1 selected
     } else if (mainMenuSelectedIdx == 1) {
         currentMenu = TROUBLESHOOT_MENU;
+    } else if (mainMenuSelectedIdx == 2) {
+        currentMenu = CALIBRATION_MENU;
     }
 }
 
@@ -304,19 +426,25 @@ void MenuManager::gridMenuCCW() {
 }
 
 void MenuManager::gridMenuEncoderButton() {
-    // Encoder button does nothing in grid menu
-    // Use CON button to select channels, back button to return to main menu
+    // Encoder button cycles through active sensors: A -> B -> C -> D -> A
+    switch (activeMIDIGridSensor) {
+        case SENSOR_A: activeMIDIGridSensor = SENSOR_B; break;
+        case SENSOR_B: activeMIDIGridSensor = SENSOR_C; break;
+        case SENSOR_C: activeMIDIGridSensor = SENSOR_D; break;
+        case SENSOR_D: activeMIDIGridSensor = SENSOR_A; break;
+        default: activeMIDIGridSensor = SENSOR_A; break;
+    }
 }
 
 void MenuManager::gridMenuConButton() {
-    // CON button sets selected channel as active MIDI channel
+    // CON button sets selected channel as active MIDI channel for current sensor
     // Send ALL NOTES OFF to current channel before switching
     if (allNotesOffCallback != nullptr) {
-        allNotesOffCallback(activeMIDIChannelA);
+        allNotesOffCallback(*getActiveSensorMIDIChannel());
     }
     
-    // Set selected channel as active MIDI channel
-    activeMIDIChannelA = gridSelectedIdx;
+    // Set selected channel as active MIDI channel for current sensor
+    setActiveSensorMIDIChannel(gridSelectedIdx);
 }
 
 void MenuManager::gridMenuBackButton() {
@@ -326,16 +454,22 @@ void MenuManager::gridMenuBackButton() {
 
 // TROUBLESHOOT_MENU
 void MenuManager::troubleshootMenuCW() {
-    // No navigation in troubleshoot menu
+    // Encoder rotation does nothing in troubleshoot mode
 }
 
 void MenuManager::troubleshootMenuCCW() {
-    // No navigation in troubleshoot menu
+    // Encoder rotation does nothing in troubleshoot mode
 }
 
 void MenuManager::troubleshootMenuEncoderButton() {
-    // "..." is always selected, return to main menu
-    currentMenu = MAIN_MENU;
+    // Encoder button cycles troubleshoot modes: 0 (colors) -> 1 (RGB) -> 0
+    int oldMode = troubleshootMode;
+    troubleshootMode = (troubleshootMode + 1) % 2;
+    
+    // If we just switched to RGB mode, request current RGB readings
+    if (oldMode == 0 && troubleshootMode == 1) {
+        requestRGBUpdate = true;
+    }
 }
 
 void MenuManager::troubleshootMenuConButton() {
@@ -348,8 +482,61 @@ void MenuManager::troubleshootMenuBackButton() {
     currentMenu = MAIN_MENU;
 }
 
+// CALIBRATION_MENU
+void MenuManager::calibrationMenuCW() {
+    // Navigate down through sensors: A -> B -> C -> D (wrap around)
+    calibrationSelectedIdx++;
+    if (calibrationSelectedIdx > 3) {
+        calibrationSelectedIdx = 0;
+    }
+}
+
+void MenuManager::calibrationMenuCCW() {
+    // Navigate up through sensors: D -> C -> B -> A (wrap around)
+    calibrationSelectedIdx--;
+    if (calibrationSelectedIdx < 0) {
+        calibrationSelectedIdx = 3;
+    }
+}
+
+void MenuManager::calibrationMenuEncoderButton() {
+    // Encoder button enters calibration for selected sensor
+    // For now, do nothing - will implement calibration sub-menus later
+}
+
+void MenuManager::calibrationMenuConButton() {
+    // CON button enters calibration for selected sensor
+    // For now, do nothing - will implement calibration sub-menus later
+}
+
+void MenuManager::calibrationMenuBackButton() {
+    // Back button returns to main menu
+    currentMenu = MAIN_MENU;
+}
+
 // Set the callback function for ALL NOTES OFF
 void MenuManager::setAllNotesOffCallback(AllNotesOffCallback callback) {
     allNotesOffCallback = callback;
+}
+
+// Helper functions for working with active sensor
+int* MenuManager::getActiveSensorMIDIChannel() {
+    switch (activeMIDIGridSensor) {
+        case SENSOR_A: return &activeMIDIChannelA;
+        case SENSOR_B: return &activeMIDIChannelB;
+        case SENSOR_C: return &activeMIDIChannelC;
+        case SENSOR_D: return &activeMIDIChannelD;
+        default: return &activeMIDIChannelA;
+    }
+}
+
+void MenuManager::setActiveSensorMIDIChannel(int channel) {
+    switch (activeMIDIGridSensor) {
+        case SENSOR_A: activeMIDIChannelA = channel; break;
+        case SENSOR_B: activeMIDIChannelB = channel; break;
+        case SENSOR_C: activeMIDIChannelC = channel; break;
+        case SENSOR_D: activeMIDIChannelD = channel; break;
+        default: activeMIDIChannelA = channel; break;
+    }
 }
 

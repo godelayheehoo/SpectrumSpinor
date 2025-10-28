@@ -4,7 +4,7 @@
 
 
 ColorHelper::ColorHelper(bool normalizeReadings) 
-    : tcs(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_4X), 
+    : tcs(TCS34725_INTEGRATIONTIME_24MS, TCS34725_GAIN_4X), 
       normalize(normalizeReadings), 
       sensorAvailable(false) {
 }

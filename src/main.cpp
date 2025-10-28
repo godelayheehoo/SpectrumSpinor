@@ -75,11 +75,20 @@ ColorHelper colorSensor(true); // Enable normalization
 // Scale manager setup
 ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
 
-// Encoder state variables
-int lastEncoderA = HIGH;
-int lastEncoderB = HIGH;
-unsigned long lastEncoderTime = 0;
-const unsigned long debounceDelay = 50;
+// Interrupt-based encoder and button handling
+volatile bool encoderCWFlag = false;
+volatile bool encoderCCWFlag = false;
+volatile bool encoderButtonFlag = false;
+volatile bool conButtonFlag = false;
+volatile bool backButtonFlag = false;
+
+// Encoder state tracking for interrupts
+volatile int lastEncoderA = HIGH;
+volatile int lastEncoderB = HIGH;
+volatile unsigned long lastEncoderTime = 0;
+volatile unsigned long lastButtonTime = 0;
+const unsigned long encoderDebounceDelay = 2; // Much shorter for encoder
+const unsigned long buttonDebounceDelay = 20; // Shorter for buttons
 
 // Button helpers
 ButtonHelper encoderBtn(ENCODER_BTN);
@@ -93,9 +102,61 @@ Color currentColorB = Color::UNKNOWN;
 Color currentColorC = Color::UNKNOWN;
 Color currentColorD = Color::UNKNOWN;
 
-//function prototypes
+//function prototypes  
 MenuButton readButtons();
 MenuButton readEncoder();
+
+// Interrupt Service Routines (ISRs) - Must be fast and minimal!
+void IRAM_ATTR encoderISR() {
+  unsigned long currentTime = millis();
+  
+  // Quick debounce check
+  if (currentTime - lastEncoderTime < encoderDebounceDelay) {
+    return;
+  }
+  
+  int currentA = digitalRead(ENCODER_A);
+  int currentB = digitalRead(ENCODER_B);
+  
+  // Full quadrature decoding - check both rising and falling edges
+  if (currentA != lastEncoderA) {
+    lastEncoderTime = currentTime;
+    
+    // Determine direction based on A and B state relationship
+    if ((currentA == HIGH && currentB == LOW) || (currentA == LOW && currentB == HIGH)) {
+      encoderCWFlag = true;
+    } else {
+      encoderCCWFlag = true;
+    }
+    
+    lastEncoderA = currentA;
+    lastEncoderB = currentB;
+  }
+}
+
+void IRAM_ATTR encoderButtonISR() {
+  unsigned long currentTime = millis();
+  if (currentTime - lastButtonTime > buttonDebounceDelay) {
+    encoderButtonFlag = true;
+    lastButtonTime = currentTime;
+  }
+}
+
+void IRAM_ATTR conButtonISR() {
+  unsigned long currentTime = millis();
+  if (currentTime - lastButtonTime > buttonDebounceDelay) {
+    conButtonFlag = true;
+    lastButtonTime = currentTime;
+  }
+}
+
+void IRAM_ATTR backButtonISR() {
+  unsigned long currentTime = millis();
+  if (currentTime - lastButtonTime > buttonDebounceDelay) {
+    backButtonFlag = true;
+    lastButtonTime = currentTime;
+  }
+}
 
 // TCA9548A I2C Multiplexer functions
 void tcaSelect(uint8_t channel) {
@@ -201,6 +262,15 @@ void setup() {
   lastEncoderA = digitalRead(ENCODER_A);
   lastEncoderB = digitalRead(ENCODER_B);
   
+  // Attach interrupts for encoder (both pins for full quadrature)
+  attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
+  
+  // Attach interrupts for buttons (falling edge - button pressed)
+  attachInterrupt(digitalPinToInterrupt(ENCODER_BTN), encoderButtonISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(CON_BTN), conButtonISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BAK_BTN), backButtonISR, FALLING);
+  
   Serial.println("Display and encoder initialized");
   
   // Initialize color sensor through I2C multiplexer
@@ -234,27 +304,52 @@ void loop() {
   static bool sensorSettling = false;
   
   const unsigned long pollInterval = 5; // Poll every 5ms for better responsiveness
-  const unsigned long colorInterval = 200; // Check colors more frequently (200ms)
-  const unsigned long settleTime = 2; // Reduced settle time
+  const unsigned long colorInterval = 50; // Much faster color checking (50ms)
+  const unsigned long settleTime = 1; // Minimal settle time
   
   unsigned long currentTime = millis();
   
-  // High priority: Always check for user input first
+  // High priority: Check interrupt flags immediately (no polling delay needed!)
+  
+  // Check encoder flags set by interrupts
+  if (encoderCWFlag) {
+    encoderCWFlag = false;
+    Serial.println("Interrupt: Encoder CW");
+    menu.handleInput(CW);
+    menu.render();
+  }
+  
+  if (encoderCCWFlag) {
+    encoderCCWFlag = false;
+    Serial.println("Interrupt: Encoder CCW");
+    menu.handleInput(CCW);
+    menu.render();
+  }
+  
+  // Check button flags set by interrupts
+  if (encoderButtonFlag) {
+    encoderButtonFlag = false;
+    Serial.println("Interrupt: Encoder button");
+    menu.handleInput(ENCODER_BUTTON);
+    menu.render();
+  }
+  
+  if (conButtonFlag) {
+    conButtonFlag = false;
+    Serial.println("Interrupt: Con button");
+    menu.handleInput(CON_BUTTON);
+    menu.render();
+  }
+  
+  if (backButtonFlag) {
+    backButtonFlag = false;
+    Serial.println("Interrupt: Back button");
+    menu.handleInput(BAK_BUTTON);
+    menu.render();
+  }
+  
+  // Keep panic button as polling since it's hardware-debounced
   if (currentTime - lastPollTime >= pollInterval) {
-    // Check for encoder rotation
-    MenuButton encoderInput = readEncoder();
-    if (encoderInput != BUTTON_NONE) {
-      menu.handleInput(encoderInput);
-      menu.render();
-    }
-    
-    // Check for button presses
-    MenuButton buttonInput = readButtons();
-    if (buttonInput != BUTTON_NONE) {
-      menu.handleInput(buttonInput);
-      menu.render();
-    }
-    
     lastPollTime = currentTime;
   }
 
@@ -369,59 +464,16 @@ void loop() {
   }
 }
 
+// Legacy function - now unused since we use interrupts
+// Keeping for compatibility but it just returns BUTTON_NONE
 MenuButton readEncoder() {
-  unsigned long currentTime = millis();
-  
-  // Debounce encoder rotation
-  if (currentTime - lastEncoderTime < debounceDelay) {
-    return BUTTON_NONE;
-  }
-  
-  int currentA = digitalRead(ENCODER_A);
-  int currentB = digitalRead(ENCODER_B);
-  
-  // Check for encoder rotation (state change on pin A)
-  if (currentA != lastEncoderA && currentA == LOW) {
-    lastEncoderTime = currentTime;
-    
-    if (currentB == LOW) {
-      // Clockwise rotation
-      lastEncoderA = currentA;
-      lastEncoderB = currentB;
-      Serial.println("Encoder rotated CCW");
-      return CCW;
-    } else {
-      // Counter-clockwise rotation
-      lastEncoderA = currentA;
-      lastEncoderB = currentB;
-      Serial.println("Encoder rotated CW");
-      return CW;
-    }
-  }
-  
-  lastEncoderA = currentA;
-  lastEncoderB = currentB;
   return BUTTON_NONE;
 }
 
+// Legacy function - now mostly unused since buttons use interrupts
+// Only panic button still uses polling for safety
 MenuButton readButtons() {
-  // Check encoder button
-  if (encoderBtn.isPressed()) {
-    Serial.println("Encoder button pressed");
-    return ENCODER_BUTTON;
-  }
-  
-  // Check con button
-  if (conBtn.isPressed()) {
-    Serial.println("Con button pressed");
-    return CON_BUTTON;
-  }
-  
-  // Check back button
-  if (bakBtn.isPressed()) {
-    Serial.println("Back button pressed");
-    return BAK_BUTTON;
-  }
-  
+  // Panic button stays as polling since it's critical and has hardware debouncing
+  // Other buttons now handled by interrupts
   return BUTTON_NONE;
 }

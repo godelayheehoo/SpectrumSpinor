@@ -308,14 +308,13 @@ void MenuManager::render() {
                     case 3: rgbValues = currentRGBD; break;
                 }
                 if (rgbValues) {
-                    // Display RGB values in three rows, centered in cell
+                    // Display RGB values in three rows, starting at top of cell (aligned with sensor label)
                     String rValue = String(rgbValues[0]);
                     String gValue = String(rgbValues[1]);
                     String bValue = String(rgbValues[2]);
                     
-                    // Calculate starting Y position for three rows
                     int lineHeight = 10; // Approximate height of text size 1
-                    int startY = cellCenterY - lineHeight;
+                    int startY = cellY + 2; // Align with sensor label
                     
                     // R value (top row)
                     int16_t x1, y1;

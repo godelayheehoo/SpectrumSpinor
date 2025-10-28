@@ -8,6 +8,10 @@ Maybe a menu called "calibrate colors" and then have calibrate orange, calibrate
 Also will need a menu functionality that just displays the current color seen.
 
 - Improve encoder turns. 
+
+- Forcing sensor update for troubleshoot menu 2 on startup and switch doesn't work i think.
+
+- remove display test stuff from setup().
 */
 #include <Arduino.h>
 #include <Wire.h>

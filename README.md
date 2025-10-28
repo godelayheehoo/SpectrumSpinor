@@ -82,35 +82,44 @@ The system continuously monitors the color sensor and generates MIDI notes:
 
 ## Features
 
-- **Non-blocking Input**: Encoder and button states polled without delays
-- **Debounced Buttons**: 50ms debounce for reliable input
-- **TFT_eSPI Library**: Optimized display library for ESP32
-- **Table-Driven Handlers**: Expandable menu system architecture
-- **Debug Output**: Serial logging at 115200 baud
+- **Non-blocking Architecture**: All input polling and color detection use millis() timing
+- **Debounced Input**: 50ms debounce for reliable button and encoder handling  
+- **Shared I2C Bus**: OLED display and color sensor on single I2C bus (GPIO 21/22)
+- **Table-Driven Menu System**: Expandable architecture with separate handlers per menu
+- **Efficient Color Processing**: Enum-based color detection vs string comparisons
+- **MIDI Integration**: Full MIDI note generation with fortyseveneffects MIDI Library
+- **Callback Architecture**: MenuManager uses callbacks to access MIDI functionality
+- **Serial Debugging**: Comprehensive logging at 115200 baud
 
 ## Development Status
 
 ✅ **Completed:**
-- ESP32 project structure
-- TFT display initialization and rendering
-- Rotary encoder input handling
-- Menu navigation system
-- MIDI channel grid with highlighting
-- Button debouncing
-- Library conversion from Adafruit to TFT_eSPI
+- ESP32 project structure with PlatformIO
+- SH1106 OLED display integration (Adafruit_SH110X library)
+- TCS34725 color sensor integration with shared I2C bus
+- Rotary encoder and multi-button input handling
+- Complete menu navigation system with table-driven handlers
+- MIDI channel grid with visual selection and active channel display
+- Real-time color detection and MIDI note generation
+- Color enum system (PINK, RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE)
+- Scale management system for color-to-MIDI conversion
+- ALL NOTES OFF functionality when changing channels
+- Button debouncing and non-blocking input polling
+- Troubleshooting interface with 2x2 diagnostic grid
 
 🔄 **In Progress:**
-- Testing display functionality with hardware
+- Menu system refinements and additional diagnostic displays
 
 📋 **Planned:**
-- Actual MIDI functionality implementation
-- Color sensor integration
-- Stepper motor control
-- Scale/offset selection menus
+- Stepper motor integration for disk rotation
+- Scale/mode selection menus (Major, Minor, etc.)
+- Color calibration interface
+- Multi-ring support with multiple sensors
+- Auto-calibration functionality
 
 ## Building
 
-This project uses PlatformIO. To build:
+This project uses PlatformIO with the Arduino framework:
 
 ```bash
 cd spectrum_spinor
@@ -129,13 +138,42 @@ pio device monitor
 
 ## Code Structure
 
-- `src/main.cpp`: Main application loop with setup and input polling
-- `src/MenuManager.h/.cpp`: Menu system implementation
-- `include/PinDefinitions.h`: Hardware pin assignments  
-- `platformio.ini`: Project configuration and dependencies
+```
+├── src/
+│   ├── main.cpp              # Main application loop and hardware initialization
+│   ├── MenuManager.h/.cpp    # Complete menu system with table-driven handlers
+│   ├── ColorHelper.cpp       # TCS34725 color sensor integration
+│   └── ScaleManager.cpp      # Color-to-MIDI note conversion
+├── include/
+│   ├── PinDefinitions.h      # Hardware pin assignments
+│   ├── SystemConfig.h        # Display and system constants
+│   ├── EEPROMAddresses.h     # Memory layout (unused currently)
+│   ├── ColorEnum.h           # Efficient color enumeration system
+│   ├── ColorInfo.h           # Color detection data structures
+│   └── ScaleManager.h        # Musical scale management
+└── platformio.ini            # Project config with library dependencies
+```
+
+## Libraries Used
+
+- **Adafruit_SH110X**: OLED display driver
+- **Adafruit_TCS34725**: Color sensor library  
+- **fortyseveneffects MIDI Library**: Hardware MIDI communication
+- **Wire**: I2C communication for display and sensor
+
+## System Architecture
+
+- **Main Loop**: Non-blocking polling of inputs and periodic color detection
+- **Menu System**: Table-driven handlers for each menu state and input type
+- **Color Detection**: Enum-based system for efficient color processing
+- **MIDI Generation**: Real-time note generation based on detected colors
+- **Callback Pattern**: MenuManager uses function pointers to access MIDI functionality from main.cpp
 
 ## Notes
 
-- The project was converted from Adafruit_ST7789 to TFT_eSPI library for better ESP32 compatibility
-- Touch functionality warnings can be ignored - we're using encoder input instead
-- Debug LED on GPIO 14 provides visual feedback during development
+- Uses shared I2C bus (GPIO 21/22) for both OLED display and color sensor
+- All timing is non-blocking using millis() for responsive interface
+- MIDI output uses hardware serial on GPIO 17 at standard 31250 baud
+- Color detection runs every 500ms to balance responsiveness with processing load
+- Button polling occurs every 10ms for responsive user interface
+- Serial debug output at 115200 baud provides comprehensive system logging

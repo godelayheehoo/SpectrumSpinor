@@ -21,12 +21,12 @@ const MenuHandlers menuHandlersTable[] = {
 MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(MAIN_MENU) {
 }
 
-void MenuManager::updateCurrentColor(const char* color) {
-    currentDetectedColor = String(color);
+void MenuManager::updateCurrentColorA(const char* color) {
+    currentDetectedColorA = String(color);
 }
 
-void MenuManager::updateCurrentMIDINote(uint8_t midiNote) {
-    currentMIDINote = midiNote;
+void MenuManager::updateCurrentMIDINoteA(uint8_t midiNote) {
+    currentMIDINoteA = midiNote;
 }
 
 // Text centering helper functions
@@ -196,13 +196,13 @@ void MenuManager::render() {
         // Calculate text position to center it
         int16_t x1, y1;
         uint16_t textWidth, textHeight;
-        display.getTextBounds(currentDetectedColor, 0, 0, &x1, &y1, &textWidth, &textHeight);
+        display.getTextBounds(currentDetectedColorA, 0, 0, &x1, &y1, &textWidth, &textHeight);
         
         int textX = cellCenterX - (textWidth / 2);
         int textY = cellCenterY - (textHeight / 2);
         
         display.setCursor(textX, textY);
-        display.print(currentDetectedColor);
+        display.print(currentDetectedColorA);
         
         // Cells 1, 2, 3 are empty for now (future expansion)
         

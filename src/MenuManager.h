@@ -89,12 +89,12 @@ public:
     byte velocityA = 127; // Default velocity for notes
     
     // Current detected color for troubleshoot menu
-    String currentDetectedColor = "unknown";
-    uint8_t currentMIDINote = 60;
+    String currentDetectedColorA = "unknown";
+    uint8_t currentMIDINoteA = 60;
     
     // Update current color and MIDI note (called from main.cpp)
-    void updateCurrentColor(const char* color);
-    void updateCurrentMIDINote(uint8_t midiNote);
+    void updateCurrentColorA(const char* color);
+    void updateCurrentMIDINoteA(uint8_t midiNote);
     
 private:
     // Callback for sending ALL NOTES OFF messages

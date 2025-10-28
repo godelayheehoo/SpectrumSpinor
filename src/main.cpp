@@ -19,6 +19,9 @@ Also will need a menu functionality that just displays the current color seen.
 #include <MIDI.h>
 #include "SystemConfig.h"
 
+// TCA9548A I2C Multiplexer setup
+#define TCA_ADDR 0x70
+
 // MIDI setup
 HardwareSerial MIDIserial(1);
 MIDI_CREATE_INSTANCE(HardwareSerial, MIDIserial, MIDI);
@@ -90,6 +93,21 @@ Color currentColorA = Color::UNKNOWN;
 //function prototypes
 MenuButton readButtons();
 MenuButton readEncoder();
+
+// TCA9548A I2C Multiplexer functions
+void tcaSelect(uint8_t channel) {
+  if (channel > 7) return;
+  Wire.beginTransmission(TCA_ADDR);
+  Wire.write(1 << channel);
+  Wire.endTransmission();
+}
+
+// Optional: disable all channels
+void tcaDisableAll() {
+  Wire.beginTransmission(TCA_ADDR);
+  Wire.write(0); // no bits set
+  Wire.endTransmission();
+}
 
 //helper functions
 void midiPanic(){
@@ -182,13 +200,21 @@ void setup() {
   
   Serial.println("Display and encoder initialized");
   
-  // Initialize color sensor
-  Serial.println("Initializing color sensor...");
+  // Initialize color sensor through I2C multiplexer
+  Serial.println("Initializing color sensor on I2C multiplexer...");
+  
+  // Select channel 0 for sensor A
+  tcaSelect(0);
+  delay(10); // small settle time
+  
   if (colorSensor.begin()) {
-    Serial.println("Color sensor ready");
+    Serial.println("Color sensor A ready on mux channel 0");
   } else {
-    Serial.println("Color sensor initialization failed - continuing without it");
+    Serial.println("Color sensor A initialization failed - continuing without it");
   }
+  
+  // Disable all channels for now
+  tcaDisableAll();
   
   // Set up MIDI callback for MenuManager
   menu.setAllNotesOffCallback(sendAllNotesOff);
@@ -230,14 +256,18 @@ void loop() {
     resetOLED();
   }
 
-  // Periodic color detection
+  // Periodic color detection (using I2C multiplexer)
   if (currentTime - lastColorTime >= colorInterval) {
+    // Select sensor A (channel 0) on the multiplexer
+    tcaSelect(0);
+    delay(5); // small settle time
+    
     if (colorSensor.isAvailable()) {
       // Use efficient enum-based color detection
       Color detectedColor = colorSensor.getCurrentColorEnum();
       
       if (detectedColor != Color::UNKNOWN && detectedColor != currentColorA) {
-        Serial.print("Detected color: ");
+        Serial.print("Sensor A - Detected color: ");
         Serial.println(colorToString(detectedColor));
         
         uint8_t oldMidiNote = currentColorA != Color::UNKNOWN ? scaleManager.colorToMIDINote(currentColorA) : ScaleManager::MIDI_NOTE_OFF;
@@ -267,14 +297,15 @@ void loop() {
           menu.render();
         }
         
-        // TODO: Send actual MIDI message here
-        // For example: sendMIDINote(midiNote, velocity);
         currentColorA = detectedColor;
       }
       else if (detectedColor == Color::UNKNOWN) {
-        Serial.println("No valid color detected");
+        Serial.println("Sensor A - No valid color detected");
       } 
     }
+    
+    // Disable all multiplexer channels after reading
+    tcaDisableAll();
     
     lastColorTime = currentTime;
   }
@@ -323,9 +354,9 @@ MenuButton readButtons() {
     return ENCODER_BUTTON;
   }
   
-  // Check aux button
+  // Check con button
   if (conBtn.isPressed()) {
-    Serial.println("Aux button pressed");
+    Serial.println("Con button pressed");
     return CON_BUTTON;
   }
   

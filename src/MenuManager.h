@@ -83,18 +83,39 @@ public:
     // Grid menu selection (1-16 = numbers, no "..." anymore)
     int gridSelectedIdx = 1;
     
-    // Active MIDI channel (1-16)
+    // Active MIDI channels (1-16) for each sensor
     int activeMIDIChannelA = 3; // Default to channel 3
+    int activeMIDIChannelB = 2; // Default to channel 2
+    int activeMIDIChannelC = 7; // Default to channel 7
+    int activeMIDIChannelD = 12; // Default to channel 12
 
     byte velocityA = 127; // Default velocity for notes
+    byte velocityB = 127; // Default velocity for notes
+    byte velocityC = 127; // Default velocity for notes
+    byte velocityD = 127; // Default velocity for notes
     
-    // Current detected color for troubleshoot menu
+    // Current detected colors for troubleshoot menu
     String currentDetectedColorA = "unknown";
+    String currentDetectedColorB = "unknown";
+    String currentDetectedColorC = "unknown";
+    String currentDetectedColorD = "unknown";
+    
+    // Current MIDI notes for each sensor
     uint8_t currentMIDINoteA = 60;
+    uint8_t currentMIDINoteB = 60;
+    uint8_t currentMIDINoteC = 60;
+    uint8_t currentMIDINoteD = 60;
     
     // Update current color and MIDI note (called from main.cpp)
     void updateCurrentColorA(const char* color);
+    void updateCurrentColorB(const char* color);
+    void updateCurrentColorC(const char* color);
+    void updateCurrentColorD(const char* color);
+    
     void updateCurrentMIDINoteA(uint8_t midiNote);
+    void updateCurrentMIDINoteB(uint8_t midiNote);
+    void updateCurrentMIDINoteC(uint8_t midiNote);
+    void updateCurrentMIDINoteD(uint8_t midiNote);
     
 private:
     // Callback for sending ALL NOTES OFF messages

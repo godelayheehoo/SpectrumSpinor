@@ -25,8 +25,32 @@ void MenuManager::updateCurrentColorA(const char* color) {
     currentDetectedColorA = String(color);
 }
 
+void MenuManager::updateCurrentColorB(const char* color) {
+    currentDetectedColorB = String(color);
+}
+
+void MenuManager::updateCurrentColorC(const char* color) {
+    currentDetectedColorC = String(color);
+}
+
+void MenuManager::updateCurrentColorD(const char* color) {
+    currentDetectedColorD = String(color);
+}
+
 void MenuManager::updateCurrentMIDINoteA(uint8_t midiNote) {
     currentMIDINoteA = midiNote;
+}
+
+void MenuManager::updateCurrentMIDINoteB(uint8_t midiNote) {
+    currentMIDINoteB = midiNote;
+}
+
+void MenuManager::updateCurrentMIDINoteC(uint8_t midiNote) {
+    currentMIDINoteC = midiNote;
+}
+
+void MenuManager::updateCurrentMIDINoteD(uint8_t midiNote) {
+    currentMIDINoteD = midiNote;
 }
 
 // Text centering helper functions
@@ -185,26 +209,43 @@ void MenuManager::render() {
             display.drawLine(0, y, SCREEN_WIDTH - 1, y, OLED_WHITE);
         }
         
-        // Cell 0 (top-left): Show detected color
-        display.setTextSize(1);
-        display.setTextColor(OLED_WHITE);
+        // Array of colors and labels for each sensor
+        String sensorColors[4] = {currentDetectedColorA, currentDetectedColorB, currentDetectedColorC, currentDetectedColorD};
+        String sensorLabels[4] = {"A", "B", "C", "D"};
         
-        // Center the color text in the first cell
-        int cellCenterX = cellWidth / 2;
-        int cellCenterY = cellHeight / 2;
-        
-        // Calculate text position to center it
-        int16_t x1, y1;
-        uint16_t textWidth, textHeight;
-        display.getTextBounds(currentDetectedColorA, 0, 0, &x1, &y1, &textWidth, &textHeight);
-        
-        int textX = cellCenterX - (textWidth / 2);
-        int textY = cellCenterY - (textHeight / 2);
-        
-        display.setCursor(textX, textY);
-        display.print(currentDetectedColorA);
-        
-        // Cells 1, 2, 3 are empty for now (future expansion)
+        // Draw each sensor's data in its respective cell
+        for (int cellIndex = 0; cellIndex < 4; cellIndex++) {
+            int row = cellIndex / 2;
+            int col = cellIndex % 2;
+            int cellX = col * cellWidth;
+            int cellY = row * cellHeight;
+            int cellCenterX = cellX + cellWidth / 2;
+            int cellCenterY = cellY + cellHeight / 2;
+            
+            // Draw sensor label in top-right corner of each cell with box
+            display.setTextSize(1);
+            display.setTextColor(OLED_WHITE);
+            int labelX = cellX + cellWidth - 12;
+            int labelY = cellY + 2;
+            
+            // Draw small box around label
+            display.drawRect(labelX - 2, labelY - 1, 10, 9, OLED_WHITE);
+            
+            // Draw label letter
+            display.setCursor(labelX, labelY);
+            display.print(sensorLabels[cellIndex]);
+            
+            // Center the color text in the cell
+            int16_t x1, y1;
+            uint16_t textWidth, textHeight;
+            display.getTextBounds(sensorColors[cellIndex], 0, 0, &x1, &y1, &textWidth, &textHeight);
+            
+            int textX = cellCenterX - (textWidth / 2);
+            int textY = cellCenterY - (textHeight / 2);
+            
+            display.setCursor(textX, textY);
+            display.print(sensorColors[cellIndex]);
+        }
         
         display.display(); // Send buffer to screen
     }

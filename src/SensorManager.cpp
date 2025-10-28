@@ -17,8 +17,8 @@ ColorCenter defaultColors[9] = {
 // Initialize global calibration storage
 SensorCalibration sensorCalibrations[4];
 
-// Legacy support - points to sensor A's calibration
-ColorCenter* colorDatabase = nullptr;
+// Legacy support - initialize with default colors directly (safer than nullptr)
+ColorCenter* colorDatabase = defaultColors;
 int numColorDatabase = 9;
 
 SensorManager::SensorManager() {
@@ -170,4 +170,30 @@ void SensorManager::printSensorStatus() const {
     }
     Serial.print("Total enabled sensors: ");
     Serial.println(getNumEnabledSensors());
+}
+
+void SensorManager::initializeCalibrationData() {
+    Serial.println("Initializing calibration data...");
+    
+    // Initialize calibration data with defaults
+    for (int i = 0; i < MAX_SENSORS; i++) {
+        sensorCalibrations[i].numColors = 9;
+        sensorCalibrations[i].isCalibrated = false;
+        
+        // Copy default colors to each sensor's database
+        for (int j = 0; j < 9; j++) {
+            sensorCalibrations[i].colorDatabase[j] = defaultColors[j];
+        }
+    }
+    
+    // Set sensor names
+    sensorCalibrations[SENSOR_A].sensorName = "A";
+    sensorCalibrations[SENSOR_B].sensorName = "B";
+    sensorCalibrations[SENSOR_C].sensorName = "C";
+    sensorCalibrations[SENSOR_D].sensorName = "D";
+    
+    // Set up legacy support (points to sensor A)
+    colorDatabase = sensorCalibrations[SENSOR_A].colorDatabase;
+    
+    Serial.println("Calibration data initialized");
 }

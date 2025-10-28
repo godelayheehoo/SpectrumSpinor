@@ -85,10 +85,9 @@ volatile bool backButtonFlag = false;
 // Encoder state tracking for interrupts
 volatile int lastEncoderA = HIGH;
 volatile int lastEncoderB = HIGH;
-volatile unsigned long lastEncoderTime = 0;
-volatile unsigned long lastButtonTime = 0;
-const unsigned long encoderDebounceDelay = 2; // Much shorter for encoder
-const unsigned long buttonDebounceDelay = 20; // Shorter for buttons
+// Removed volatile timing variables - debouncing now handled in main loop
+const unsigned long encoderDebounceDelay = 5; // Moderate debounce for clean detent clicks  
+const unsigned long buttonDebounceDelay = 300; // Very aggressive debouncing for buttons
 
 // Button helpers
 ButtonHelper encoderBtn(ENCODER_BTN);
@@ -107,55 +106,60 @@ MenuButton readButtons();
 MenuButton readEncoder();
 
 // Interrupt Service Routines (ISRs) - Must be fast and minimal!
+// Debug counter for ISR calls
+volatile int encoderISRCounter = 0;
+
 void IRAM_ATTR encoderISR() {
-  unsigned long currentTime = millis();
+  encoderISRCounter++; // Count ISR calls for debugging
   
-  // Quick debounce check
-  if (currentTime - lastEncoderTime < encoderDebounceDelay) {
-    return;
-  }
+  static int lastState = 0;
   
+  // Read current state of both pins
   int currentA = digitalRead(ENCODER_A);
   int currentB = digitalRead(ENCODER_B);
   
-  // Full quadrature decoding - check both rising and falling edges
-  if (currentA != lastEncoderA) {
-    lastEncoderTime = currentTime;
-    
-    // Determine direction based on A and B state relationship
-    if ((currentA == HIGH && currentB == LOW) || (currentA == LOW && currentB == HIGH)) {
+  // Encode current state as 2-bit value: B<<1 | A
+  int currentState = (currentB << 1) | currentA;
+  
+  // Proper quadrature decoding - only trigger on valid transitions
+  // Quadrature sequence: 00 -> 01 -> 11 -> 10 -> 00 (CW)
+  //                      00 -> 10 -> 11 -> 01 -> 00 (CCW)
+  
+  int transition = (lastState << 2) | currentState;
+  
+  switch (transition) {
+    case 0b0001: // 00->01
+    case 0b0111: // 01->11  
+    case 0b1110: // 11->10
+    case 0b1000: // 10->00
       encoderCWFlag = true;
-    } else {
+      break;
+      
+    case 0b0010: // 00->10
+    case 0b1011: // 10->11
+    case 0b1101: // 11->01  
+    case 0b0100: // 01->00
       encoderCCWFlag = true;
-    }
-    
-    lastEncoderA = currentA;
-    lastEncoderB = currentB;
+      break;
+      
+    // Ignore invalid transitions (noise/bounce)
+    default:
+      break;
   }
+  
+  lastState = currentState;
 }
 
 void IRAM_ATTR encoderButtonISR() {
-  unsigned long currentTime = millis();
-  if (currentTime - lastButtonTime > buttonDebounceDelay) {
-    encoderButtonFlag = true;
-    lastButtonTime = currentTime;
-  }
+  encoderButtonFlag = true;
 }
 
 void IRAM_ATTR conButtonISR() {
-  unsigned long currentTime = millis();
-  if (currentTime - lastButtonTime > buttonDebounceDelay) {
-    conButtonFlag = true;
-    lastButtonTime = currentTime;
-  }
+  conButtonFlag = true;
 }
 
 void IRAM_ATTR backButtonISR() {
-  unsigned long currentTime = millis();
-  if (currentTime - lastButtonTime > buttonDebounceDelay) {
-    backButtonFlag = true;
-    lastButtonTime = currentTime;
-  }
+  backButtonFlag = true;
 }
 
 // TCA9548A I2C Multiplexer functions
@@ -262,11 +266,11 @@ void setup() {
   lastEncoderA = digitalRead(ENCODER_A);
   lastEncoderB = digitalRead(ENCODER_B);
   
-  // Attach interrupts for encoder (both pins for full quadrature)
+  // Attach interrupts to both encoder pins for proper quadrature decoding
   attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
   
-  // Attach interrupts for buttons (falling edge - button pressed)
+  // Attach interrupts for buttons (falling edge only - button press)
   attachInterrupt(digitalPinToInterrupt(ENCODER_BTN), encoderButtonISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(CON_BTN), conButtonISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(BAK_BTN), backButtonISR, FALLING);
@@ -311,41 +315,95 @@ void loop() {
   
   // High priority: Check interrupt flags immediately (no polling delay needed!)
   
-  // Check encoder flags set by interrupts
-  if (encoderCWFlag) {
+  // Check encoder flags set by interrupts with debouncing in main loop
+  static unsigned long lastEncoderAction = 0;
+  
+  if (encoderCWFlag && (currentTime - lastEncoderAction > encoderDebounceDelay)) {
     encoderCWFlag = false;
+    lastEncoderAction = currentTime;
     Serial.println("Interrupt: Encoder CW");
     menu.handleInput(CW);
     menu.render();
   }
   
-  if (encoderCCWFlag) {
+  if (encoderCCWFlag && (currentTime - lastEncoderAction > encoderDebounceDelay)) {
     encoderCCWFlag = false;
+    lastEncoderAction = currentTime;
     Serial.println("Interrupt: Encoder CCW");
     menu.handleInput(CCW);
     menu.render();
   }
   
-  // Check button flags set by interrupts
+  // Debug: Print ISR call count and flag counts periodically
+  static unsigned long lastDebugTime = 0;
+  static int cwCount = 0, ccwCount = 0;
+  
+  if (encoderCWFlag) {
+    cwCount++;
+  }
+  if (encoderCCWFlag) {
+    ccwCount++;
+  }
+  
+  if (currentTime - lastDebugTime > 5000) { // Every 5 seconds
+    Serial.print("ISR calls: ");
+    Serial.print(encoderISRCounter);
+    Serial.print(", CW flags: ");
+    Serial.print(cwCount);
+    Serial.print(", CCW flags: ");
+    Serial.println(ccwCount);
+    
+    encoderISRCounter = 0;
+    cwCount = 0;
+    ccwCount = 0;
+    lastDebugTime = currentTime;
+  }
+  
+  // Check button flags set by interrupts with toggle debouncing
+  static bool ignoreNextEncoderButton = false;
+  static bool ignoreNextConButton = false;
+  static bool ignoreNextBackButton = false;
+  
   if (encoderButtonFlag) {
     encoderButtonFlag = false;
-    Serial.println("Interrupt: Encoder button");
-    menu.handleInput(ENCODER_BUTTON);
-    menu.render();
+    
+    if (ignoreNextEncoderButton) {
+      ignoreNextEncoderButton = false;
+      // Ignore this trigger
+    } else {
+      ignoreNextEncoderButton = true;
+      Serial.println("Interrupt: Encoder button");
+      menu.handleInput(ENCODER_BUTTON);
+      menu.render();
+    }
   }
   
   if (conButtonFlag) {
     conButtonFlag = false;
-    Serial.println("Interrupt: Con button");
-    menu.handleInput(CON_BUTTON);
-    menu.render();
+    
+    if (ignoreNextConButton) {
+      ignoreNextConButton = false;
+      // Ignore this trigger
+    } else {
+      ignoreNextConButton = true;
+      Serial.println("Interrupt: Con button");
+      menu.handleInput(CON_BUTTON);
+      menu.render();
+    }
   }
   
   if (backButtonFlag) {
     backButtonFlag = false;
-    Serial.println("Interrupt: Back button");
-    menu.handleInput(BAK_BUTTON);
-    menu.render();
+    
+    if (ignoreNextBackButton) {
+      ignoreNextBackButton = false;
+      // Ignore this trigger
+    } else {
+      ignoreNextBackButton = true;
+      Serial.println("Interrupt: Back button");
+      menu.handleInput(BAK_BUTTON);
+      menu.render();
+    }
   }
   
   // Keep panic button as polling since it's hardware-debounced

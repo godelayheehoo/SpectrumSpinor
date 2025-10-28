@@ -1,51 +1,84 @@
 # SpectrumSpinor ESP32 Project
 
-This project implements a menu-driven interface on an ESP32 with a ST7789 TFT display and rotary encoder input.
+This project recreates the functionality of the Playtronic "MIDI COLOR SEQUENCER ORBITA" using an ESP32 microcontroller. The device uses a rotating disk with color sensors to generate MIDI signals based on detected colors.
 
 ## Hardware Components
 
 - **ESP32 Development Board**: Main microcontroller
-- **ST7789 TFT Display**: 320x240 resolution screen
+- **SH1106 OLED Display**: 128x64 monochrome I2C display
+- **TCS34725 Color Sensor**: I2C color detection sensor
 - **Rotary Encoder**: With built-in push button for navigation
-- **Auxiliary Button**: Secondary input button
+- **Control Button (CON)**: Secondary input button
+- **Back Button (BAK)**: Navigation button
+- **Panic Button**: Emergency MIDI all-notes-off button
+- **NEMA 17 Stepper Motor**: For rotating the color disk (planned)
+- **A4988 Stepper Driver**: Motor control (planned)
 
 ## Pin Connections
 
 ```
-TFT Display:
-- SCLK: GPIO 18
-- MOSI: GPIO 23  
-- DC:   GPIO 2
-- CS:   GPIO 5
-- RST:  Not connected (handled by software)
+OLED Display (I2C):
+- SDA:  GPIO 21
+- SCL:  GPIO 22
+- RST:  GPIO 4
+
+Color Sensor (I2C - shared bus):
+- SDA:  GPIO 21  
+- SCL:  GPIO 22
 
 Rotary Encoder:
 - A:    GPIO 32
 - B:    GPIO 33  
 - BTN:  GPIO 25
 
-Auxiliary Button:
-- BTN:  GPIO 26
+Buttons:
+- CON:   GPIO 26
+- BAK:   GPIO 14
+- PANIC: GPIO 27
 
-Debug LED:
-- LED:  GPIO 14
+MIDI Output:
+- TX:   GPIO 17 (Hardware Serial)
 ```
 
 ## Menu System
 
-The project features a table-driven menu system with the following menus:
+The project features a table-driven menu system optimized for the OLED display:
 
 ### Main Menu
+- **Grid View**: Access MIDI channel selection
+- **Troubleshoot**: View current color detection and system status
 - Navigate with rotary encoder (CW/CCW)
-- Select "Grid View" to access MIDI channel selection
+- Select with encoder button
+- Back button returns to previous menu
 
 ### MIDI Grid Menu  
 - 4x4 grid showing MIDI channels 1-16
-- "..." in top left to return to main menu
-- Currently selected channel highlighted in white
-- Active MIDI channel highlighted in green
-- Use encoder to navigate, press to select active channel
-- Aux button returns to main menu
+- Currently selected channel highlighted with white background
+- Active MIDI channel marked with "X"
+- When active channel is selected: shows white background with black X
+- Navigate with encoder rotation (CW/CCW wraps around 1-16)
+- **CON button**: Confirms selection and sets active MIDI channel
+- **Back button**: Returns to main menu
+- Automatically sends ALL NOTES OFF to previous channel when switching
+
+### Troubleshoot Menu
+- 2x2 grid layout for system diagnostics
+- Top-left cell shows currently detected color
+- Other cells reserved for future diagnostics
+- **Back button**: Returns to main menu
+
+## Color Detection & MIDI
+
+The system continuously monitors the color sensor and generates MIDI notes:
+
+- **Color Enum System**: Efficient integer-based color identification (9 colors: PINK through WHITE)
+- **Scale Management**: Converts colors to MIDI notes based on musical scales
+- **MIDI Output**: Hardware serial MIDI at 31250 baud on GPIO 17
+- **Note Handling**: 
+  - Sends note-off for previous color before new note-on
+  - WHITE color acts as note-off signal
+  - Configurable velocity and channel selection
+- **Panic Function**: Emergency all-notes-off on all channels (panic button)
 
 ## Features
 

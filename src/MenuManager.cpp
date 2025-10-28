@@ -13,9 +13,9 @@
 #define SAFE_VISIBLE_OPTIONS 5
 
 const MenuHandlers menuHandlersTable[] = {
-    { &MenuManager::mainMenuCW, &MenuManager::mainMenuCCW, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuAuxButton }, // MAIN_MENU
-    { &MenuManager::gridMenuCW, &MenuManager::gridMenuCCW, &MenuManager::gridMenuEncoderButton, &MenuManager::gridMenuAuxButton }, // GRID_MENU
-    { &MenuManager::troubleshootMenuCW, &MenuManager::troubleshootMenuCCW, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuAuxButton }, // TROUBLESHOOT_MENU
+    { &MenuManager::mainMenuCW, &MenuManager::mainMenuCCW, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuConButton, &MenuManager::mainMenuBackButton }, // MAIN_MENU
+    { &MenuManager::gridMenuCW, &MenuManager::gridMenuCCW, &MenuManager::gridMenuEncoderButton, &MenuManager::gridMenuConButton, &MenuManager::gridMenuBackButton }, // GRID_MENU
+    { &MenuManager::troubleshootMenuCW, &MenuManager::troubleshootMenuCCW, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuConButton, &MenuManager::troubleshootMenuBackButton }, // TROUBLESHOOT_MENU
 };
 
 MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(MAIN_MENU) {
@@ -62,13 +62,6 @@ void MenuManager::centerTextInContent(String text, int textSize) {
 }
 
 void MenuManager::handleInput(MenuButton btn) {
-    // Handle back button first (works in all menus)
-    if (btn == BAK_BUTTON) {
-        // Back button always returns to main menu
-        currentMenu = MAIN_MENU;
-        return;
-    }
-    
     // Map button to handler index
     int handlerIdx = -1;
     switch (btn) {
@@ -76,6 +69,7 @@ void MenuManager::handleInput(MenuButton btn) {
         case CCW: handlerIdx = 1; break;
         case ENCODER_BUTTON: handlerIdx = 2; break;
         case CON_BUTTON: handlerIdx = 3; break;
+        case BAK_BUTTON: handlerIdx = 4; break;
         default: return; // Unknown button
     }
     
@@ -86,7 +80,8 @@ void MenuManager::handleInput(MenuButton btn) {
             case 0: handler = menuHandlersTable[currentMenu].onCW; break;
             case 1: handler = menuHandlersTable[currentMenu].onCCW; break;
             case 2: handler = menuHandlersTable[currentMenu].onEncoderButton; break;
-            case 3: handler = menuHandlersTable[currentMenu].onAuxButton; break;
+            case 3: handler = menuHandlersTable[currentMenu].onConButton; break;
+            case 4: handler = menuHandlersTable[currentMenu].onBackButton; break;
             default: handler = nullptr; break;
         }
         if (handler) {
@@ -245,8 +240,12 @@ void MenuManager::mainMenuEncoderButton() {
     }
 }
 
-void MenuManager::mainMenuAuxButton() {
+void MenuManager::mainMenuConButton() {
     // Secondary action - to be implemented based on needs
+}
+
+void MenuManager::mainMenuBackButton() {
+    // Back button in main menu does nothing (already at root)
 }
 
 // GRID_MENU
@@ -267,6 +266,12 @@ void MenuManager::gridMenuCCW() {
 }
 
 void MenuManager::gridMenuEncoderButton() {
+    // Encoder button does nothing in grid menu
+    // Use CON button to select channels, back button to return to main menu
+}
+
+void MenuManager::gridMenuConButton() {
+    // CON button sets selected channel as active MIDI channel
     // Send ALL NOTES OFF to current channel before switching
     if (allNotesOffCallback != nullptr) {
         allNotesOffCallback(activeMIDIChannelA);
@@ -276,9 +281,9 @@ void MenuManager::gridMenuEncoderButton() {
     activeMIDIChannelA = gridSelectedIdx;
 }
 
-void MenuManager::gridMenuAuxButton() {
-    // Aux button functionality (if needed)
-    // For now, do nothing - back button handles menu navigation
+void MenuManager::gridMenuBackButton() {
+    // Back button returns to main menu
+    currentMenu = MAIN_MENU;
 }
 
 // TROUBLESHOOT_MENU
@@ -295,8 +300,13 @@ void MenuManager::troubleshootMenuEncoderButton() {
     currentMenu = MAIN_MENU;
 }
 
-void MenuManager::troubleshootMenuAuxButton() {
-    // Return to main menu
+void MenuManager::troubleshootMenuConButton() {
+    // CON button returns to main menu
+    currentMenu = MAIN_MENU;
+}
+
+void MenuManager::troubleshootMenuBackButton() {
+    // Back button returns to main menu
     currentMenu = MAIN_MENU;
 }
 

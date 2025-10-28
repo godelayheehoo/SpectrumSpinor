@@ -11,7 +11,8 @@ struct MenuHandlers {
     MenuActionHandler onCW;
     MenuActionHandler onCCW;
     MenuActionHandler onEncoderButton;
-    MenuActionHandler onAuxButton;
+    MenuActionHandler onConButton;
+    MenuActionHandler onBackButton;
 };
 
 // Handler table declaration
@@ -52,19 +53,22 @@ public:
     void mainMenuCW();
     void mainMenuCCW();
     void mainMenuEncoderButton();
-    void mainMenuAuxButton();
+    void mainMenuConButton();
+    void mainMenuBackButton();
     
     // Handler functions for GRID_MENU
     void gridMenuCW();
     void gridMenuCCW();
     void gridMenuEncoderButton();
-    void gridMenuAuxButton();
+    void gridMenuConButton();
+    void gridMenuBackButton();
     
     // Handler functions for TROUBLESHOOT_MENU
     void troubleshootMenuCW();
     void troubleshootMenuCCW();
     void troubleshootMenuEncoderButton();
-    void troubleshootMenuAuxButton();
+    void troubleshootMenuConButton();
+    void troubleshootMenuBackButton();
     
 
 

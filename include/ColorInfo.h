@@ -20,7 +20,7 @@ struct SensorCalibration {
 extern ColorCenter defaultColors[9];
 
 // Global calibration storage for all four sensors
-// extern SensorCalibration sensorCalibrations[4];
+extern SensorCalibration sensorCalibrations[4];
 
 // Legacy support - points to sensor A's calibration
 extern ColorCenter* colorDatabase;

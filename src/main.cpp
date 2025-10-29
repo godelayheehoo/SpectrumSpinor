@@ -25,7 +25,6 @@ Also will need a menu functionality that just displays the current color seen.
 #include "MenuManager.h"
 #include "PinDefinitions.h"
 #include "ColorHelper.h"
-#include "ScaleManager.h"
 #include "ColorEnum.h"
 #include <MIDI.h>
 #include "SystemConfig.h"
@@ -92,10 +91,9 @@ ColorHelper colorHelperD(true);
 ColorHelper colorHelpers[4]{colorHelperA, colorHelperB, colorHelperC, colorHelperD};
 ColorHelper* activeColorSensor = nullptr;
 
-SensorCalibration sensorCalibrations[4];
+extern SensorCalibration sensorCalibrations[4];
 
 // Scale manager setup
-ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
 
 // Encoder setup
 
@@ -574,7 +572,7 @@ void loop() {
          Serial.println(activeMIDIChannel);
           
           // Send note on for new color
-          uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
+          uint8_t newMidiNote = menu.scaleManager.colorToMIDINote(detectedColor);
           // Adjust based on octave
           uint8_t offset;
           switch (currentSensorIndex){

@@ -5,7 +5,8 @@
 class ScaleManager {
 public:
     enum ScaleType {
-        MAJOR
+        MAJOR,
+        MINOR,
         // Future: MINOR, PENTATONIC, BLUES, etc.
     };
     

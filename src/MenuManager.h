@@ -1,6 +1,7 @@
 #pragma once
 #include <Adafruit_SH110X.h>
 #include "SystemConfig.h"
+#include "ScaleManager.h"
 
 class MenuManager;
 
@@ -279,6 +280,7 @@ public:
     void SharedCalibrationMenuRender(int selectedIdx, int scrollIdx);
     void startCalibrationCountdown();
 
+    ScaleManager scaleManager = ScaleManager(ScaleManager::MAJOR, 4, 60);
 private:
     // Callback for sending ALL NOTES OFF messages
     AllNotesOffCallback allNotesOffCallback = nullptr;

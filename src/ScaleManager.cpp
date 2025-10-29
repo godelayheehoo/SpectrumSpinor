@@ -11,6 +11,10 @@ static const uint8_t majorScaleOffsets[] = {
     0, 2, 4, 5, 7, 9, 11, 12, MIDI_NOTE_OFF  // Maps to: C, D, E, F, G, A, B, C, OFF
 };
 
+static const uint8_t minorScaleOffsets[] = {
+    0, 2, 3, 5, 7, 8, 10, 12, MIDI_NOTE_OFF  // Maps to: C, D, D#, F, G, G#, A#, C, OFF
+};
+
 ScaleManager::ScaleManager(ScaleType initialScale, uint8_t initialOctave, uint8_t initialRootNote)
     : currentScale(initialScale), baseOctave(initialOctave), rootNote(initialRootNote) {
 }
@@ -108,6 +112,8 @@ uint8_t ScaleManager::getScaleOffset(int colorIndex) {
     switch (currentScale) {
         case MAJOR:
             return majorScaleOffsets[colorIndex];
+        case MINOR:
+            return minorScaleOffsets[colorIndex];
         default:
             return 0;
     }

@@ -12,6 +12,9 @@ Also will need a menu functionality that just displays the current color seen.
 - Forcing sensor update for troubleshoot menu 2 on startup and switch doesn't work i think.
 
 - remove display test stuff from setup().
+
+- need to work in the manual calibration, which is going to suck.
+
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -77,7 +80,13 @@ Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 MenuManager menu(display);
 
 // Color sensor setup
-ColorHelper colorSensor(true); // Enable normalization
+ColorHelper colorSensorA(true); // Enable normalization
+ColorHelper colorSensorB(true);
+ColorHelper colorSensorC(true);
+ColorHelper colorSensorD(true);
+
+ColorHelper colorSensors[4]{colorSensorA, colorSensorB, colorSensorC, colorSensorD};
+ColorHelper* activeColorSensor = nullptr;
 
 // Scale manager setup
 ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
@@ -98,6 +107,12 @@ Color currentColorA = Color::UNKNOWN;
 Color currentColorB = Color::UNKNOWN;
 Color currentColorC = Color::UNKNOWN;
 Color currentColorD = Color::UNKNOWN;
+
+byte oldMidiNote = 0;
+byte lastNoteA = 0;
+byte lastNoteB = 0;
+byte lastNoteC = 0;
+byte lastNoteD = 0;
 
 // Interrupt flags
 bool encoderButtonFlag = false;
@@ -240,7 +255,8 @@ void setup() {
     tcaSelect(channel);
     delay(50); // Longer settle time for initialization
     
-    if (colorSensor.begin()) {
+    activeColorSensor = &colorSensors[channel];
+    if (activeColorSensor->begin()) {
       Serial.print("Color sensor ");
       Serial.print((char)('A' + channel));
       Serial.print(" ready on mux channel ");
@@ -368,7 +384,7 @@ void loop() {
       delay(5); // Brief settling time
       
       uint16_t r, g, b, c;
-      colorSensor.getRawData(&r, &g, &b, &c);
+      activeColorSensor->getRawData(&r, &g, &b, &c);
       
       // Update RGB values in menu
       switch (sensorIdx) {
@@ -409,8 +425,8 @@ void loop() {
     // Check if sensor has settled
     if (currentTime - lastSensorSettleTime >= settleTime) {
       // Process current sensor
-      if (colorSensor.isAvailable()) {
-        Color detectedColor = colorSensor.getCurrentColorEnum();
+      if (activeColorSensor->isAvailable()) {
+        Color detectedColor = activeColorSensor->getCurrentColorEnum();
         Color* currentColorPtr = nullptr;
         String sensorName = "";
         uint8_t activeMIDIChannel = 1;
@@ -472,12 +488,13 @@ void loop() {
           }
         }
 #endif
-        
+
         // Update RGB values if in troubleshoot mode 1 (RGB display) and color changed
         if (menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1 && 
             detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
           uint16_t r, g, b, c;
-          colorSensor.getRawData(&r, &g, &b, &c);
+          activeColorSensor->getRawData(&r, &g, &b, &c);
+          
           
           // Update RGB values in menu for troubleshoot mode
           switch (currentSensorIndex) {
@@ -488,16 +505,86 @@ void loop() {
           }
         }
         
+        
         // Process color change if detected and valid
         if (detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
+         
+          switch(currentSensorIndex){
+            case 0:
+              oldMidiNote = lastNoteA;
+              break;
+            case 1:
+              oldMidiNote = lastNoteB;
+              break;
+            case 2:
+              oldMidiNote = lastNoteC;
+              break;
+            case 3:
+              oldMidiNote = lastNoteD;
+              break;
+          }
+         
           // Send note off for previous color
-          uint8_t oldMidiNote = *currentColorPtr != Color::UNKNOWN ? scaleManager.colorToMIDINote(*currentColorPtr) : ScaleManager::MIDI_NOTE_OFF;
-          MIDI.sendNoteOff(oldMidiNote, 0, activeMIDIChannel);
+         MIDI.sendNoteOff(oldMidiNote, 0, activeMIDIChannel);
+         Serial.print("Sending note off to note ");
+         Serial.print(oldMidiNote);
+         Serial.print("on channel ");
+         Serial.println(activeMIDIChannel);
           
           // Send note on for new color
           uint8_t newMidiNote = scaleManager.colorToMIDINote(detectedColor);
+          // Adjust based on octave
+          uint8_t offset;
+          switch (currentSensorIndex){
+            case 0:
+              offset = (menu.octaveA - 4) * 12;
+              newMidiNote += offset;
+              lastNoteA = newMidiNote;
+              break;
+            case 1:
+              offset = (menu.octaveB - 4) * 12;
+              newMidiNote += offset;
+              lastNoteB = newMidiNote;
+              break;  
+            case 2:
+              offset = (menu.octaveC - 4) * 12;
+              newMidiNote += offset;
+              lastNoteC = newMidiNote;
+              break;
+            case 3:
+              offset = (menu.octaveD - 4) * 12;
+              newMidiNote += offset;
+              lastNoteD = newMidiNote;
+              break;
+          }
+
+   
+
           byte currentChannel = (detectedColor == Color::WHITE) ? 0 : activeMIDIChannel;
           MIDI.sendNoteOn(newMidiNote, velocity, currentChannel);
+
+          switch(currentSensorIndex){
+            case 0:
+              lastNoteA = newMidiNote;
+              Serial.print("Set last note A to ");
+              Serial.println(lastNoteA);
+              break;
+            case 1:
+              lastNoteB = newMidiNote;
+              Serial.print("Set last note B to ");
+              Serial.println(lastNoteB);
+              break;  
+            case 2:
+              lastNoteC = newMidiNote;
+              Serial.print("Set last note C to ");
+              Serial.println(lastNoteC);
+              break;
+            case 3:
+              lastNoteD = newMidiNote;
+              Serial.print("Set last note D to ");
+              Serial.println(lastNoteD);
+              break;
+          }
           
           // Update menu display
           switch (currentSensorIndex) {
@@ -541,6 +628,17 @@ void loop() {
         lastColorTime = currentTime;
       }
     }
+  }
+
+  //check if we're calibrating
+  if(menu.pendingCalibrationA!=PendingCalibrationA::NONE){
+    //unfinished: white balance
+    menu.startCalibrationCountdown();
+    Serial.println("A is pending and unsupported");
+    menu.render();
+
+    menu.pendingCalibrationA = PendingCalibrationA::NONE;
+    //handle pending calibration A
   }
 }
 

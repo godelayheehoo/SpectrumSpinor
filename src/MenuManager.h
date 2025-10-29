@@ -22,8 +22,14 @@ enum MenuState {
     MAIN_MENU,
     MIDI_GRID_MENU,
     TROUBLESHOOT_MENU,
-    CALIBRATION_MENU
+    CALIBRATION_MENU,
+    OCTAVE_MENU, 
+    CALIBRATION_A_MENU,
+    CALIBRATION_B_MENU,
+    CALIBRATION_C_MENU,
+    CALIBRATION_D_MENU
 };
+static const int NUM_MAIN_MENU_ITEMS = 5;
 
 enum MenuButton {
     BUTTON_NONE,
@@ -39,6 +45,67 @@ enum ActiveSensor {
     SENSOR_B,
     SENSOR_C,
     SENSOR_D
+};
+
+enum class PendingCalibrationA{
+    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
+    // "Yellow","Green","Red","Purple","Brown"
+    NONE,
+    WHITE,
+    BLACK,
+    PINK,
+    ORANGE,
+    BLUE,
+    YELLOW,
+    GREEN,
+    RED,
+    PURPLE,
+    BROWN
+};
+enum class PendingCalibrationB{
+    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
+    // "Yellow","Green","Red","Purple","Brown"
+    NONE,
+    WHITE,
+    BLACK,
+    PINK,
+    ORANGE,
+    BLUE,
+    YELLOW,
+    GREEN,
+    RED,
+    PURPLE,
+    BROWN
+};
+enum class PendingCalibrationC{
+    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
+    // "Yellow","Green","Red","Purple","Brown"
+    NONE,
+    WHITE,
+    BLACK,
+    PINK,
+    ORANGE,
+    BLUE,
+    YELLOW,
+    GREEN,
+    RED,
+    PURPLE,
+    BROWN
+};
+enum class PendingCalibrationD{
+    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
+    // "Yellow","Green","Red","Purple","Brown"
+    NONE,
+    WHITE,
+    BLACK,
+    PINK,
+    ORANGE,
+    BLUE,
+    YELLOW,
+    GREEN,
+    RED,
+    PURPLE,
+    BROWN
 };
 
 // Function pointer type for MIDI ALL NOTES OFF callback
@@ -84,8 +151,33 @@ public:
     void calibrationMenuEncoderButton();
     void calibrationMenuConButton();
     void calibrationMenuBackButton();
-    
 
+    void calibrationMenuAEncoder(int turns);
+    void calibrationMenuAEncoderButton();
+    void calibrationMenuAConButton();
+    void calibrationMenuABackButton();
+
+    void calibrationMenuBEncoder(int turns);
+    void calibrationMenuBEncoderButton();
+    void calibrationMenuBConButton();
+    void calibrationMenuBBackButton();
+
+
+    void calibrationMenuCEncoder(int turns);
+    void calibrationMenuCEncoderButton();
+    void calibrationMenuCConButton();
+    void calibrationMenuCBackButton();
+
+    void calibrationMenuDEncoder(int turns);
+    void calibrationMenuDEncoderButton();
+    void calibrationMenuDConButton();
+    void calibrationMenuDBackButton();
+    
+    // Handler functions for OCTAVE_MENU
+    void octaveMenuEncoder(int turns);
+    void octaveMenuEncoderButton();
+    void octaveMenuConButton();
+    void octaveMenuBackButton();   
 
     MenuState currentMenu;
     Adafruit_SH1106G& display;
@@ -135,6 +227,7 @@ public:
     uint8_t currentMIDINoteB = 60;
     uint8_t currentMIDINoteC = 60;
     uint8_t currentMIDINoteD = 60;
+
     
     // Update current color and MIDI note (called from main.cpp)
     void updateCurrentColorA(const char* color);
@@ -152,11 +245,40 @@ public:
     void updateCurrentRGBB(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
     void updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
     void updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+
+    uint8_t octaveA = 1; // Current octave for sensor A
+    uint8_t octaveB = 3; // Current octave for sensor B
+    uint8_t octaveC = 4; // Current octave for sensor C
+    uint8_t octaveD = 6; // Current octave for sensor D
+
+    int activeOctaveSensor = SENSOR_A; //0: A, 1: B, 2: C, 3: D
     
     // Helper functions for working with active sensor
     int* getActiveSensorMIDIChannel(); // Returns pointer to the active sensor's MIDI channel
     void setActiveSensorMIDIChannel(int channel); // Sets the MIDI channel for the active sensor
     
+    int calibrationMenuSelectedIdx = 0; //there will only be four so this is fine.
+
+    static const int CALIBRATION_SUBMENU_VISIBLE_ITEMS = 5;
+    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 10;
+    int calibrationMenuASelectedIdx = 0;
+    int calibrationMenuAScrollIdx = 0;
+    int calibrationMenuBSelectedIdx = 0;
+    int calibrationMenuBScrollIdx = 0;
+    int calibrationMenuCSelectedIdx = 0;
+    int calibrationMenuCScrollIdx = 0;
+    int calibrationMenuDSelectedIdx = 0;
+    int calibrationMenuDScrollIdx = 0;
+
+    PendingCalibrationA pendingCalibrationA;
+    PendingCalibrationB pendingCalibrationB;
+    PendingCalibrationC pendingCalibrationC;
+    PendingCalibrationD pendingCalibrationD;
+
+    
+    void SharedCalibrationMenuRender(int selectedIdx, int scrollIdx);
+    void startCalibrationCountdown();
+
 private:
     // Callback for sending ALL NOTES OFF messages
     AllNotesOffCallback allNotesOffCallback = nullptr;

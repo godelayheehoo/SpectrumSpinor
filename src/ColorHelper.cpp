@@ -9,6 +9,12 @@ ColorHelper::ColorHelper(bool normalizeReadings)
       sensorAvailable(false) {
 }
 
+// Set or update the color database
+void ColorHelper::setColorDatabase(ColorCenter* db, int numColors) {
+    colorDatabase = db;
+    numColorDatabase = numColors;
+}
+
 bool ColorHelper::begin() {
     // Don't re-initialize Wire - assume it's already been set up by main.cpp
     // The color sensor will use the same I2C bus as the OLED display

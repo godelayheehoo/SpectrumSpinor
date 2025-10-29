@@ -17,6 +17,11 @@ const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::gridMenuEncoder, &MenuManager::gridMenuEncoderButton, &MenuManager::gridMenuConButton, &MenuManager::gridMenuBackButton }, // GRID_MENU
     { &MenuManager::troubleshootMenuEncoder, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuConButton, &MenuManager::troubleshootMenuBackButton }, // TROUBLESHOOT_MENU
     { &MenuManager::calibrationMenuEncoder, &MenuManager::calibrationMenuEncoderButton, &MenuManager::calibrationMenuConButton, &MenuManager::calibrationMenuBackButton }, // CALIBRATION_MENU
+    { &MenuManager::octaveMenuEncoder, &MenuManager::octaveMenuEncoderButton, &MenuManager::octaveMenuConButton, &MenuManager::octaveMenuBackButton },  // OCTAVE_MENU
+    { &MenuManager::calibrationMenuAEncoder, &MenuManager::calibrationMenuAEncoderButton, &MenuManager::calibrationMenuAConButton, &MenuManager::calibrationMenuABackButton }, // CALIBRATION_A_MENU
+    { &MenuManager::calibrationMenuBEncoder, &MenuManager::calibrationMenuBEncoderButton, &MenuManager::calibrationMenuBConButton, &MenuManager::calibrationMenuBBackButton }, // CALIBRATION_B_MENU
+    { &MenuManager::calibrationMenuCEncoder, &MenuManager::calibrationMenuCEncoderButton, &MenuManager::calibrationMenuCConButton, &MenuManager::calibrationMenuCBackButton }, // CALIBRATION_C_MENU
+    { &MenuManager::calibrationMenuDEncoder, &MenuManager::calibrationMenuDEncoderButton, &MenuManager::calibrationMenuDConButton, &MenuManager::calibrationMenuDBackButton }  // CALIBRATION_D_MENU
 };
 
 MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(TROUBLESHOOT_MENU) {
@@ -138,35 +143,38 @@ void MenuManager::render() {
         display.clearDisplay();
         display.setTextSize(1);
         display.setTextColor(OLED_WHITE);
-        display.setCursor(0, 0);
-        display.print("Main Menu");
-        
+        display.setCursor(10, 0);
         // Menu item 1: Grid View
-        display.setCursor(10, 20);
         if (mainMenuSelectedIdx == 0) {
             display.setTextColor(OLED_BLACK, OLED_WHITE);
         } else {
             display.setTextColor(OLED_WHITE);
         }
         display.print("Grid View");
-        
         // Menu item 2: Troubleshoot
-        display.setCursor(10, 35);
+        display.setCursor(10, 15);
         if (mainMenuSelectedIdx == 1) {
             display.setTextColor(OLED_BLACK, OLED_WHITE);
         } else {
             display.setTextColor(OLED_WHITE);
         }
         display.print("Troubleshoot");
-        
         // Menu item 3: Calibration
-        display.setCursor(10, 50);
+        display.setCursor(10, 30);
         if (mainMenuSelectedIdx == 2) {
             display.setTextColor(OLED_BLACK, OLED_WHITE);
         } else {
             display.setTextColor(OLED_WHITE);
         }
         display.print("Calibration");
+        // Menu item 4: Octave
+        display.setCursor(10,45);
+        if (mainMenuSelectedIdx == 3) {
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
+        } else {
+            display.setTextColor(OLED_WHITE);
+        }
+        display.print("Octave");
         
         display.display(); // Send buffer to screen
         
@@ -361,11 +369,47 @@ void MenuManager::render() {
                 display.setTextColor(OLED_WHITE);
             }
             
-            display.print("Sensor ");
+            display.print("Ring ");
             display.print(sensorNames[i]);
         }
         
         display.display(); // Send buffer to screen
+    } else if(currentMenu == OCTAVE_MENU) {
+        display.clearDisplay();
+                // Convert enum to character for display
+        char sensorChar;
+        int octaveToDisplay;
+        switch (activeOctaveSensor) {
+            case SENSOR_A: sensorChar = 'A'; octaveToDisplay = octaveA; break;
+            case SENSOR_B: sensorChar = 'B'; octaveToDisplay = octaveB; break;
+            case SENSOR_C: sensorChar = 'C'; octaveToDisplay = octaveC; break;
+            case SENSOR_D: sensorChar = 'D'; octaveToDisplay = octaveD; break;
+            default: sensorChar = 'A'; octaveToDisplay = octaveA; break;
+        }
+
+        display.setTextSize(2);
+        display.setTextColor(OLED_WHITE);
+        display.setCursor(SCREEN_WIDTH - 20, 5); // Position in top right
+        display.print(sensorChar);
+
+        display.setTextSize(4);
+        display.setCursor(10,10);
+        display.print(octaveToDisplay);
+
+        display.display();
+    }
+    else if(currentMenu == CALIBRATION_A_MENU){
+        SharedCalibrationMenuRender(calibrationMenuASelectedIdx, calibrationMenuAScrollIdx);
+    }
+}
+
+void MenuManager::startCalibrationCountdown(){
+    display.clearDisplay();
+    for(int i=5;i>=0;i--){
+        display.clearDisplay();
+        centerTextInContent(String(i), 5);
+        display.display();
+        delay(500);
     }
 }
 
@@ -374,7 +418,7 @@ void MenuManager::render() {
 // MAIN_MENU
 
 void MenuManager::mainMenuEncoder(int turns){
-    mainMenuSelectedIdx = constrain(mainMenuSelectedIdx + turns, 0, 2);
+    mainMenuSelectedIdx = constrain(mainMenuSelectedIdx + turns, 0, NUM_MAIN_MENU_ITEMS-2); //-2 because we don't count MAIN_MENU itself!
     if (mainMenuSelectedIdx < mainMenuScrollIdx) {
         mainMenuScrollIdx = mainMenuSelectedIdx;
     } else if (mainMenuSelectedIdx > mainMenuScrollIdx + MAIN_MENU_VISIBLE_ITEMS - 1) {
@@ -390,6 +434,9 @@ void MenuManager::mainMenuEncoderButton() {
         currentMenu = TROUBLESHOOT_MENU;
     } else if (mainMenuSelectedIdx == 2) {
         currentMenu = CALIBRATION_MENU;
+    }
+    else if (mainMenuSelectedIdx ==3){
+        currentMenu = OCTAVE_MENU;
     }
 }
 
@@ -458,11 +505,34 @@ void MenuManager::troubleshootMenuBackButton() {
 }
 
 // CALIBRATION_MENU
-void MenuManager::calibrationMenuEncoder(int turns){}
+void MenuManager::calibrationMenuEncoder(int turns){
+    calibrationSelectedIdx = constrain(calibrationSelectedIdx + turns, 0, 3);
+}
 
 void MenuManager::calibrationMenuEncoderButton() {
     // Encoder button enters calibration for selected sensor
-    // For now, do nothing - will implement calibration sub-menus later
+    switch(calibrationMenuSelectedIdx){
+        case 0:
+            currentMenu = CALIBRATION_A_MENU;
+            calibrationMenuASelectedIdx = 0;
+            calibrationMenuAScrollIdx = 0;
+            break;
+        case 1:
+            currentMenu = CALIBRATION_A_MENU;
+            calibrationMenuASelectedIdx = 0;
+            calibrationMenuAScrollIdx = 0;
+            break;
+        case 2:
+            currentMenu = CALIBRATION_A_MENU;
+            calibrationMenuASelectedIdx = 0;
+            calibrationMenuAScrollIdx = 0;
+            break;
+        case 3:
+            currentMenu = CALIBRATION_A_MENU;
+            calibrationMenuASelectedIdx = 0;
+            calibrationMenuAScrollIdx = 0;
+            break;
+    }
 }
 
 void MenuManager::calibrationMenuConButton() {
@@ -475,6 +545,163 @@ void MenuManager::calibrationMenuBackButton() {
     currentMenu = MAIN_MENU;
 }
 
+//// Calibration submenu commands
+void MenuManager::calibrationMenuAEncoder(int turns){
+    calibrationMenuASelectedIdx = constrain(calibrationMenuASelectedIdx+turns, 0, CALIBRATION_SUBMENU_TOTAL_ITEMS-1);
+    if (calibrationMenuASelectedIdx < calibrationMenuAScrollIdx) {
+            calibrationMenuAScrollIdx = calibrationMenuASelectedIdx;
+        }
+    if (calibrationMenuASelectedIdx > calibrationMenuAScrollIdx + CALIBRATION_SUBMENU_VISIBLE_ITEMS - 1) {
+            calibrationMenuAScrollIdx = calibrationMenuASelectedIdx - CALIBRATION_SUBMENU_VISIBLE_ITEMS + 1;
+        }
+}
+void MenuManager::calibrationMenuAEncoderButton(){
+    switch(calibrationMenuASelectedIdx){
+        case 0:
+            pendingCalibrationA = PendingCalibrationA::WHITE;
+            break;
+        case 1:
+            pendingCalibrationA = PendingCalibrationA::BLACK;
+            break;
+        case 2:
+            pendingCalibrationA = PendingCalibrationA::PINK;
+            break;
+
+        case 3:
+            pendingCalibrationA = PendingCalibrationA::ORANGE;
+            break;
+        case 4:
+            pendingCalibrationA = PendingCalibrationA::BLUE;
+            break;
+        case 5:
+            pendingCalibrationA = PendingCalibrationA::YELLOW;
+            break;
+        case 6:
+            pendingCalibrationA = PendingCalibrationA::GREEN;
+            break;
+        case 7:
+            pendingCalibrationA = PendingCalibrationA::RED;
+            break;
+        case 8:
+            pendingCalibrationA = PendingCalibrationA::PURPLE;
+            break;
+        case 9:
+            pendingCalibrationA = PendingCalibrationA::BROWN;
+            break;
+    }
+}
+
+void MenuManager::calibrationMenuAConButton(){}
+void MenuManager::calibrationMenuABackButton(){
+    currentMenu = CALIBRATION_MENU;
+}
+
+void MenuManager::calibrationMenuBEncoder(int turns){
+    calibrationMenuBSelectedIdx = constrain(calibrationMenuBSelectedIdx+turns, 0, CALIBRATION_SUBMENU_TOTAL_ITEMS-1);
+    if (calibrationMenuBSelectedIdx < calibrationMenuBScrollIdx) {
+            calibrationMenuBScrollIdx = calibrationMenuBSelectedIdx;
+        }
+    if (calibrationMenuBSelectedIdx > calibrationMenuBScrollIdx + CALIBRATION_SUBMENU_VISIBLE_ITEMS - 1) {
+            calibrationMenuBScrollIdx = calibrationMenuBSelectedIdx - CALIBRATION_SUBMENU_VISIBLE_ITEMS + 1;
+        }
+}
+void MenuManager::calibrationMenuBEncoderButton(){
+}
+void MenuManager::calibrationMenuBConButton(){}
+void MenuManager::calibrationMenuBBackButton(){
+    currentMenu = CALIBRATION_MENU;
+}
+
+void MenuManager::calibrationMenuCEncoder(int turns){
+    calibrationMenuCSelectedIdx = constrain(calibrationMenuCSelectedIdx+turns, 0, CALIBRATION_SUBMENU_TOTAL_ITEMS-1);
+    if (calibrationMenuCSelectedIdx < calibrationMenuCScrollIdx) {
+            calibrationMenuCScrollIdx = calibrationMenuCSelectedIdx;
+        }
+    if (calibrationMenuCSelectedIdx > calibrationMenuCScrollIdx + CALIBRATION_SUBMENU_VISIBLE_ITEMS - 1) {
+            calibrationMenuCScrollIdx = calibrationMenuCSelectedIdx - CALIBRATION_SUBMENU_VISIBLE_ITEMS + 1;
+        }
+}
+void MenuManager::calibrationMenuCEncoderButton(){
+}
+void MenuManager::calibrationMenuCConButton(){}
+void MenuManager::calibrationMenuCBackButton(){
+    currentMenu = CALIBRATION_MENU;
+}
+
+void MenuManager::calibrationMenuDEncoder(int turns){
+    calibrationMenuDSelectedIdx = constrain(calibrationMenuDSelectedIdx+turns, 0, CALIBRATION_SUBMENU_TOTAL_ITEMS-1);
+    if (calibrationMenuDSelectedIdx < calibrationMenuDScrollIdx) {
+            calibrationMenuDScrollIdx = calibrationMenuDSelectedIdx;
+        }
+    if (calibrationMenuDSelectedIdx > calibrationMenuDScrollIdx + CALIBRATION_SUBMENU_VISIBLE_ITEMS - 1) {
+            calibrationMenuDScrollIdx = calibrationMenuDSelectedIdx - CALIBRATION_SUBMENU_VISIBLE_ITEMS + 1;
+        }
+}
+void MenuManager::calibrationMenuDEncoderButton(){
+}
+void MenuManager::calibrationMenuDConButton(){}
+void MenuManager::calibrationMenuDBackButton(){
+    currentMenu = CALIBRATION_MENU;
+}
+
+
+
+
+
+// OCTAVE MENU
+void MenuManager::octaveMenuEncoder(int turns) {
+    switch (activeOctaveSensor) {
+        case SENSOR_A: octaveA = constrain(octaveA + turns, 0, 8); break;
+        case SENSOR_B: octaveB = constrain(octaveB + turns, 0, 8); break;
+        case SENSOR_C: octaveC = constrain(octaveC + turns, 0, 8); break;
+        case SENSOR_D: octaveD = constrain(octaveD + turns, 0, 8); break;
+        default: octaveA = constrain(octaveA + turns, 0, 8); break;
+    }
+}
+
+void MenuManager::octaveMenuEncoderButton(
+
+){
+       switch (activeOctaveSensor) {
+        case SENSOR_A: activeOctaveSensor = SENSOR_B; break;
+        case SENSOR_B: activeOctaveSensor = SENSOR_C; break;
+        case SENSOR_C: activeOctaveSensor = SENSOR_D; break;
+        case SENSOR_D: activeOctaveSensor = SENSOR_A; break;
+        default: activeOctaveSensor = SENSOR_A; break;
+    }
+}
+
+void MenuManager::octaveMenuConButton(){}
+
+void MenuManager::octaveMenuBackButton(){
+    currentMenu = MAIN_MENU;
+}
+
+
+//// helper functions
+void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
+    display.clearDisplay();
+    display.setTextSize(1);
+    const char* menus[10] = {"White Balance", "Dark Offset", "Pink", "Orange", "Blue",
+    "Yellow","Green","Red","Purple","Brown"};
+    int yStart = 10;
+    display.setCursor(10,yStart);
+    display.setTextColor(OLED_WHITE);
+
+    int itemIdx = scrollIdx;
+    int y = yStart;
+    for(int visible = 0; visible < CALIBRATION_SUBMENU_VISIBLE_ITEMS; ++visible,++itemIdx){
+        display.setCursor(10,y);
+        if(itemIdx == selectedIdx){
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
+        } else {
+            display.setTextColor(OLED_WHITE, OLED_BLACK);
+        }
+        display.print(menus[itemIdx]);
+    y+=10;
+    }
+    display.display();    
+}
 // Set the callback function for ALL NOTES OFF
 void MenuManager::setAllNotesOffCallback(AllNotesOffCallback callback) {
     allNotesOffCallback = callback;
@@ -500,4 +727,6 @@ void MenuManager::setActiveSensorMIDIChannel(int channel) {
         default: activeMIDIChannelA = channel; break;
     }
 }
+
+
 

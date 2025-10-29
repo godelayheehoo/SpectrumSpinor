@@ -24,6 +24,7 @@ Also will need a menu functionality that just displays the current color seen.
 #include "ColorEnum.h"
 #include <MIDI.h>
 #include "SystemConfig.h"
+#include <Encoder.h>
 
 // TCA9548A I2C Multiplexer setup
 #define TCA_ADDR 0x70

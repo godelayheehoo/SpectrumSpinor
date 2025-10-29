@@ -11,9 +11,11 @@ Also will need a menu functionality that just displays the current color seen.
 
 - Forcing sensor update for troubleshoot menu 2 on startup and switch doesn't work i think.
 
-- remove display test stuff from setup().
+- remove display test stuff from setup
 
 - need to work in the manual calibration, which is going to suck.
+
+- need to add in dark to colorhelper, colordatabase, etc.
 
 */
 #include <Arduino.h>
@@ -80,12 +82,12 @@ Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 MenuManager menu(display);
 
 // Color sensor setup
-ColorHelper colorSensorA(true); // Enable normalization
-ColorHelper colorSensorB(true);
-ColorHelper colorSensorC(true);
-ColorHelper colorSensorD(true);
+ColorHelper colorHelperA(true); // Enable normalization
+ColorHelper colorHelperB(true);
+ColorHelper colorHelperC(true);
+ColorHelper colorHelperD(true);
 
-ColorHelper colorSensors[4]{colorSensorA, colorSensorB, colorSensorC, colorSensorD};
+ColorHelper colorHelpers[4]{colorHelperA, colorHelperB, colorHelperC, colorHelperD};
 ColorHelper* activeColorSensor = nullptr;
 
 // Scale manager setup
@@ -123,6 +125,7 @@ bool backButtonFlag = false;
 //function prototypes  
 MenuButton readButtons();
 MenuButton readEncoder();
+void calibrateColor(Color color);
 
 void IRAM_ATTR encoderButtonISR() {
   encoderButtonFlag = true;
@@ -255,12 +258,13 @@ void setup() {
     tcaSelect(channel);
     delay(50); // Longer settle time for initialization
     
-    activeColorSensor = &colorSensors[channel];
+    activeColorSensor = &colorHelpers[channel];
     if (activeColorSensor->begin()) {
       Serial.print("Color sensor ");
       Serial.print((char)('A' + channel));
       Serial.print(" ready on mux channel ");
       Serial.println(channel);
+      activeColorSensor->setColorDatabase(defaultColors, 9);
     } else {
       Serial.print("Color sensor ");
       Serial.print((char)('A' + channel));
@@ -268,7 +272,8 @@ void setup() {
       Serial.println(channel);
     }
   }
-  
+
+
   // Disable all channels for now
   tcaDisableAll();
   
@@ -635,6 +640,9 @@ void loop() {
     //unfinished: white balance
     menu.startCalibrationCountdown();
     Serial.println("A is pending and unsupported");
+    //there has to be a better way to convert between the two. We'll have to add black though.
+    //for now, need to check that the enums line up right and then add special case handling.
+    calibrateColor(indexToColor(static_cast<uint8_t>(menu.pendingCalibrationA)-1));
     menu.render();
 
     menu.pendingCalibrationA = PendingCalibrationA::NONE;
@@ -654,4 +662,13 @@ MenuButton readButtons() {
   // Panic button stays as polling since it's critical and has hardware debouncing
   // Other buttons now handled by interrupts
   return BUTTON_NONE;
+}
+
+void calibrateColor(Color color){
+  for (int i=0; i<NUM_CALIBRATION_STEPS; i++){
+    Serial.print("Calibration step ");
+    Serial.print(i);
+    Serial.print(" color# ");
+    Serial.println(static_cast<uint8_t>(color));
+  }
 }

@@ -12,3 +12,5 @@
 
 // Legacy TFT colors (commented out for reference)
 // #define TFT_WHITE, TFT_BLACK, TFT_RED, etc.
+
+#define NUM_CALIBRATION_STEPS 20

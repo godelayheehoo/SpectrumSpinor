@@ -10,7 +10,8 @@ static const char* colorNames[] = {
     "red",      // Color::RED = 5
     "purple",   // Color::PURPLE = 6
     "brown",    // Color::BROWN = 7
-    "white"     // Color::WHITE = 8
+    "white",    // Color::WHITE = 8
+    "black"     // Color::BLACK = 9
 };
 
 const char* colorToString(Color color) {

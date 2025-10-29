@@ -6,10 +6,10 @@ class MenuManager;
 
 // Table-driven menu action handler types
 typedef void (MenuManager::*MenuActionHandler)();
+typedef void (MenuManager::*MenuEncoderHandler)(int turns);
 
 struct MenuHandlers {
-    MenuActionHandler onCW;
-    MenuActionHandler onCCW;
+    MenuEncoderHandler onEncoder;
     MenuActionHandler onEncoderButton;
     MenuActionHandler onConButton;
     MenuActionHandler onBackButton;
@@ -49,6 +49,7 @@ public:
     MenuManager(Adafruit_SH1106G& display);
     void render();
     void handleInput(MenuButton btn);
+    void handleEncoder(int turns);
 
     // RGB update flag for troubleshoot mode
     bool requestRGBUpdate = true;
@@ -61,29 +62,25 @@ public:
     void centerTextInContent(String text, int textSize = 2);
     
     // Handler functions for MAIN_MENU
-    void mainMenuCW();
-    void mainMenuCCW();
+    void mainMenuEncoder(int turns);
     void mainMenuEncoderButton();
     void mainMenuConButton();
     void mainMenuBackButton();
     
     // Handler functions for GRID_MENU
-    void gridMenuCW();
-    void gridMenuCCW();
+    void gridMenuEncoder(int turns);
     void gridMenuEncoderButton();
     void gridMenuConButton();
     void gridMenuBackButton();
     
     // Handler functions for TROUBLESHOOT_MENU
-    void troubleshootMenuCW();
-    void troubleshootMenuCCW();
+    void troubleshootMenuEncoder(int turns);
     void troubleshootMenuEncoderButton();
     void troubleshootMenuConButton();
     void troubleshootMenuBackButton();
     
     // Handler functions for CALIBRATION_MENU
-    void calibrationMenuCW();
-    void calibrationMenuCCW();
+    void calibrationMenuEncoder(int turns);
     void calibrationMenuEncoderButton();
     void calibrationMenuConButton();
     void calibrationMenuBackButton();

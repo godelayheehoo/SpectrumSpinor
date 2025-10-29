@@ -82,19 +82,9 @@ ColorHelper colorSensor(true); // Enable normalization
 // Scale manager setup
 ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
 
-// Interrupt-based encoder and button handling
-volatile bool encoderCWFlag = false;
-volatile bool encoderCCWFlag = false;
-volatile bool encoderButtonFlag = false;
-volatile bool conButtonFlag = false;
-volatile bool backButtonFlag = false;
-
-// Encoder state tracking for interrupts
-volatile int lastEncoderA = HIGH;
-volatile int lastEncoderB = HIGH;
-// Removed volatile timing variables - debouncing now handled in main loop
-const unsigned long encoderDebounceDelay = 5; // Moderate debounce for clean detent clicks  
-const unsigned long buttonDebounceDelay = 300; // Very aggressive debouncing for buttons
+// Encoder setup
+Encoder enc(ENCODER_A, ENCODER_B);
+long lastEncoderPos = 0;
 
 // Button helpers
 ButtonHelper encoderBtn(ENCODER_BTN);
@@ -108,58 +98,15 @@ Color currentColorB = Color::UNKNOWN;
 Color currentColorC = Color::UNKNOWN;
 Color currentColorD = Color::UNKNOWN;
 
+// Interrupt flags
+bool encoderButtonFlag = false;
+bool conButtonFlag = false;
+bool backButtonFlag = false;
+
+
 //function prototypes  
 MenuButton readButtons();
 MenuButton readEncoder();
-
-// Interrupt Service Routines (ISRs) - Must be fast and minimal!
-#ifdef TROUBLESHOOT
-// Debug counter for ISR calls
-volatile int encoderISRCounter = 0;
-#endif
-
-void IRAM_ATTR encoderISR() {
-#ifdef TROUBLESHOOT
-  encoderISRCounter++; // Count ISR calls for debugging
-#endif
-  
-  static int lastState = 0;
-  
-  // Read current state of both pins
-  int currentA = digitalRead(ENCODER_A);
-  int currentB = digitalRead(ENCODER_B);
-  
-  // Encode current state as 2-bit value: B<<1 | A
-  int currentState = (currentB << 1) | currentA;
-  
-  // Proper quadrature decoding - only trigger on valid transitions
-  // Quadrature sequence: 00 -> 01 -> 11 -> 10 -> 00 (CW)
-  //                      00 -> 10 -> 11 -> 01 -> 00 (CCW)
-  
-  int transition = (lastState << 2) | currentState;
-  
-  switch (transition) {
-    case 0b0001: // 00->01
-    case 0b0111: // 01->11  
-    case 0b1110: // 11->10
-    case 0b1000: // 10->00
-      encoderCWFlag = true;
-      break;
-      
-    case 0b0010: // 00->10
-    case 0b1011: // 10->11
-    case 0b1101: // 11->01  
-    case 0b0100: // 01->00
-      encoderCCWFlag = true;
-      break;
-      
-    // Ignore invalid transitions (noise/bounce)
-    default:
-      break;
-  }
-  
-  lastState = currentState;
-}
 
 void IRAM_ATTR encoderButtonISR() {
   encoderButtonFlag = true;
@@ -273,14 +220,6 @@ void setup() {
   pinMode(ENCODER_A, INPUT_PULLUP);
   pinMode(ENCODER_B, INPUT_PULLUP);
   
-  // Read initial encoder state
-  lastEncoderA = digitalRead(ENCODER_A);
-  lastEncoderB = digitalRead(ENCODER_B);
-  
-  // Attach interrupts to both encoder pins for proper quadrature decoding
-  attachInterrupt(digitalPinToInterrupt(ENCODER_A), encoderISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(ENCODER_B), encoderISR, CHANGE);
-  
   // Attach interrupts for buttons (falling edge only - button press)
   attachInterrupt(digitalPinToInterrupt(ENCODER_BTN), encoderButtonISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(CON_BTN), conButtonISR, FALLING);
@@ -332,25 +271,15 @@ void loop() {
   
   unsigned long currentTime = millis();
   
-  // High priority: Check interrupt flags immediately (no polling delay needed!)
-  
-  // Check encoder flags set by interrupts with debouncing in main loop
-  static unsigned long lastEncoderAction = 0;
-  
-  if (encoderCWFlag && (currentTime - lastEncoderAction > encoderDebounceDelay)) {
-    encoderCWFlag = false;
-    lastEncoderAction = currentTime;
-    menu.handleInput(CW);
+  //check encoder and pass in turns if turns!=0
+  int newEncoderPos =  enc.read();
+  int encoderTurns = newEncoderPos - lastEncoderPos;
+  if (encoderTurns != 0) {
+    lastEncoderPos = newEncoderPos;
+    menu.handleEncoder(encoderTurns);
     menu.render();
-  }
-  
-  if (encoderCCWFlag && (currentTime - lastEncoderAction > encoderDebounceDelay)) {
-    encoderCCWFlag = false;
-    lastEncoderAction = currentTime;
-    menu.handleInput(CCW);
-    menu.render();
-  }
-  
+  }  
+
 #ifdef TROUBLESHOOT
   // Debug: Print ISR call count and flag counts periodically
   static unsigned long lastDebugTime = 0;

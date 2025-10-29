@@ -13,10 +13,10 @@
 #define SAFE_VISIBLE_OPTIONS 5
 
 const MenuHandlers menuHandlersTable[] = {
-    { &MenuManager::mainMenuCW, &MenuManager::mainMenuCCW, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuConButton, &MenuManager::mainMenuBackButton }, // MAIN_MENU
-    { &MenuManager::gridMenuCW, &MenuManager::gridMenuCCW, &MenuManager::gridMenuEncoderButton, &MenuManager::gridMenuConButton, &MenuManager::gridMenuBackButton }, // GRID_MENU
-    { &MenuManager::troubleshootMenuCW, &MenuManager::troubleshootMenuCCW, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuConButton, &MenuManager::troubleshootMenuBackButton }, // TROUBLESHOOT_MENU
-    { &MenuManager::calibrationMenuCW, &MenuManager::calibrationMenuCCW, &MenuManager::calibrationMenuEncoderButton, &MenuManager::calibrationMenuConButton, &MenuManager::calibrationMenuBackButton }, // CALIBRATION_MENU
+    { &MenuManager::mainMenuEncoder, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuConButton, &MenuManager::mainMenuBackButton }, // MAIN_MENU
+    { &MenuManager::gridMenuEncoder, &MenuManager::gridMenuEncoderButton, &MenuManager::gridMenuConButton, &MenuManager::gridMenuBackButton }, // GRID_MENU
+    { &MenuManager::troubleshootMenuEncoder, &MenuManager::troubleshootMenuEncoderButton, &MenuManager::troubleshootMenuConButton, &MenuManager::troubleshootMenuBackButton }, // TROUBLESHOOT_MENU
+    { &MenuManager::calibrationMenuEncoder, &MenuManager::calibrationMenuEncoderButton, &MenuManager::calibrationMenuConButton, &MenuManager::calibrationMenuBackButton }, // CALIBRATION_MENU
 };
 
 MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(TROUBLESHOOT_MENU) {
@@ -106,29 +106,31 @@ void MenuManager::handleInput(MenuButton btn) {
     // Map button to handler index
     int handlerIdx = -1;
     switch (btn) {
-        case CW: handlerIdx = 0; break;
-        case CCW: handlerIdx = 1; break;
-        case ENCODER_BUTTON: handlerIdx = 2; break;
-        case CON_BUTTON: handlerIdx = 3; break;
-        case BAK_BUTTON: handlerIdx = 4; break;
-        default: return; // Unknown button
+        case ENCODER_BUTTON: handlerIdx = 0; break;
+        case CON_BUTTON: handlerIdx = 1; break;
+        case BAK_BUTTON: handlerIdx = 2; break;
+        default: {Serial.println("Unknown button!"); 
+        return; // Unknown button
+        };
     }
     
     // Call the handler from the table
     if (currentMenu >= 0 && currentMenu < (sizeof(menuHandlersTable)/sizeof(menuHandlersTable[0]))) {
         MenuActionHandler handler = nullptr;
         switch (handlerIdx) {
-            case 0: handler = menuHandlersTable[currentMenu].onCW; break;
-            case 1: handler = menuHandlersTable[currentMenu].onCCW; break;
-            case 2: handler = menuHandlersTable[currentMenu].onEncoderButton; break;
-            case 3: handler = menuHandlersTable[currentMenu].onConButton; break;
-            case 4: handler = menuHandlersTable[currentMenu].onBackButton; break;
+            case 0: handler = menuHandlersTable[currentMenu].onEncoderButton; break;
+            case 1: handler = menuHandlersTable[currentMenu].onConButton; break;
+            case 2: handler = menuHandlersTable[currentMenu].onBackButton; break;
             default: handler = nullptr; break;
         }
         if (handler) {
             (this->*handler)();
         }
     }
+}
+
+void MenuManager::handleEncoder(int turns){
+    (this->*menuHandlersTable[currentMenu].onEncoder)(turns);
 }
 
 void MenuManager::render() {
@@ -370,21 +372,13 @@ void MenuManager::render() {
 // Handler functions for each menu
 
 // MAIN_MENU
-void MenuManager::mainMenuCW() {
-    if (mainMenuSelectedIdx < 2) { // Now we have 3 items (0-2)
-        mainMenuSelectedIdx++;
-        if (mainMenuSelectedIdx > mainMenuScrollIdx + MAIN_MENU_VISIBLE_ITEMS - 1) {
-            mainMenuScrollIdx = mainMenuSelectedIdx - MAIN_MENU_VISIBLE_ITEMS + 1;
-        }
-    }
-}
 
-void MenuManager::mainMenuCCW() {
-    if (mainMenuSelectedIdx > 0) { // Navigate up/back
-        mainMenuSelectedIdx--;
-        if (mainMenuSelectedIdx < mainMenuScrollIdx) {
-            mainMenuScrollIdx = mainMenuSelectedIdx;
-        }
+void MenuManager::mainMenuEncoder(int turns){
+    mainMenuSelectedIdx = constrain(mainMenuSelectedIdx + turns, 0, 2);
+    if (mainMenuSelectedIdx < mainMenuScrollIdx) {
+        mainMenuScrollIdx = mainMenuSelectedIdx;
+    } else if (mainMenuSelectedIdx > mainMenuScrollIdx + MAIN_MENU_VISIBLE_ITEMS - 1) {
+        mainMenuScrollIdx = mainMenuSelectedIdx - MAIN_MENU_VISIBLE_ITEMS + 1;
     }
 }
 
@@ -408,21 +402,7 @@ void MenuManager::mainMenuBackButton() {
 }
 
 // GRID_MENU
-void MenuManager::gridMenuCW() {
-    // Navigate forward: 1 -> 2 -> ... -> 16 -> 1 (wrap around)
-    gridSelectedIdx++;
-    if (gridSelectedIdx > 16) {
-        gridSelectedIdx = 1;
-    }
-}
-
-void MenuManager::gridMenuCCW() {
-    // Navigate backward: 16 -> 15 -> ... -> 1 -> 16 (wrap around)
-    gridSelectedIdx--;
-    if (gridSelectedIdx < 1) {
-        gridSelectedIdx = 16;
-    }
-}
+void MenuManager::gridMenuEncoder(int turns){}
 
 void MenuManager::gridMenuEncoderButton() {
     // Encoder button cycles through active sensors: A -> B -> C -> D -> A
@@ -452,11 +432,7 @@ void MenuManager::gridMenuBackButton() {
 }
 
 // TROUBLESHOOT_MENU
-void MenuManager::troubleshootMenuCW() {
-    // Encoder rotation does nothing in troubleshoot menu
-}
-
-void MenuManager::troubleshootMenuCCW() {
+void MenuManager::troubleshootMenuEncoder(int turns) {
     // Encoder rotation does nothing in troubleshoot menu
 }
 
@@ -480,21 +456,7 @@ void MenuManager::troubleshootMenuBackButton() {
 }
 
 // CALIBRATION_MENU
-void MenuManager::calibrationMenuCW() {
-    // Navigate down through sensors: A -> B -> C -> D (wrap around)
-    calibrationSelectedIdx++;
-    if (calibrationSelectedIdx > 3) {
-        calibrationSelectedIdx = 0;
-    }
-}
-
-void MenuManager::calibrationMenuCCW() {
-    // Navigate up through sensors: D -> C -> B -> A (wrap around)
-    calibrationSelectedIdx--;
-    if (calibrationSelectedIdx < 0) {
-        calibrationSelectedIdx = 3;
-    }
-}
+void MenuManager::calibrationMenuEncoder(int turns){}
 
 void MenuManager::calibrationMenuEncoderButton() {
     // Encoder button enters calibration for selected sensor

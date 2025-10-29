@@ -197,10 +197,10 @@ public:
     int calibrationSelectedIdx = 0; // Default to sensor A
     
     // Active MIDI channels (1-16) for each sensor
-    int activeMIDIChannelA = 3; // Default to channel 3
-    int activeMIDIChannelB = 2; // Default to channel 2
-    int activeMIDIChannelC = 7; // Default to channel 7
-    int activeMIDIChannelD = 12; // Default to channel 12
+    byte activeMIDIChannelA = 3; // Default to channel 3
+    byte activeMIDIChannelB = 2; // Default to channel 2
+    byte activeMIDIChannelC = 7; // Default to channel 7
+    byte activeMIDIChannelD = 12; // Default to channel 12
 
     byte velocityA = 127; // Default velocity for notes
     byte velocityB = 127; // Default velocity for notes
@@ -246,15 +246,15 @@ public:
     void updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
     void updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
 
-    uint8_t octaveA = 1; // Current octave for sensor A
-    uint8_t octaveB = 3; // Current octave for sensor B
-    uint8_t octaveC = 4; // Current octave for sensor C
-    uint8_t octaveD = 6; // Current octave for sensor D
+    uint8_t octaveA; // Current octave for sensor A
+    uint8_t octaveB; // Current octave for sensor B
+    uint8_t octaveC; // Current octave for sensor C
+    uint8_t octaveD; // Current octave for sensor D
 
     int activeOctaveSensor = SENSOR_A; //0: A, 1: B, 2: C, 3: D
     
     // Helper functions for working with active sensor
-    int* getActiveSensorMIDIChannel(); // Returns pointer to the active sensor's MIDI channel
+    byte* getActiveSensorMIDIChannel(); // Returns pointer to the active sensor's MIDI channel
     void setActiveSensorMIDIChannel(int channel); // Sets the MIDI channel for the active sensor
     
     int calibrationMenuSelectedIdx = 0; //there will only be four so this is fine.

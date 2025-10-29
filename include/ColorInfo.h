@@ -5,7 +5,7 @@ struct ColorCenter{
   uint16_t avgR;
   uint16_t avgG;
   uint16_t avgB;
-  const char* name;
+  char[8] name;
 };
 
 // Per-sensor calibration data structure
@@ -13,7 +13,7 @@ struct SensorCalibration {
     ColorCenter colorDatabase[9]; // Each sensor gets its own calibration for 9 colors
     int numColors;
     bool isCalibrated;
-    const char* sensorName; // "A", "B", "C", "D"
+    char sensorName[2]; // "A", "B", "C", "D" (plus null terminator)
 };
 
 // Default color definitions (used as template for new sensor calibrations)

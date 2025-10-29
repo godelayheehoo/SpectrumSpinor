@@ -1,5 +1,6 @@
 #include "SensorManager.h"
 #include "ColorInfo.h"
+#include <EEPROM.h>
 
 // Define the default colors (moved from header to avoid multiple definition)
 ColorCenter defaultColors[9] = {
@@ -175,7 +176,6 @@ void SensorManager::printSensorStatus() const {
 void SensorManager::initializeCalibrationData() {
     Serial.println("Initializing calibration data...");
     
-    // Initialize calibration data with defaults
     for (int i = 0; i < MAX_SENSORS; i++) {
         sensorCalibrations[i].numColors = 9;
         sensorCalibrations[i].isCalibrated = false;
@@ -187,10 +187,10 @@ void SensorManager::initializeCalibrationData() {
     }
     
     // Set sensor names
-    sensorCalibrations[SENSOR_A].sensorName = "A";
-    sensorCalibrations[SENSOR_B].sensorName = "B";
-    sensorCalibrations[SENSOR_C].sensorName = "C";
-    sensorCalibrations[SENSOR_D].sensorName = "D";
+    strcpy(sensorCalibrations[SENSOR_A].sensorName, "A");
+    strcpy(sensorCalibrations[SENSOR_B].sensorName, "B");
+    strcpy(sensorCalibrations[SENSOR_C].sensorName, "C");
+    strcpy(sensorCalibrations[SENSOR_D].sensorName, "D");
     
     // Set up legacy support (points to sensor A)
     colorDatabase = sensorCalibrations[SENSOR_A].colorDatabase;

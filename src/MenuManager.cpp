@@ -392,9 +392,10 @@ void MenuManager::render() {
         display.setCursor(SCREEN_WIDTH - 20, 5); // Position in top right
         display.print(sensorChar);
 
-        display.setTextSize(4);
-        display.setCursor(10,10);
-        display.print(octaveToDisplay);
+        // display.setTextSize(4);
+        // display.setCursor(10,10);
+        // display.print(octaveToDisplay);
+        centerTextInContent(String(octaveToDisplay), 5);
 
         display.display();
     }
@@ -405,6 +406,7 @@ void MenuManager::render() {
 
 void MenuManager::startCalibrationCountdown(){
     display.clearDisplay();
+    display.setTextColor(OLED_WHITE,OLED_BLACK);
     for(int i=5;i>=0;i--){
         display.clearDisplay();
         centerTextInContent(String(i), 5);
@@ -708,7 +710,7 @@ void MenuManager::setAllNotesOffCallback(AllNotesOffCallback callback) {
 }
 
 // Helper functions for working with active sensor
-int* MenuManager::getActiveSensorMIDIChannel() {
+byte* MenuManager::getActiveSensorMIDIChannel() {
     switch (activeMIDIGridSensor) {
         case SENSOR_A: return &activeMIDIChannelA;
         case SENSOR_B: return &activeMIDIChannelB;

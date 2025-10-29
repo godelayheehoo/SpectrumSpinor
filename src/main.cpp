@@ -30,6 +30,8 @@ Also will need a menu functionality that just displays the current color seen.
 #include <MIDI.h>
 #include "SystemConfig.h"
 #include <ESP32Encoder.h>
+#include <EEPROM.h>
+#include "EEPROMAddresses.h"
 
 // TCA9548A I2C Multiplexer setup
 #define TCA_ADDR 0x70
@@ -89,6 +91,8 @@ ColorHelper colorHelperD(true);
 
 ColorHelper colorHelpers[4]{colorHelperA, colorHelperB, colorHelperC, colorHelperD};
 ColorHelper* activeColorSensor = nullptr;
+
+SensorCalibration sensorCalibrations[4];
 
 // Scale manager setup
 ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
@@ -253,29 +257,60 @@ void setup() {
   // Initialize color sensors through I2C multiplexer
   Serial.println("Initializing color sensors on I2C multiplexer...");
   
-  // Initialize all 4 sensors (channels 0-3)
-  for (int channel = 0; channel < 4; channel++) {
-    tcaSelect(channel);
-    delay(50); // Longer settle time for initialization
-    
-    activeColorSensor = &colorHelpers[channel];
-    if (activeColorSensor->begin()) {
-      Serial.print("Color sensor ");
-      Serial.print((char)('A' + channel));
-      Serial.print(" ready on mux channel ");
-      Serial.println(channel);
-      activeColorSensor->setColorDatabase(defaultColors, 9);
-    } else {
-      Serial.print("Color sensor ");
-      Serial.print((char)('A' + channel));
-      Serial.print(" initialization failed on channel ");
-      Serial.println(channel);
-    }
-  }
+  //load from EEPROM or initialize if not available
+  bool calibrationValid = EEPROM.read(0)==EEPROM_MAGIC_VALUE;
 
+  for (int i = 0; i < 4; i++) {
+        if (calibrationValid) {
+            // Load calibration from EEPROM
+            int addr = 0;
+            switch (i) {
+                case 0: addr = SENSOR_A_CALIBRATION; break;
+                case 1: addr = SENSOR_B_CALIBRATION; break;
+                case 2: addr = SENSOR_C_CALIBRATION; break;
+                case 3: addr = SENSOR_D_CALIBRATION; break;
+            }
+            EEPROM.get(addr, sensorCalibrations[i]);
+            // Set calibration in ColorHelper
+            colorHelpers[i].setColorDatabase(sensorCalibrations[i].colorDatabase, sensorCalibrations[i].numColors);
+        } else {
+            // Use defaults (already set in your code, or copy defaultColors if needed)
+            colorHelpers[i].setColorDatabase(defaultColors, 9);
+        }
+        tcaSelect(i);
+        delay(50);
+        // Always begin the sensor
+        colorHelpers[i].begin();
+    }
 
   // Disable all channels for now
   tcaDisableAll();
+
+  //load menu values
+  if(calibrationValid){
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_A, menu.activeMIDIChannelA);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_B, menu.activeMIDIChannelB);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_C, menu.activeMIDIChannelC);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_D, menu.activeMIDIChannelD);
+
+    EEPROM.get(OCTAVE_A, menu.octaveA);
+    EEPROM.get(OCTAVE_B, menu.octaveB);
+    EEPROM.get(OCTAVE_C, menu.octaveC);
+    EEPROM.get(OCTAVE_D, menu.octaveD);
+
+  }
+  else{
+    Serial.println("EEPROM not valid, using default values")
+    menu.activeMIDIChannelA = 3; // Default to channel 3
+    menu.activeMIDIChannelB = 2; // Default to channel 2
+    menu.activeMIDIChannelC = 7; // Default to channel 7
+    menu.activeMIDIChannelD = 12;// Default to channel 12
+
+    menu.octaveA = 1;
+    menu.octaveB = 3;
+    menu.octaveC = 4;
+    menu.octaveD = 6;
+  }
   
   // Set up MIDI callback for MenuManager
   menu.setAllNotesOffCallback(sendAllNotesOff);
@@ -294,6 +329,8 @@ void loop() {
   const unsigned long pollInterval = 5; // Poll every 5ms for better responsiveness
   const unsigned long colorInterval = 50; // Much faster color checking (50ms)
   const unsigned long settleTime = 1; // Minimal settle time
+
+  EEPROM.begin(1024); // Initialize EEPROM with 1KB size
   
   unsigned long currentTime = millis();
   

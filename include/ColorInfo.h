@@ -5,7 +5,7 @@ struct ColorCenter{
   uint16_t avgR;
   uint16_t avgG;
   uint16_t avgB;
-  char[8] name;
+  char name[8];
 };
 
 // Per-sensor calibration data structure

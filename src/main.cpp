@@ -300,7 +300,7 @@ void setup() {
 
   }
   else{
-    Serial.println("EEPROM not valid, using default values")
+    Serial.println("EEPROM not valid, using default values");
     menu.activeMIDIChannelA = 3; // Default to channel 3
     menu.activeMIDIChannelB = 2; // Default to channel 2
     menu.activeMIDIChannelC = 7; // Default to channel 7

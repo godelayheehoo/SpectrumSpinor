@@ -402,7 +402,9 @@ void MenuManager::mainMenuBackButton() {
 }
 
 // GRID_MENU
-void MenuManager::gridMenuEncoder(int turns){}
+void MenuManager::gridMenuEncoder(int turns) {
+    gridSelectedIdx = ((gridSelectedIdx - 1 + turns) % 16 + 16) % 16 + 1;
+}
 
 void MenuManager::gridMenuEncoderButton() {
     // Encoder button cycles through active sensors: A -> B -> C -> D -> A

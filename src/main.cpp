@@ -7,7 +7,7 @@ The current working letter will be in the top left color, aux button will cycle 
 Maybe a menu called "calibrate colors" and then have calibrate orange, calibrate blue, etc.
 Also will need a menu functionality that just displays the current color seen.
 
-- Improve encoder turns. 
+- Improve encoder turns, make it match detents. Naive dividing by two does not work.. 
 
 - Forcing sensor update for troubleshoot menu 2 on startup and switch doesn't work i think.
 
@@ -24,7 +24,7 @@ Also will need a menu functionality that just displays the current color seen.
 #include "ColorEnum.h"
 #include <MIDI.h>
 #include "SystemConfig.h"
-#include <Encoder.h>
+#include <ESP32Encoder.h>
 
 // TCA9548A I2C Multiplexer setup
 #define TCA_ADDR 0x70
@@ -83,7 +83,8 @@ ColorHelper colorSensor(true); // Enable normalization
 ScaleManager scaleManager(ScaleManager::MAJOR, 4, 60); // Major scale, octave 4, root C4
 
 // Encoder setup
-Encoder enc(ENCODER_A, ENCODER_B);
+
+ESP32Encoder enc;
 long lastEncoderPos = 0;
 
 // Button helpers
@@ -214,7 +215,11 @@ void setup() {
   display.display();
   Serial.println("OLED tests complete");
 
-  delay(200);
+  //encoder startup
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  //putting these backwards to get the correct direction
+  enc.attachHalfQuad(ENCODER_B, ENCODER_A);
+  enc.setCount(0);
   
   // Initialize encoder pins
   pinMode(ENCODER_A, INPUT_PULLUP);
@@ -272,11 +277,13 @@ void loop() {
   unsigned long currentTime = millis();
   
   //check encoder and pass in turns if turns!=0
-  int newEncoderPos =  enc.read();
+  int newEncoderPos =  enc.getCount();
+  //temp
+  //remove baove
   int encoderTurns = newEncoderPos - lastEncoderPos;
   if (encoderTurns != 0) {
     lastEncoderPos = newEncoderPos;
-    menu.handleEncoder(encoderTurns);
+    menu.handleEncoder(encoderTurns); 
     menu.render();
   }  
 

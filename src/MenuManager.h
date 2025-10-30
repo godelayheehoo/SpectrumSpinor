@@ -140,6 +140,7 @@ public:
     void gridMenuEncoderButton();
     void gridMenuConButton();
     void gridMenuBackButton();
+    void saveMIDIGrid();
     
     // Handler functions for TROUBLESHOOT_MENU
     void troubleshootMenuEncoder(int turns);

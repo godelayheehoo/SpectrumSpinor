@@ -263,10 +263,10 @@ void setup() {
             // Load calibration from EEPROM
             int addr = 0;
             switch (i) {
-                case 0: addr = SENSOR_A_CALIBRATION; break;
-                case 1: addr = SENSOR_B_CALIBRATION; break;
-                case 2: addr = SENSOR_C_CALIBRATION; break;
-                case 3: addr = SENSOR_D_CALIBRATION; break;
+                case 0: addr = SENSOR_A_CALIBRATION_ADDR; break;
+                case 1: addr = SENSOR_B_CALIBRATION_ADDR; break;
+                case 2: addr = SENSOR_C_CALIBRATION_ADDR; break;
+                case 3: addr = SENSOR_D_CALIBRATION_ADDR; break;
             }
             EEPROM.get(addr, sensorCalibrations[i]);
             // Set calibration in ColorHelper
@@ -286,15 +286,15 @@ void setup() {
 
   //load menu values
   if(calibrationValid){
-    EEPROM.get(ACTIVE_MIDI_CHANNEL_A, menu.activeMIDIChannelA);
-    EEPROM.get(ACTIVE_MIDI_CHANNEL_B, menu.activeMIDIChannelB);
-    EEPROM.get(ACTIVE_MIDI_CHANNEL_C, menu.activeMIDIChannelC);
-    EEPROM.get(ACTIVE_MIDI_CHANNEL_D, menu.activeMIDIChannelD);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_A_ADDR, menu.activeMIDIChannelA);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_B_ADDR, menu.activeMIDIChannelB);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_C_ADDR, menu.activeMIDIChannelC);
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_D_ADDR, menu.activeMIDIChannelD);
 
-    EEPROM.get(OCTAVE_A, menu.octaveA);
-    EEPROM.get(OCTAVE_B, menu.octaveB);
-    EEPROM.get(OCTAVE_C, menu.octaveC);
-    EEPROM.get(OCTAVE_D, menu.octaveD);
+    EEPROM.get(OCTAVE_A_ADDR, menu.octaveA);
+    EEPROM.get(OCTAVE_B_ADDR, menu.octaveB);
+    EEPROM.get(OCTAVE_C_ADDR, menu.octaveC);
+    EEPROM.get(OCTAVE_D_ADDR, menu.octaveD);
 
   }
   else{

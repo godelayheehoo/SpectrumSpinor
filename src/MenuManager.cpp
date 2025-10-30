@@ -1,4 +1,7 @@
 #include "MenuManager.h"
+#include "SystemConfig.h"
+#include <EEPROM.h>
+#include "EEPROMAddresses.h"
 
 // Legacy screen constants (now defined in SystemConfig.h)
 // Keeping these for any remaining references until layout is updated
@@ -11,6 +14,7 @@
 #define BOTTOM_LINE (SCREEN_HEIGHT - MARGIN_BOTTOM)
 #define LARGE_TEXT_SIZE 3
 #define SAFE_VISIBLE_OPTIONS 5
+
 
 const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::mainMenuEncoder, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuConButton, &MenuManager::mainMenuBackButton }, // MAIN_MENU
@@ -74,6 +78,7 @@ void MenuManager::updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t
 void MenuManager::updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
     currentRGBD[0] = r; currentRGBD[1] = g; currentRGBD[2] = b; currentRGBD[3] = c;
 }
+
 
 // Text centering helper functions
 void MenuManager::centerTextAt(int y, String text, int textSize) {
@@ -475,6 +480,7 @@ void MenuManager::gridMenuConButton() {
     
     // Set selected channel as active MIDI channel for current sensor
     setActiveSensorMIDIChannel(gridSelectedIdx);
+    saveMIDIGrid();
 }
 
 void MenuManager::gridMenuBackButton() {
@@ -730,5 +736,20 @@ void MenuManager::setActiveSensorMIDIChannel(int channel) {
     }
 }
 
-
-
+// save functions
+void MenuManager::saveMIDIGrid(){
+    switch(activeMIDIGridSensor){
+        case SENSOR_A:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_A_ADDR, activeMIDIChannelA);
+            break;
+        case SENSOR_B:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, activeMIDIChannelB);
+            break;
+        case SENSOR_C:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, activeMIDIChannelC);
+            break;
+        case SENSOR_D:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, activeMIDIChannelD);
+            break;
+    }
+}

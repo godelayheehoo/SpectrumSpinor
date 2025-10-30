@@ -313,7 +313,7 @@ void MenuManager::render() {
                 
                 display.setCursor(textX, textY);
                 display.print(displayText);
-            } else {
+            } else if (troubleshootMode == 1) {
                 // Mode 1: RGB values in three rows (no labels, drop C value)
                 uint16_t* rgbValues = nullptr;
                 switch (cellIndex) {
@@ -352,6 +352,25 @@ void MenuManager::render() {
                     display.setCursor(cellCenterX - 6, cellCenterY);
                     display.print("N/A");
                 }
+            } else if (troubleshootMode == 2) {
+                // Mode 2: MIDI Note values (centered)
+                uint8_t midiNote = 0;
+                switch (cellIndex) {
+                    case 0: midiNote = currentMIDINoteA; break;
+                    case 1: midiNote = currentMIDINoteB; break;
+                    case 2: midiNote = currentMIDINoteC; break;
+                    case 3: midiNote = currentMIDINoteD; break;
+                }
+                String displayText = String(midiNote);
+                int16_t x1, y1;
+                uint16_t textWidth, textHeight;
+                display.getTextBounds(displayText, 0, 0, &x1, &y1, &textWidth, &textHeight);
+                
+                int textX = cellCenterX - (textWidth / 2);
+                int textY = cellCenterY - (textHeight / 2);
+                
+                display.setCursor(textX, textY);
+                display.print(displayText);
             }
         }
         
@@ -494,11 +513,11 @@ void MenuManager::troubleshootMenuEncoder(int turns) {
 }
 
 void MenuManager::troubleshootMenuEncoderButton() {
-    // Encoder button cycles troubleshoot modes: 0 (colors) -> 1 (RGB) -> 0
+    // Encoder button cycles troubleshoot modes: 0 (colors) -> 1 (RGB) -> 2 (MIDI Notes) -> 0
     int oldMode = troubleshootMode;
-    troubleshootMode = (troubleshootMode + 1) % 2;
+    troubleshootMode = (troubleshootMode + 1) % 3;
     // If we just switched to RGB mode, request current RGB readings
-    if (oldMode == 0 && troubleshootMode == 1) {
+    if (oldMode != 1 && troubleshootMode == 1) {
         requestRGBUpdate = true;
     }
 }

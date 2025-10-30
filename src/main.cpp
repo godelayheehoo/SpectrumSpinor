@@ -257,6 +257,10 @@ void setup() {
   
   //load from EEPROM or initialize if not available
   bool calibrationValid = EEPROM.read(0)==EEPROM_MAGIC_VALUE;
+  if(calibrationValid){
+    Serial.println("Stored values found!");
+  }
+  else{Serial.println("Stored values not found!");}
 
   for (int i = 0; i < 4; i++) {
         if (calibrationValid) {
@@ -274,18 +278,24 @@ void setup() {
         } else {
             // Use defaults (already set in your code, or copy defaultColors if needed)
             colorHelpers[i].setColorDatabase(defaultColors, 9);
+            EEPROM.put(SENSOR_A_CALIBRATION_ADDR + i * sizeof(SensorCalibration), sensorCalibrations[i]);
         }
         tcaSelect(i);
         delay(50);
         // Always begin the sensor
         colorHelpers[i].begin();
+        Serial.print("Sensor # ");
+        Serial.print(i);
+        Serial.println(" begun");
     }
 
   // Disable all channels for now
   tcaDisableAll();
 
+  Serial.println("Loading menu values....");
   //load menu values
   if(calibrationValid){
+    Serial.println("Using stored menu values");
     EEPROM.get(ACTIVE_MIDI_CHANNEL_A_ADDR, menu.activeMIDIChannelA);
     EEPROM.get(ACTIVE_MIDI_CHANNEL_B_ADDR, menu.activeMIDIChannelB);
     EEPROM.get(ACTIVE_MIDI_CHANNEL_C_ADDR, menu.activeMIDIChannelC);
@@ -308,6 +318,16 @@ void setup() {
     menu.octaveB = 3;
     menu.octaveC = 4;
     menu.octaveD = 6;
+
+    EEPROM.put(ACTIVE_MIDI_CHANNEL_A_ADDR, menu.activeMIDIChannelA);
+    EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, menu.activeMIDIChannelB);
+    EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, menu.activeMIDIChannelC);
+    EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, menu.activeMIDIChannelD);
+
+    EEPROM.put(OCTAVE_A_ADDR, menu.octaveA);
+    EEPROM.put(OCTAVE_B_ADDR, menu.octaveB);
+    EEPROM.put(OCTAVE_C_ADDR, menu.octaveC);
+    EEPROM.put(OCTAVE_D_ADDR, menu.octaveD);
   }
   
   // Set up MIDI callback for MenuManager

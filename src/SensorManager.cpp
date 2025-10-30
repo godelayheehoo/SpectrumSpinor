@@ -175,7 +175,7 @@ void SensorManager::printSensorStatus() const {
 
 void SensorManager::initializeCalibrationData() {
     Serial.println("Initializing calibration data...");
-    
+        
     for (int i = 0; i < MAX_SENSORS; i++) {
         sensorCalibrations[i].numColors = 9;
         sensorCalibrations[i].isCalibrated = false;

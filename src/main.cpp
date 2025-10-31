@@ -723,11 +723,36 @@ void loop() {
     Serial.println("A is pending and unsupported");
     //there has to be a better way to convert between the two. We'll have to add black though.
     //for now, need to check that the enums line up right and then add special case handling.
-    calibrateColor(indexToColor(static_cast<uint8_t>(menu.pendingCalibrationA)-1));
+    ColorHelper sensorA = colorHelpers[0];
+    if(menu.pendingCalibrationA==PendingCalibrationA::WHITE){
+      Serial.print("Initial r,g,b:")
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].r);
+      Serial.print(", ");
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].g);
+      Serial.print(", ");
+      Serial.println(sensorA.colorDatabse[colorToIndex(Color::WHITE)].b)
+      sensorA.calibrateWhite();
+      Serial.print("Adjusted r,g,b:")
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].r);
+      Serial.print(", ");
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].g);
+      Serial.print(", ");
+      Serial.println(sensorA.colorDatabse[colorToIndex(Color::WHITE)].b)
+    }
+    else if (menu.pendingCalibrationA!=PendingCalibrationA::Black){
+    sensorA.calibrateColor(menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
+                             menu.pendingCalibrationA==PendingCalibrationA::BLUE?Color::BLUE:
+                             menu.pendingCalibrationA==PendingCalibrationA::GREEN?Color::GREEN:
+                             menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
+                             menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
+                             menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
+                             Color::UNKNOWN); //safety
+    }
+    else{
+      Serial.println("Shouldn't be able tor each this.....")
+    }
     menu.render();
-
     menu.pendingCalibrationA = PendingCalibrationA::NONE;
-    //handle pending calibration A
   }
 }
 
@@ -745,11 +770,3 @@ MenuButton readButtons() {
   return BUTTON_NONE;
 }
 
-void calibrateColor(Color color){
-  for (int i=0; i<NUM_CALIBRATION_STEPS; i++){
-    Serial.print("Calibration step ");
-    Serial.print(i);
-    Serial.print(" color# ");
-    Serial.println(static_cast<uint8_t>(color));
-  }
-}

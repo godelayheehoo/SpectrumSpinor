@@ -545,26 +545,25 @@ void MenuManager::calibrationMenuEncoderButton() {
             calibrationMenuAScrollIdx = 0;
             break;
         case 1:
-            currentMenu = CALIBRATION_A_MENU;
-            calibrationMenuASelectedIdx = 0;
-            calibrationMenuAScrollIdx = 0;
+            currentMenu = CALIBRATION_B_MENU;
+            calibrationMenuBSelectedIdx = 0;
+            calibrationMenuBScrollIdx = 0;
             break;
         case 2:
-            currentMenu = CALIBRATION_A_MENU;
-            calibrationMenuASelectedIdx = 0;
-            calibrationMenuAScrollIdx = 0;
+            currentMenu = CALIBRATION_C_MENU;
+            calibrationMenuCSelectedIdx = 0;
+            calibrationMenuCScrollIdx = 0;
             break;
         case 3:
-            currentMenu = CALIBRATION_A_MENU;
-            calibrationMenuASelectedIdx = 0;
-            calibrationMenuAScrollIdx = 0;
+            currentMenu = CALIBRATION_D_MENU;
+            calibrationMenuDSelectedIdx = 0;
+            calibrationMenuDScrollIdx = 0;
             break;
     }
 }
 
 void MenuManager::calibrationMenuConButton() {
-    // CON button enters calibration for selected sensor
-    // For now, do nothing - will implement calibration sub-menus later
+
 }
 
 void MenuManager::calibrationMenuBackButton() {

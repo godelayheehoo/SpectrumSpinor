@@ -180,6 +180,7 @@ public:
     void octaveMenuEncoderButton();
     void octaveMenuConButton();
     void octaveMenuBackButton();   
+    void saveOctaves();
 
     MenuState currentMenu;
     Adafruit_SH1106G& display;

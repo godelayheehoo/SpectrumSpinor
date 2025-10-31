@@ -771,4 +771,25 @@ void MenuManager::saveMIDIGrid(){
             EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, activeMIDIChannelD);
             break;
     }
+    EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);
+    EEPROM.commit();
+}
+
+void MenuManager::saveMIDIGrid(){
+    switch(activeOctaveSensor){
+        case SENSOR_A:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_A_ADDR, octaveA);
+            break;
+        case SENSOR_B:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, activeMIDIChannelB);
+            break;
+        case SENSOR_C:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, activeMIDIChannelC);
+            break;
+        case SENSOR_D:
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, activeMIDIChannelD);
+            break;
+    }
+    EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);
+    EEPROM.commit();
 }

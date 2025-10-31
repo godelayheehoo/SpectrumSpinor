@@ -1,7 +1,7 @@
 #pragma once
 //EEPROM magic number to indicate valid stored settings
 #define EEPROM_MAGIC_ADDRESS 0x00 // don't change this one
-#define EEPROM_MAGIC_VALUE 0x02 //do change this one
+#define EEPROM_MAGIC_VALUE 0x10 //do change this one
 
 #define SENSOR_A_CALIBRATION_ADDR 1
 #define SENSOR_B_CALIBRATION_ADDR 125 //124 + 1

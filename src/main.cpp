@@ -182,6 +182,8 @@ void resetOLED() {
 
 void setup() {
   Serial.begin(115200);
+  Serial.print("Sanity check magic number is: ");
+  Serial.println(EEPROM_MAGIC_VALUE);
   Serial.println("Starting up...");
 
   Serial.println("Setting up MIDI...");
@@ -191,7 +193,8 @@ void setup() {
   Serial.println("Initializing I2C for display...");
   Wire.begin(OLED_SDA, OLED_SCL);
   Serial.println("I2C initialized");
-  
+
+  EEPROM.begin(1024); // Initialize EEPROM with 1KB size
 
   if (!display.begin(OLED_I2C_ADDRESS)) {
     Serial.println("SH1106G allocation failed");
@@ -256,11 +259,18 @@ void setup() {
   Serial.println("Initializing color sensors on I2C multiplexer...");
   
   //load from EEPROM or initialize if not available
-  bool calibrationValid = EEPROM.read(0)==EEPROM_MAGIC_VALUE;
+  byte storedMagicValue = EEPROM.read(EEPROM_MAGIC_ADDRESS);
+  bool calibrationValid = storedMagicValue==EEPROM_MAGIC_VALUE;
+  Serial.print("Stored magic value was: ");
+  Serial.print(storedMagicValue);
+  Serial.print(" set magic val: ");
+  Serial.println(EEPROM_MAGIC_VALUE);
+  
   if(calibrationValid){
     Serial.println("Stored values found!");
   }
-  else{Serial.println("Stored values not found!");}
+  else{Serial.println("Stored values not found!");
+  }
 
   for (int i = 0; i < 4; i++) {
         if (calibrationValid) {
@@ -328,6 +338,14 @@ void setup() {
     EEPROM.put(OCTAVE_B_ADDR, menu.octaveB);
     EEPROM.put(OCTAVE_C_ADDR, menu.octaveC);
     EEPROM.put(OCTAVE_D_ADDR, menu.octaveD);
+
+    // EEPROM.put(EEPROM_MAGIC_ADDRESS,EEPROM_MAGIC_VALUE);
+    EEPROM.commit();
+  
+
+    //todo: write magic number
+
+    Serial.println("Default settings now saved to EEPROM");
   }
   
   // Set up MIDI callback for MenuManager
@@ -335,6 +353,8 @@ void setup() {
   
   // Initial menu render
   menu.render();
+  
+  Serial.println("Setup complete");
 }
 
 void loop() {
@@ -348,7 +368,7 @@ void loop() {
   const unsigned long colorInterval = 50; // Much faster color checking (50ms)
   const unsigned long settleTime = 1; // Minimal settle time
 
-  EEPROM.begin(1024); // Initialize EEPROM with 1KB size
+
   
   unsigned long currentTime = millis();
   
@@ -476,6 +496,9 @@ void loop() {
   if (currentTime - lastColorTime >= colorInterval) {
     // Start sensor settling if not already settling
     if (!sensorSettling) {
+      Serial.print("tca select on sensor");
+      Serial.println(currentSensorIndex);
+      activeColorSensor = &colorHelpers[currentSensorIndex]; //trying this added here
       tcaSelect(currentSensorIndex);
       lastSensorSettleTime = currentTime;
       sensorSettling = true;
@@ -485,8 +508,11 @@ void loop() {
     // Check if sensor has settled
     if (currentTime - lastSensorSettleTime >= settleTime) {
       // Process current sensor
+      Serial.println("checking for sensor availability");
       if (activeColorSensor->isAvailable()) {
+        Serial.println("Attempting to get color");
         Color detectedColor = activeColorSensor->getCurrentColorEnum();
+        Serial.println("Got color");
         Color* currentColorPtr = nullptr;
         String sensorName = "";
         uint8_t activeMIDIChannel = 1;

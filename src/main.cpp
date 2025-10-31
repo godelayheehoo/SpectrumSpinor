@@ -283,6 +283,7 @@ void setup() {
                 case 3: addr = SENSOR_D_CALIBRATION_ADDR; break;
             }
             EEPROM.get(addr, sensorCalibrations[i]);
+            sensorCalibrations[i].numColors = NUM_COLORS; // Ensure numColors is set, may need to adjust how this works later
             // Set calibration in ColorHelper
             colorHelpers[i].setColorDatabase(sensorCalibrations[i].colorDatabase, sensorCalibrations[i].numColors);
         } else {
@@ -504,13 +505,35 @@ void loop() {
       sensorSettling = true;
       return; // Exit loop to allow other operations
     }
-    
+    else{
+      // Serial.print("Sensor settling in progress for sensor #");
+      // Serial.println(currentSensorIndex);
+    }
+
     // Check if sensor has settled
     if (currentTime - lastSensorSettleTime >= settleTime) {
       // Process current sensor
       // Serial.println("checking for sensor availability");
       if (activeColorSensor->isAvailable()) {
-        // Serial.println("Attempting to get color");
+        // Serial.print("Attempting to get color, sensor #");
+        if (!activeColorSensor) {
+          Serial.println("ERROR: activeColorSensor is null!");
+          return;
+        }
+        // Serial.println(currentSensorIndex);
+        // Serial.print("activeColorSensor ptr: "); 
+        // Serial.println((uintptr_t)activeColorSensor, HEX);
+        // Serial.print("colorDatabase ptr: "); 
+        // Serial.println((uintptr_t)activeColorSensor->colorDatabase, HEX);
+
+      //   for (int i = 0; i < 9; i++) {
+      //   Serial.print("colorDatabase["); Serial.print(i); Serial.print("]: ");
+      //   Serial.print(activeColorSensor->colorDatabase[i].avgR); Serial.print(", ");
+      //   Serial.print(activeColorSensor->colorDatabase[i].avgG); Serial.print(", ");
+      //   Serial.println(activeColorSensor->colorDatabase[i].avgB);
+      // }
+
+
         Color detectedColor = activeColorSensor->getCurrentColorEnum();
         // Serial.println("Got color");
         Color* currentColorPtr = nullptr;

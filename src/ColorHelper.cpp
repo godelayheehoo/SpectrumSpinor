@@ -68,7 +68,9 @@ Color ColorHelper::getCurrentColorEnum() {
     }
     
     float r, g, b;
+    // Serial.println("DEBUG:  about to call getNormalizedData [getCurrentColorEnum]");
     getNormalizedData(&r, &g, &b);
+    // Serial.println("DEBUG: About to call findNearestColorEnum [getCurrentColorEnum]");
     
     return findNearestColorEnum(r, g, b);
 }
@@ -91,10 +93,15 @@ void* ColorHelper::getColorDatabase(int& numColors) {
 }
 
 Color ColorHelper::findNearestColorEnum(float r, float g, float b) {
+
+    // Serial.println("DEBUG: inside findNearestColorEnum");
     Color nearestColor = Color::UNKNOWN;
     float minDistance = 1e9f;
-    
+    // Serial.print("[DEBUG]: numColorDatabase is: ");
+    // Serial.println(numColorDatabase);
     for (int i = 0; i < numColorDatabase; i++) {
+        // Serial.print("[DEBUG]: checking #");
+        // Serial.println(i);
         // Convert stored color values to normalized range
         float storedR = colorDatabase[i].avgR / 65535.0f;
         float storedG = colorDatabase[i].avgG / 65535.0f;

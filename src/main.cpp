@@ -35,6 +35,10 @@ Also will need a menu functionality that just displays the current color seen.
 #include <EEPROM.h>
 #include "EEPROMAddresses.h"
 
+//checks
+// static_assert(sizeof(ColorHelper) == 124, "ColorHelper struct size must be 124 bytes for EEPROM layout!");
+
+
 // TCA9548A I2C Multiplexer setup
 #define TCA_ADDR 0x70
 
@@ -180,8 +184,14 @@ void resetOLED() {
   Serial.println("OLED reset complete");
 }
 
+//////////////////////////////////
+/////////   SETUP ///////////////
+////////////////////////////////
+
 void setup() {
   Serial.begin(115200);
+  Serial.print("Size of colorhelper is: ");
+Serial.println(sizeof(ColorHelper));
   Serial.print("Sanity check magic number is: ");
   Serial.println(EEPROM_MAGIC_VALUE);
   Serial.println("Starting up...");
@@ -195,6 +205,11 @@ void setup() {
   Serial.println("I2C initialized");
 
   EEPROM.begin(1024); // Initialize EEPROM with 1KB size
+  //DEBUG: immediately check midi channel
+  byte check;
+  EEPROM.get(ACTIVE_MIDI_CHANNEL_A_ADDR, check);
+  Serial.print("Read back from EEPROM for A at startup, immediately after begin(): ");
+  Serial.println(check);
 
   if (!display.begin(OLED_I2C_ADDRESS)) {
     Serial.println("SH1106G allocation failed");
@@ -273,24 +288,27 @@ void setup() {
   }
 
   for (int i = 0; i < 4; i++) {
-        if (calibrationValid) {
-            // Load calibration from EEPROM
-            int addr = 0;
-            switch (i) {
-                case 0: addr = SENSOR_A_CALIBRATION_ADDR; break;
-                case 1: addr = SENSOR_B_CALIBRATION_ADDR; break;
-                case 2: addr = SENSOR_C_CALIBRATION_ADDR; break;
-                case 3: addr = SENSOR_D_CALIBRATION_ADDR; break;
-            }
-            EEPROM.get(addr, sensorCalibrations[i]);
-            sensorCalibrations[i].numColors = NUM_COLORS; // Ensure numColors is set, may need to adjust how this works later
+        // if (calibrationValid) {
+        //     // Load calibration from EEPROM
+        //     int addr = 0;
+        //     switch (i) {
+        //         case 0: addr = SENSOR_A_CALIBRATION_ADDR; break;
+        //         case 1: addr = SENSOR_B_CALIBRATION_ADDR; break;
+        //         case 2: addr = SENSOR_C_CALIBRATION_ADDR; break;
+        //         case 3: addr = SENSOR_D_CALIBRATION_ADDR; break;
+        //     }
+        //     EEPROM.get(addr, sensorCalibrations[i]);
+        //     sensorCalibrations[i].numColors = NUM_COLORS; // Ensure numColors is set, may need to adjust how this works later
             // Set calibration in ColorHelper
-            colorHelpers[i].setColorDatabase(sensorCalibrations[i].colorDatabase, sensorCalibrations[i].numColors);
-        } else {
+            // colorHelpers[i].setColorDatabase(sensorCalibrations[i].colorDatabase, sensorCalibrations[i].numColors);
+        // } else {
             // Use defaults (already set in your code, or copy defaultColors if needed)
             colorHelpers[i].setColorDatabase(defaultColors, 9);
-            EEPROM.put(SENSOR_A_CALIBRATION_ADDR + i * sizeof(SensorCalibration), sensorCalibrations[i]);
-        }
+            uint write_address = SENSOR_A_CALIBRATION_ADDR + i * sizeof(SensorCalibration);
+            Serial.print("Write Address:  ");
+            Serial.println(write_address);
+            EEPROM.put(write_address, sensorCalibrations[i]);
+        // }
         tcaSelect(i);
         delay(50);
         // Always begin the sensor
@@ -299,6 +317,9 @@ void setup() {
         Serial.print(i);
         Serial.println(" begun");
     }
+    if(!calibrationValid){
+      EEPROM.commit();
+    }
 
   // Disable all channels for now
   tcaDisableAll();
@@ -306,8 +327,16 @@ void setup() {
   Serial.println("Loading menu values....");
   //load menu values
   if(calibrationValid){
+
+    byte check;
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_A_ADDR, check);
+    Serial.print("Read back from EEPROM for A at startup: ");
+    Serial.println(check);
+
     Serial.println("Using stored menu values");
     EEPROM.get(ACTIVE_MIDI_CHANNEL_A_ADDR, menu.activeMIDIChannelA);
+    Serial.print("Settting sensor A channel to ");
+    Serial.println(menu.activeMIDIChannelA);
     EEPROM.get(ACTIVE_MIDI_CHANNEL_B_ADDR, menu.activeMIDIChannelB);
     EEPROM.get(ACTIVE_MIDI_CHANNEL_C_ADDR, menu.activeMIDIChannelC);
     EEPROM.get(ACTIVE_MIDI_CHANNEL_D_ADDR, menu.activeMIDIChannelD);

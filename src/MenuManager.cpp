@@ -500,6 +500,7 @@ void MenuManager::gridMenuConButton() {
     // Set selected channel as active MIDI channel for current sensor
     setActiveSensorMIDIChannel(gridSelectedIdx);
     saveMIDIGrid();
+    Serial.println("MIDI grid saved!");
 }
 
 void MenuManager::gridMenuBackButton() {
@@ -699,6 +700,7 @@ void MenuManager::octaveMenuEncoderButton(
 
 void MenuManager::octaveMenuConButton(){
     saveOctaves();
+    Serial.println("Octave saved!");
 }
 
 void MenuManager::octaveMenuBackButton(){
@@ -761,34 +763,48 @@ void MenuManager::saveMIDIGrid(){
     switch(activeMIDIGridSensor){
         case SENSOR_A:
             EEPROM.put(ACTIVE_MIDI_CHANNEL_A_ADDR, activeMIDIChannelA);
+            Serial.print("Saved sensor A to channel ");
+            Serial.println(activeMIDIChannelA);
             break;
         case SENSOR_B:
             EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, activeMIDIChannelB);
+            Serial.print("Saved sensor B to channel ");
+            Serial.println(activeMIDIChannelB);
             break;
         case SENSOR_C:
             EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, activeMIDIChannelC);
+            Serial.print("Saved sensor C to channel ");
+            Serial.println(activeMIDIChannelC);
             break;
         case SENSOR_D:
             EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, activeMIDIChannelD);
+            Serial.print("Saved sensor D to channel ");
+            Serial.println(activeMIDIChannelD);
             break;
     }
     EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);
+    Serial.println("Committing MIDI Channels...");
     EEPROM.commit();
+
+    byte check;
+    EEPROM.get(ACTIVE_MIDI_CHANNEL_A_ADDR, check);
+    Serial.print("Read back from EEPROM for A: ");
+    Serial.println(check);
 }
 
 void MenuManager::saveOctaves(){
     switch(activeOctaveSensor){
         case SENSOR_A:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_A_ADDR, octaveA);
+            EEPROM.put(OCTAVE_A_ADDR, octaveA);
             break;
         case SENSOR_B:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, octaveB);
+            EEPROM.put(OCTAVE_B_ADDR, octaveB);
             break;
         case SENSOR_C:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, octaveC);
+            EEPROM.put(OCTAVE_C_ADDR, octaveC);
             break;
         case SENSOR_D:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, octaveD);
+            EEPROM.put(OCTAVE_D_ADDR, octaveD);
             break;
     }
     EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);

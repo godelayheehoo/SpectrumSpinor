@@ -698,7 +698,9 @@ void MenuManager::octaveMenuEncoderButton(
     }
 }
 
-void MenuManager::octaveMenuConButton(){}
+void MenuManager::octaveMenuConButton(){
+    saveOctaves();
+}
 
 void MenuManager::octaveMenuBackButton(){
     currentMenu = MAIN_MENU;
@@ -775,19 +777,19 @@ void MenuManager::saveMIDIGrid(){
     EEPROM.commit();
 }
 
-void MenuManager::saveMIDIGrid(){
+void MenuManager::saveOctaves(){
     switch(activeOctaveSensor){
         case SENSOR_A:
             EEPROM.put(ACTIVE_MIDI_CHANNEL_A_ADDR, octaveA);
             break;
         case SENSOR_B:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, activeMIDIChannelB);
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_B_ADDR, octaveB);
             break;
         case SENSOR_C:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, activeMIDIChannelC);
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_C_ADDR, octaveC);
             break;
         case SENSOR_D:
-            EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, activeMIDIChannelD);
+            EEPROM.put(ACTIVE_MIDI_CHANNEL_D_ADDR, octaveD);
             break;
     }
     EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);

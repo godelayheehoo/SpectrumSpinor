@@ -17,6 +17,9 @@ Also will need a menu functionality that just displays the current color seen.
 
 - need to add in dark to colorhelper, colordatabase, etc.
 
+- calibration is still really screwy
+
+
 */
 #include <Arduino.h>
 #include <Wire.h>
@@ -125,9 +128,6 @@ bool backButtonFlag = false;
 
 
 //function prototypes  
-MenuButton readButtons();
-MenuButton readEncoder();
-void calibrateColor(Color color);
 
 void IRAM_ATTR encoderButtonISR() {
   encoderButtonFlag = true;
@@ -496,8 +496,8 @@ void loop() {
   if (currentTime - lastColorTime >= colorInterval) {
     // Start sensor settling if not already settling
     if (!sensorSettling) {
-      Serial.print("tca select on sensor");
-      Serial.println(currentSensorIndex);
+      // Serial.print("tca select on sensor");
+      // Serial.println(currentSensorIndex);
       activeColorSensor = &colorHelpers[currentSensorIndex]; //trying this added here
       tcaSelect(currentSensorIndex);
       lastSensorSettleTime = currentTime;
@@ -508,11 +508,11 @@ void loop() {
     // Check if sensor has settled
     if (currentTime - lastSensorSettleTime >= settleTime) {
       // Process current sensor
-      Serial.println("checking for sensor availability");
+      // Serial.println("checking for sensor availability");
       if (activeColorSensor->isAvailable()) {
-        Serial.println("Attempting to get color");
+        // Serial.println("Attempting to get color");
         Color detectedColor = activeColorSensor->getCurrentColorEnum();
-        Serial.println("Got color");
+        // Serial.println("Got color");
         Color* currentColorPtr = nullptr;
         String sensorName = "";
         uint8_t activeMIDIChannel = 1;
@@ -723,50 +723,58 @@ void loop() {
     Serial.println("A is pending and unsupported");
     //there has to be a better way to convert between the two. We'll have to add black though.
     //for now, need to check that the enums line up right and then add special case handling.
-    ColorHelper sensorA = colorHelpers[0];
+    ColorHelper& sensorA = colorHelpers[0];
+    tcaSelect(0);
     if(menu.pendingCalibrationA==PendingCalibrationA::WHITE){
-      Serial.print("Initial r,g,b:")
-      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].r);
+      Serial.print("Initial r,g,b:");
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgR);
       Serial.print(", ");
-      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].g);
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgG);
       Serial.print(", ");
-      Serial.println(sensorA.colorDatabse[colorToIndex(Color::WHITE)].b)
+      Serial.println(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgB);
       sensorA.calibrateWhite();
-      Serial.print("Adjusted r,g,b:")
-      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].r);
+      Serial.print("Adjusted r,g,b:");
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgR);
       Serial.print(", ");
-      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].g);
+      Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgG);
       Serial.print(", ");
-      Serial.println(sensorA.colorDatabse[colorToIndex(Color::WHITE)].b)
+      Serial.println(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgB);
     }
-    else if (menu.pendingCalibrationA!=PendingCalibrationA::Black){
-    sensorA.calibrateColor(menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
+    else{
+
+      Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
                              menu.pendingCalibrationA==PendingCalibrationA::BLUE?Color::BLUE:
                              menu.pendingCalibrationA==PendingCalibrationA::GREEN?Color::GREEN:
                              menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
                              menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
                              menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
-                             Color::UNKNOWN); //safety
+                             menu.pendingCalibrationA==PendingCalibrationA::PINK?Color::PINK:
+                             Color::UNKNOWN;
+      Serial.print("Initial r,g,b");
+      Serial.print(colorToString(selectedColor));
+      Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgR);
+      Serial.print(", ");
+      Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgG);
+      Serial.print(", ");
+      Serial.println(sensorA.colorDatabase[colorToIndex(selectedColor)].avgB);
+     sensorA.calibrateColor(selectedColor); //safety
+
+      Serial.print("Adjusted r,g,b FOR ");
+      Serial.print(colorToString(selectedColor));
+      Serial.print(":");
+      Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgR);
+      Serial.print(", ");
+      Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgG);
+      Serial.print(", ");
+      Serial.println(sensorA.colorDatabase[colorToIndex(selectedColor)].avgB);
     }
-    else{
-      Serial.println("Shouldn't be able tor each this.....")
-    }
+    // else{
+    //   Serial.println("Shouldn't be able tor each this.....");
+    // }
     menu.render();
     menu.pendingCalibrationA = PendingCalibrationA::NONE;
   }
 }
 
-// Legacy function - now unused since we use interrupts
-// Keeping for compatibility but it just returns BUTTON_NONE
-MenuButton readEncoder() {
-  return BUTTON_NONE;
-}
 
-// Legacy function - now mostly unused since buttons use interrupts
-// Only panic button still uses polling for safety
-MenuButton readButtons() {
-  // Panic button stays as polling since it's critical and has hardware debouncing
-  // Other buttons now handled by interrupts
-  return BUTTON_NONE;
-}
 

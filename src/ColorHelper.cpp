@@ -137,6 +137,9 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
         Serial.println(i);
         uint16_t r, g, b, c;
         getRawData(&r, &g, &b, &c);
+
+        // I think maybe I shouldn't be normalizing here.
+
         if (this->normalize && c != 0) {  // avoid divide-by-zero
             sumR += (uint32_t)((float)r / c * 65535);
             sumG += (uint32_t)((float)g / c * 65535);

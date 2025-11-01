@@ -14,3 +14,4 @@
 // #define TFT_WHITE, TFT_BLACK, TFT_RED, etc.
 
 #define NUM_CALIBRATION_STEPS 20
+#define NUM_COLORS 9

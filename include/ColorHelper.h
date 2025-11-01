@@ -26,6 +26,14 @@ public:
     // Set or update the color database
     void setColorDatabase(ColorCenter* db, int numColors);
 
+    void getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* avgB);
+
+    void calibrateWhite(); // Calibration function prototype
+    
+    void calibrateColor(Color color);
+
+    ColorCenter* colorDatabase = nullptr;
+
 private:
     Adafruit_TCS34725 tcs;
     bool normalize;
@@ -42,6 +50,6 @@ private:
                                float r2, float g2, float b2);
 
     // Add these members to hold the color database
-    ColorCenter* colorDatabase = nullptr;
+   
     int numColorDatabase = 0;
 };

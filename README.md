@@ -1,6 +1,9 @@
 README TODO
 - mention octave menu
 - - include mention that changing octaves doesn't come into affect until the next note.
+- - octave changes happen immediately (no con), con saves it. 
+- Con for grid, autosaves
+
 # SpectrumSpinor ESP32 Project
 
 This project recreates the functionality of the Playtronic "MIDI COLOR SEQUENCER ORBITA" using an ESP32 microcontroller. The device uses a rotating disk with color sensors to generate MIDI signals based on detected colors.

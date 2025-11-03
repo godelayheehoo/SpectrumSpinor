@@ -6,12 +6,18 @@
 #include "ColorEnum.h"
 #include "ColorInfo.h"
 
-struct ColorCalibration{
-    uint red;
-    uint green;
-    uint blue;
-    char name[12];
-};
+// Default color calibrations (defined in one .cpp file)
+extern ColorCalibration pinkDefaultCal;
+extern ColorCalibration orangeDefaultCal;
+extern ColorCalibration darkBlueDefaultCal;
+extern ColorCalibration yellowDefaultCal;
+extern ColorCalibration greenDefaultCal;
+extern ColorCalibration redDefaultCal;
+extern ColorCalibration lightBlueDefaultCal;
+extern ColorCalibration blackDefaultCal;
+extern ColorCalibration whiteDefaultCal;
+
+extern ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS];
 
 class ColorHelper {
 public:
@@ -61,27 +67,6 @@ public:
     uint gGain = avgW / gW;
     uint bGain = avgW / bW;
 
-    ColorCalibration pinkCal = ColorCalibration{26588, 15769, 20923, "Pink"};
-    ColorCalibration orangeCal = ColorCalibration{33937, 14220, 10201, "Orange"};
-    ColorCalibration darkBlueCal = ColorCalibration{6808, 17916, 56515, "DarkBlue"};
-    ColorCalibration yellowCal = ColorCalibration{27469, 20655, 9679, "Yellow"};
-    ColorCalibration greenCal = ColorCalibration{9516, 32877, 23031, "Green"};
-    ColorCalibration redCal = ColorCalibration{45099, 8233, 13700, "Red"};
-    ColorCalibration lightBlueCal = ColorCalibration{11127, 18437, 46838, "LightBlue"};
-    ColorCalibration blackCal = ColorCalibration{8374, 22792, 22171, "Black"};
-    ColorCalibration whiteCal = ColorCalibration{21200, 21179, 22199, "White"}; //this is the background, not the white disk
-
-    ColorCalibration colorCalibrationDefaultDatabase [NUM_COLORS] = {
-    pinkCal,
-    orangeCal,
-    darkBlueCal,
-    yellowCal,
-    greenCal,
-    redCal,
-    blackCal,
-    lightBlueCal,
-    whiteCal
-    };
 
     
 private:

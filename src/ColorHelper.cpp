@@ -2,6 +2,29 @@
 #include "ColorInfo.h"
 #include "SystemConfig.h"
 
+// Default color calibration definitions (define once in this translation unit)
+ColorCalibration pinkDefaultCal = ColorCalibration{26588, 15769, 20923, "Pink"};
+ColorCalibration orangeDefaultCal = ColorCalibration{33937, 14220, 10201, "Orange"};
+ColorCalibration darkBlueDefaultCal = ColorCalibration{6808, 17916, 56515, "DarkBlue"};
+ColorCalibration yellowDefaultCal = ColorCalibration{27469, 20655, 9679, "Yellow"};
+ColorCalibration greenDefaultCal = ColorCalibration{9516, 32877, 23031, "Green"};
+ColorCalibration redDefaultCal = ColorCalibration{45099, 8233, 13700, "Red"};
+ColorCalibration lightBlueDefaultCal = ColorCalibration{11127, 18437, 46838, "LightBlue"};
+ColorCalibration blackDefaultCal = ColorCalibration{8374, 22792, 22171, "Black"};
+ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199, "White"}; //this is the background, not the white disk
+
+ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS] = {
+    pinkDefaultCal,
+    orangeDefaultCal,
+    darkBlueDefaultCal,
+    yellowDefaultCal,
+    greenDefaultCal,
+    redDefaultCal,
+    blackDefaultCal,
+    lightBlueDefaultCal,
+    whiteDefaultCal
+};
+
 //todo: maybe do sample counts in the menu as well.
 
 ColorHelper::ColorHelper(bool normalizeReadings) 
@@ -143,9 +166,9 @@ Color ColorHelper::findNearestColorEnum(float r, float g, float b) {
         // Serial.print("[DEBUG]: checking #");
         // Serial.println(i);
         // Convert stored color values to normalized range
-        float storedR = calibrationDatabase[i].red // / 65535.0f;
-        float storedG = calibrationDatabase[i].green // / 65535.0f;
-        float storedB = calibrationDatabase[i].blue // / 65535.0f;
+    float storedR = calibrationDatabase[i].red; // / 65535.0f;
+    float storedG = calibrationDatabase[i].green; // / 65535.0f;
+    float storedB = calibrationDatabase[i].blue; // / 65535.0f;
 
         float distance = calculateColorDistance(r, g, b, storedR, storedG, storedB);
         
@@ -207,6 +230,7 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
 //white is separate from the colors because it might be treated differently soon.
 void ColorHelper::calibrateWhite(){
  
+    Serial.println("WARNING: NEEDS TO BE UPDATED");
   uint16_t avgR, avgG, avgB;
   getSamplesAverage(&avgR, &avgG, &avgB);
 
@@ -216,12 +240,14 @@ void ColorHelper::calibrateWhite(){
   Serial.print("Average B: "); Serial.println(avgB);
 
   byte whiteIndex = colorToIndex(Color::WHITE);
-  this->colorDatabase[whiteIndex].avgR = avgR;
-  this->colorDatabase[whiteIndex].avgG = avgG;
-  this->colorDatabase[whiteIndex].avgB = avgB;
+    this->calibrationDatabase[whiteIndex].red = avgR;
+    this->calibrationDatabase[whiteIndex].green = avgG;
+    this->calibrationDatabase[whiteIndex].blue = avgB;
 }
 
 void ColorHelper::calibrateColor(Color color){
+
+    Serial.println("WARNING: NEEDS TO BE UPDATED");
       uint16_t avgR, avgG, avgB;
   getSamplesAverage(&avgR, &avgG, &avgB);
 
@@ -231,8 +257,8 @@ void ColorHelper::calibrateColor(Color color){
   Serial.print("Average B: "); Serial.println(avgB);
 
   byte colorIndex = colorToIndex(color);
-  this->colorDatabase[colorIndex].avgR = avgR;
-  this->colorDatabase[colorIndex].avgG = avgG;
-  this->colorDatabase[colorIndex].avgB = avgB;
+    this->calibrationDatabase[colorIndex].red = avgR;
+    this->calibrationDatabase[colorIndex].green = avgG;
+    this->calibrationDatabase[colorIndex].blue = avgB;
 }
     

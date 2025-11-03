@@ -1,5 +1,7 @@
 #pragma once
 #include <Arduino.h>
+#include "SystemConfig.h"
+#include <Arduino.h>
 
 // struct ColorCenter{
 //   uint16_t avgR;
@@ -7,6 +9,14 @@
 //   uint16_t avgB;
 //   char name[8];
 // };
+
+struct ColorCalibration{
+    uint red;
+    uint green;
+    uint blue;
+    char name[12];
+};
+
 
 // Per-sensor calibration data structure
 struct SensorCalibration {
@@ -24,5 +34,5 @@ extern ColorCalibration defaultColors[NUM_COLORS];
 extern SensorCalibration sensorCalibrations[4];
 
 // Legacy support - points to sensor A's calibration
-extern ColorCalibration* colorCalibrationDefaultDatabase;
-extern int numColorDatabase;
+// extern ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS];
+// extern int numColorDatabase;

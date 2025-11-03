@@ -17,7 +17,7 @@ Below is a practical, robust recipe you can implement on the ESP32 + TCS34725 + 
 
 1) Calibration steps (one time per sensor)
 
-Dark offset — cover sensor, read R,G,B,C and store those as R_dark, G_dark, B_dark, C_dark. Subtract these from all future raw readings.
+Dark offset — cover sensor, read R,G,B,C and store those as R_dark, G_dark, B_dark, C_dark. Subtract these from all future raw readings. Be sure to turn off the led with digitalWrite() on the LED pin. This is currently only set up for sensor A.
 
 White balance — put a neutral white under sensor, read Rw, Gw, Bw. Compute gains:
 

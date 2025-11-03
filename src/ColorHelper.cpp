@@ -10,10 +10,22 @@ ColorHelper::ColorHelper(bool normalizeReadings)
       sensorAvailable(false) {
 }
 
-// Set or update the color database
-void ColorHelper::setColorDatabase(ColorCenter* db, int numColors) {
-    colorDatabase = db;
-    numColorDatabase = numColors;
+// Set or update the color database by copying entries into the internal array
+// Copies at most NUM_COLORS entries from the provided db array.
+void ColorHelper::setColorDatabase(const ColorCalibration db[], int numColors) {
+    int toCopy = numColors;
+    if (toCopy > NUM_COLORS) toCopy = NUM_COLORS;
+    for (int i = 0; i < toCopy; ++i) {
+        calibrationDatabase[i] = db[i];
+    }
+    // If fewer entries provided than NUM_COLORS, zero out remaining entries
+    for (int i = toCopy; i < NUM_COLORS; ++i) {
+        calibrationDatabase[i].red = 0;
+        calibrationDatabase[i].green = 0;
+        calibrationDatabase[i].blue = 0;
+        calibrationDatabase[i].name[0] = '\0';
+    }
+    numColorDatabase = toCopy;
 }
 
 bool ColorHelper::begin() {
@@ -45,21 +57,49 @@ void ColorHelper::getRawData(uint16_t* r, uint16_t* g, uint16_t* b, uint16_t* c)
     tcs.getRawData(r, g, b, c);
 }
 
-void ColorHelper::getNormalizedData(float* r, float* g, float* b) {
+// void ColorHelper::getNormalizedData(float* r, float* g, float* b) {
+//     uint16_t rawR, rawG, rawB, rawC;
+//     getRawData(&rawR, &rawG, &rawB, &rawC);
+    
+//     if (normalize && rawC != 0) {
+//         // Normalize by clear channel to reduce brightness effects
+//         *r = rawR / (float)rawC;
+//         *g = rawG / (float)rawC;
+//         *b = rawB / (float)rawC;
+//     } else {
+//         // Convert to 0.0-1.0 range without clear channel normalization
+//         *r = rawR / 65535.0f;
+//         *g = rawG / 65535.0f;
+//         *b = rawB / 65535.0f;
+//     }
+// }
+
+void ColorHelper::getCalibratedData(float* r, float* g, float* b) {
     uint16_t rawR, rawG, rawB, rawC;
     getRawData(&rawR, &rawG, &rawB, &rawC);
-    
-    if (normalize && rawC != 0) {
-        // Normalize by clear channel to reduce brightness effects
-        *r = rawR / (float)rawC;
-        *g = rawG / (float)rawC;
-        *b = rawB / (float)rawC;
-    } else {
-        // Convert to 0.0-1.0 range without clear channel normalization
-        *r = rawR / 65535.0f;
-        *g = rawG / 65535.0f;
-        *b = rawB / 65535.0f;
-    }
+
+   uint32_t rAdj = max(0, (int)rawR-(int)rDark);
+   uint32_t bAdj = max(0, (int)rawB-(int)bDark);
+   uint32_t gAdj = max(0, (int)rawG-(int)gDark);
+
+  rAdj = (uint32_t)(rAdj * rGain);
+  gAdj = (uint32_t)(gAdj * gGain);
+  bAdj = (uint32_t)(bAdj * bGain);
+
+//   Serial.print("rAdj2: ");
+  Serial.println(rAdj);
+
+  if (normalize && rawC != 0) {
+    rAdj = (uint32_t)((float)rAdj / rawC * 65535);
+    // Serial.print("rAdj3: ");
+    Serial.println(rAdj);
+    gAdj = (uint32_t)((float)gAdj / rawC * 65535);
+    bAdj = (uint32_t)((float)bAdj / rawC * 65535);
+}
+
+*r = rAdj;
+*g = gAdj;
+*b = bAdj;
 }
 
 Color ColorHelper::getCurrentColorEnum() {
@@ -69,7 +109,7 @@ Color ColorHelper::getCurrentColorEnum() {
     
     float r, g, b;
     // Serial.println("DEBUG:  about to call getNormalizedData [getCurrentColorEnum]");
-    getNormalizedData(&r, &g, &b);
+    getCalibratedData(&r, &g, &b);
     // Serial.println("DEBUG: About to call findNearestColorEnum [getCurrentColorEnum]");
     
     return findNearestColorEnum(r, g, b);
@@ -89,7 +129,7 @@ const char* ColorHelper::getCurrentColor() {
 
 void* ColorHelper::getColorDatabase(int& numColors) {
     numColors = numColorDatabase;
-    return colorDatabase;
+    return calibrationDatabase;
 }
 
 Color ColorHelper::findNearestColorEnum(float r, float g, float b) {
@@ -103,10 +143,10 @@ Color ColorHelper::findNearestColorEnum(float r, float g, float b) {
         // Serial.print("[DEBUG]: checking #");
         // Serial.println(i);
         // Convert stored color values to normalized range
-        float storedR = colorDatabase[i].avgR / 65535.0f;
-        float storedG = colorDatabase[i].avgG / 65535.0f;
-        float storedB = colorDatabase[i].avgB / 65535.0f;
-        
+        float storedR = calibrationDatabase[i].red // / 65535.0f;
+        float storedG = calibrationDatabase[i].green // / 65535.0f;
+        float storedB = calibrationDatabase[i].blue // / 65535.0f;
+
         float distance = calculateColorDistance(r, g, b, storedR, storedG, storedB);
         
         if (distance < minDistance) {

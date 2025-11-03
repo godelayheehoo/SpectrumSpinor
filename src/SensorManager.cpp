@@ -3,24 +3,26 @@
 #include <EEPROM.h>
 
 // Define the default colors (moved from header to avoid multiple definition)
-ColorCenter defaultColors[9] = {
-    {29661, 14660, 20216, "pink"},
-    {38714, 7259, 17264, "orange"}, 
-    {15596, 26298, 23352, "blue"},
-    {28083, 26337, 8616, "yellow"},
-    {15202, 35000, 13116, "green"},
-    {47706, 11395, 9411, "red"},
-    {26269, 19172, 20256, "purple"},
-    {34588, 20049, 9354, "brown"},
-    {24491, 24725, 13963, "white"}
-};
+// ColorCenter defaultColors[10] = {
+//     {29661, 14660, 20216, "pink"},
+//     {38714, 7259, 17264, "orange"}, 
+//     {15596, 26298, 23352, "blue"},
+//     {28083, 26337, 8616, "yellow"},
+//     {15202, 35000, 13116, "green"},
+//     {47706, 11395, 9411, "red"},
+//     {26269, 19172, 20256, "purple"},
+//     {34588, 20049, 9354, "brown"},
+//     {24491, 24725, 13963, "white"},
+//     {25308, 23709, 14652, "black"}
+// };
 
 // Initialize global calibration storage
 SensorCalibration sensorCalibrations[4];
 
 // Legacy support - initialize with default colors directly (safer than nullptr)
-ColorCenter* colorDatabase = defaultColors;
-int numColorDatabase = 9;
+// ColorCenter* colorDatabase = defaultColors;
+ColorCalibration* calibrationDatabse = 
+int numColorDatabase = 10;
 
 SensorManager::SensorManager() {
     Serial.println("SensorManager constructor starting...");
@@ -181,7 +183,7 @@ void SensorManager::initializeCalibrationData() {
         sensorCalibrations[i].isCalibrated = false;
         
         // Copy default colors to each sensor's database
-        for (int j = 0; j < 9; j++) {
+        for (int j = 0; j < NUM_COLORS; j++) {
             sensorCalibrations[i].colorDatabase[j] = defaultColors[j];
         }
     }

@@ -698,7 +698,7 @@ void loop() {
 
    
 
-          byte currentChannel = (detectedColor == Color::WHITE) ? 0 : activeMIDIChannel;
+          byte currentChannel = (detectedColor == Color::WHITE || detectedColor == Color::BLACK ) ? 0 : activeMIDIChannel;
           MIDI.sendNoteOn(newMidiNote, velocity, currentChannel);
 
           switch(currentSensorIndex){

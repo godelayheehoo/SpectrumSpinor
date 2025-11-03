@@ -647,7 +647,8 @@ void loop() {
         
         // Process color change if detected and valid
         if (detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
-         
+         Serial.print("New color:");
+          Serial.println(colorToString(detectedColor));
           switch(currentSensorIndex){
             case 0:
               oldMidiNote = lastNoteA;
@@ -671,36 +672,46 @@ void loop() {
          Serial.println(activeMIDIChannel);
           
           // Send note on for new color
-          uint8_t newMidiNote = menu.scaleManager.colorToMIDINote(detectedColor);
-          // Adjust based on octave
-          uint8_t offset;
+          int newMidiNote = menu.scaleManager.colorToMIDINote(detectedColor);
+          Serial.print("new midi note (pre-octave):");
+          Serial.println(newMidiNote);
+          // Adjust based on octave using signed arithmetic to allow negative offsets
+          int offset;
           switch (currentSensorIndex){
             case 0:
-              offset = (menu.octaveA - 4) * 12;
+              offset = (int(menu.octaveA) - 4) * 12;
               newMidiNote += offset;
-              lastNoteA = newMidiNote;
+              // clamp to valid MIDI range
+              if (newMidiNote < 0) newMidiNote = 0;
+              if (newMidiNote > 127) newMidiNote = 127;
+              lastNoteA = (uint8_t)newMidiNote;
               break;
             case 1:
-              offset = (menu.octaveB - 4) * 12;
+              offset = (int(menu.octaveB) - 4) * 12;
               newMidiNote += offset;
-              lastNoteB = newMidiNote;
+              if (newMidiNote < 0) newMidiNote = 0;
+              if (newMidiNote > 127) newMidiNote = 127;
+              lastNoteB = (uint8_t)newMidiNote;
               break;  
             case 2:
-              offset = (menu.octaveC - 4) * 12;
+              offset = (int(menu.octaveC) - 4) * 12;
               newMidiNote += offset;
-              lastNoteC = newMidiNote;
+              if (newMidiNote < 0) newMidiNote = 0;
+              if (newMidiNote > 127) newMidiNote = 127;
+              lastNoteC = (uint8_t)newMidiNote;
               break;
             case 3:
-              offset = (menu.octaveD - 4) * 12;
+              offset = (int(menu.octaveD) - 4) * 12;
               newMidiNote += offset;
-              lastNoteD = newMidiNote;
+              if (newMidiNote < 0) newMidiNote = 0;
+              if (newMidiNote > 127) newMidiNote = 127;
+              lastNoteD = (uint8_t)newMidiNote;
               break;
           }
-
    
 
           byte currentChannel = (detectedColor == Color::WHITE || detectedColor == Color::BLACK ) ? 0 : activeMIDIChannel;
-          MIDI.sendNoteOn(newMidiNote, velocity, currentChannel);
+          MIDI.sendNoteOn((uint8_t)newMidiNote, velocity, currentChannel);
 
           switch(currentSensorIndex){
             case 0:

@@ -100,22 +100,30 @@ void ColorHelper::getRawData(uint16_t* r, uint16_t* g, uint16_t* b, uint16_t* c)
 void ColorHelper::getCalibratedData(float* r, float* g, float* b) {
     uint16_t rawR, rawG, rawB, rawC;
     getRawData(&rawR, &rawG, &rawB, &rawC);
-
+    // Serial.print("Raw R: ");
+    // Serial.println(rawR);
+    // Serial.print("rDark");
+    // Serial.println(rDark);
    uint32_t rAdj = max(0, (int)rawR-(int)rDark);
    uint32_t bAdj = max(0, (int)rawB-(int)bDark);
    uint32_t gAdj = max(0, (int)rawG-(int)gDark);
 
+//    Serial.print("Adj1: ");
+//    Serial.println(rAdj);
+
+//    Serial.print("rGain: ");
+//    Serial.println(rGain);
   rAdj = (uint32_t)(rAdj * rGain);
   gAdj = (uint32_t)(gAdj * gGain);
   bAdj = (uint32_t)(bAdj * bGain);
 
 //   Serial.print("rAdj2: ");
-  Serial.println(rAdj);
+//   Serial.println(rAdj);
 
   if (normalize && rawC != 0) {
     rAdj = (uint32_t)((float)rAdj / rawC * 65535);
     // Serial.print("rAdj3: ");
-    Serial.println(rAdj);
+    // Serial.println(rAdj);
     gAdj = (uint32_t)((float)gAdj / rawC * 65535);
     bAdj = (uint32_t)((float)bAdj / rawC * 65535);
 }
@@ -134,7 +142,8 @@ Color ColorHelper::getCurrentColorEnum() {
     // Serial.println("DEBUG:  about to call getNormalizedData [getCurrentColorEnum]");
     getCalibratedData(&r, &g, &b);
     // Serial.println("DEBUG: About to call findNearestColorEnum [getCurrentColorEnum]");
-    
+    // Serial.print("calibrated R: ");
+    // Serial.println(r);
     return findNearestColorEnum(r, g, b);
 }
 
@@ -166,9 +175,14 @@ Color ColorHelper::findNearestColorEnum(float r, float g, float b) {
         // Serial.print("[DEBUG]: checking #");
         // Serial.println(i);
         // Convert stored color values to normalized range
-    float storedR = calibrationDatabase[i].red; // / 65535.0f;
-    float storedG = calibrationDatabase[i].green; // / 65535.0f;
-    float storedB = calibrationDatabase[i].blue; // / 65535.0f;
+    float storedR = calibrationDatabase[i].red; /// 65535.0f;
+    float storedG = calibrationDatabase[i].green;// / 65535.0f;
+    float storedB = calibrationDatabase[i].blue;// / 65535.0f;
+
+    // Serial.print("comparing r: ");
+    // Serial.print(r);
+    // Serial.print(" and storedR: ");
+    // Serial.println(storedR);
 
         float distance = calculateColorDistance(r, g, b, storedR, storedG, storedB);
         

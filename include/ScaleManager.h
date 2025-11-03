@@ -35,7 +35,7 @@ public:
     bool isNoteOffColor(Color color) const;
     
     // Special MIDI note value for note-off colors
-    static const uint8_t MIDI_NOTE_OFF = 0;
+    static const uint8_t MIDI_NOTE_OFF = 255;
     
 private:
     ScaleType currentScale;

@@ -52,20 +52,20 @@ public:
     ColorCalibration calibrationDatabase[NUM_COLORS];
 
   //default values gotten from sensor A -- actually got all zeroes
-    uint rDark = 0;
-    uint gDark = 0;
-    uint bDark = 0;
+  uint32_t rDark = 0;
+  uint32_t gDark = 0;
+  uint32_t bDark = 0;
 
-    //default values, from sensor A
-    uint rW = 24519;
-    uint gW = 24150;
-    uint bW = 14495;
+  // default white calibration values (from sensor A)
+  uint32_t rW = 24519u;
+  uint32_t gW = 24150u;
+  uint32_t bW = 14495u;
 
-    
-    uint avgW = (rW + gW + bW) / 3.0;
-    uint rGain = avgW / rW;
-    uint gGain = avgW / gW;
-    uint bGain = avgW / bW;
+  // Use floating-point gains so we don't lose fractional precision
+  float avgW = (rW + gW + bW) / 3.0f;
+  float rGain = avgW / (float)rW;
+  float gGain = avgW / (float)gW;
+  float bGain = avgW / (float)bW;
 
 
     

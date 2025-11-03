@@ -1,8 +1,9 @@
 #include "ScaleManager.h"
 #include "ColorEnum.h"
 
-// Special MIDI note value for white (background) color - indicates "turn off notes"
-const uint8_t MIDI_NOTE_OFF = 0;  // Use note 0 on invalid channel, or we could use 255 as a special flag
+// Special sentinel value used in scale offset tables to indicate "no note / note-off"
+// Must NOT be 0 because 0 is a valid offset (root). Use 0xFF (255) as an out-of-band sentinel.
+const uint8_t MIDI_NOTE_OFF = 0xFF;
 
 // Major scale intervals (semitones from root)
 // Maps to Color enum order: PINK, ORANGE, BLUE, YELLOW, GREEN, RED, PURPLE, BROWN, WHITE
@@ -29,6 +30,7 @@ uint8_t ScaleManager::colorToMIDINote(Color color) {
     
     if (colorIndex == -1) {
         // Unknown color, return root note as default
+        Serial.println("Got UNKNOWN color in colorToMIDINote");
         return rootNote;
     }
     
@@ -39,6 +41,8 @@ uint8_t ScaleManager::colorToMIDINote(Color color) {
         return MIDI_NOTE_OFF;
     }
     
+    // Serial.print("Using root note ");
+    // Serial.println(rootNote);
     uint8_t midiNote = rootNote + offset;
     
     // Ensure we stay within valid MIDI range (0-127)
@@ -106,6 +110,8 @@ bool ScaleManager::isNoteOffColor(Color color) const {
 
 uint8_t ScaleManager::getScaleOffset(int colorIndex) {
     if (colorIndex < 0 || colorIndex >= getColorCount()) {
+        Serial.print("got color index out of range! Idx: ");
+        Serial.println(colorIndex);
         return 0; // Default to root note
     }
     

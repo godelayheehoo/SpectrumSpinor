@@ -16,15 +16,16 @@
     // lightBlueCal,
     // whiteCal
 enum class Color : uint8_t {
-    PINK = 0,
+    LIGHT_BLUE  = 0,
     ORANGE = 1,
-    DARK_BLUE = 2,
+    PINK = 2,
     YELLOW = 3,
     GREEN = 4,
     RED = 5,
     BLACK = 6,
-    LIGHT_BLUE = 7,
-    WHITE = 8,      // Special color - ignore this
+    DARK_BLUE = 7,
+    PURPLE = 8,
+    WHITE = 9,      // Special color - ignore this
     UNKNOWN = 255   // Special value for unrecognized colors
 };
 

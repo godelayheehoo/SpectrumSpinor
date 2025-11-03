@@ -9,11 +9,11 @@ const uint8_t MIDI_NOTE_OFF = 0xFF;
 // Maps to Color enum order: PINK, ORANGE, BLUE, YELLOW, GREEN, RED, PURPLE, BROWN, WHITE
 // C=0, D=2, E=4, F=5, G=7, A=9, B=11, C(next)=12, WHITE=special
 static const uint8_t majorScaleOffsets[] = {
-    0, 2, 4, 5, 7, 9, 11, 12, MIDI_NOTE_OFF, MIDI_NOTE_OFF  // Maps to: C, D, E, F, G, A, B, C, OFF
+    0, 2, 4, 5, 7, 9, 11, 12, 14, MIDI_NOTE_OFF  // Maps to: C, D, E, F, G, A, B, C, D,  OFF
 };
 
 static const uint8_t minorScaleOffsets[] = {
-    0, 2, 3, 5, 7, 8, 10, 12, MIDI_NOTE_OFF, MIDI_NOTE_OFF  // Maps to: C, D, D#, F, G, G#, A#, C, OFF
+    0, 2, 3, 5, 7, 8, 10, 12, 14, MIDI_NOTE_OFF  // Maps to: C, D, D#, F, G, G#, A#, C, D<  OFF
 };
 
 ScaleManager::ScaleManager(ScaleType initialScale, uint8_t initialOctave, uint8_t initialRootNote)

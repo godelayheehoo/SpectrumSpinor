@@ -14,7 +14,6 @@ struct ColorCalibration{
     uint red;
     uint green;
     uint blue;
-    char name[12];
 };
 
 

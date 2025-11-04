@@ -282,6 +282,8 @@ public:
     
     void SharedCalibrationMenuRender(int selectedIdx, int scrollIdx);
     void startCalibrationCountdown();
+    void calibrationStartProgressBar(); 
+    void calibrationIncrementProgressBar(uint8_t i);
 
     ScaleManager scaleManager = ScaleManager(ScaleManager::MAJOR, 4, 60);
 private:

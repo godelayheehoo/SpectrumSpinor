@@ -3,6 +3,7 @@
 #include "SystemConfig.h"
 #include <EEPROM.h>
 #include "EEPROMAddresses.h"
+#include "MenuManager.h"
 
 // Default color calibration definitions (define once in this translation unit)
 ColorCalibration pinkDefaultCal = ColorCalibration{26588, 15769, 20923};
@@ -31,10 +32,11 @@ ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS] = {
 
 //todo: maybe do sample counts in the menu as well.
 
-ColorHelper::ColorHelper(bool normalizeReadings) 
+ColorHelper::ColorHelper(bool normalizeReadings, MenuManager* menuPtr) 
     : tcs(TCS34725_INTEGRATIONTIME_24MS, TCS34725_GAIN_4X), 
       normalize(normalizeReadings), 
-      sensorAvailable(false) {
+      sensorAvailable(false),
+      menu(menuPtr) {
 }
 
 // Set or update the color database by copying entries into the internal array
@@ -52,6 +54,10 @@ void ColorHelper::setColorDatabase(const ColorCalibration db[], int numColors) {
         calibrationDatabase[i].blue = 0;
     }
     numColorDatabase = toCopy;
+}
+
+void ColorHelper::setMenu(MenuManager* menuPtr) {
+    menu = menuPtr;
 }
 
 bool ColorHelper::begin() {
@@ -246,6 +252,8 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
 
 void ColorHelper::calibrateDark(){
     Serial.println("Not currently working, need to install LED off pins");
+    return;
+    /*
     rDark = 0;
     gDark = 0;
     bDark = 0;
@@ -276,6 +284,7 @@ void ColorHelper::calibrateDark(){
             Serial.println("ERROR: Invalid sensor number for dark calibration");
     }
     EEPROM.commit();
+    */
 }
 
 //white is separate from the colors because it might be treated differently soon.
@@ -297,6 +306,7 @@ void ColorHelper::calibrateWhiteGains(){
     sumGw = 0;
     sumBw = 0;
     delay(50);
+    menu->calibrationStartProgressBar();
     for(int i = 0; i < NUM_CALIBRATION_STEPS; i++){
         Serial.print("Sample # ");
         Serial.println(i);
@@ -314,6 +324,7 @@ void ColorHelper::calibrateWhiteGains(){
             sumGw += g;
             sumBw += b;
         }
+        menu->calibrationIncrementProgressBar(i);
         delay(100);
     }
     // Compute averages
@@ -365,8 +376,8 @@ void ColorHelper::calibrateWhiteGains(){
 
 void ColorHelper::calibrateColor(Color color){
 
-    Serial.println("WARNING: NEEDS TO BE UPDATED");
-      uint16_t avgR, avgG, avgB;
+  Serial.println("WARNING: NEEDS TO BE UPDATED");
+  uint16_t avgR, avgG, avgB;
   getSamplesAverage(&avgR, &avgG, &avgB);
 
   Serial.println("Calibration complete!");

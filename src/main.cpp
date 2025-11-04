@@ -95,10 +95,10 @@ Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 MenuManager menu(display);
 
 // Color sensor setup
-ColorHelper colorHelperA(true); // Enable normalization
-ColorHelper colorHelperB(true);
-ColorHelper colorHelperC(true);
-ColorHelper colorHelperD(true);
+ColorHelper colorHelperA(true, &menu); // Enable normalization
+ColorHelper colorHelperB(true, &menu);
+ColorHelper colorHelperC(true, &menu);
+ColorHelper colorHelperD(true, &menu);
 
 ColorHelper* colorHelpers[4]{&colorHelperA, &colorHelperB, &colorHelperC, &colorHelperD};
 ColorHelper* activeColorSensor = nullptr;

@@ -20,9 +20,12 @@ extern ColorCalibration purpleDefaultCal;
 
 extern ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS];
 
+class MenuManager;
+
 class ColorHelper {
 public:
-    ColorHelper(bool normalizeReadings = true);
+    ColorHelper(bool normalizeReadings = true, MenuManager* menuPtr = nullptr);
+    void setMenu(MenuManager* menuPtr);
     // Initialize the color sensor
     bool begin();
     // Get the currently detected color enum (EFFICIENT!)
@@ -77,6 +80,7 @@ public:
 private:
     Adafruit_TCS34725 tcs;
     bool normalize;
+    MenuManager* menu = nullptr;
     bool sensorAvailable;
 
     // Internal color database access

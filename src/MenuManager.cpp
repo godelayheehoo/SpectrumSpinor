@@ -3,18 +3,6 @@
 #include <EEPROM.h>
 #include "EEPROMAddresses.h"
 
-// Legacy screen constants (now defined in SystemConfig.h)
-// Keeping these for any remaining references until layout is updated
-#define MARGIN_TOP 2
-#define MARGIN_LEFT 2
-#define MARGIN_BOTTOM 2
-#define USABLE_WIDTH (SCREEN_WIDTH - 2 * MARGIN_LEFT)
-#define USABLE_HEIGHT (SCREEN_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM)
-#define CENTER_X(width) (MARGIN_LEFT + (USABLE_WIDTH - width) / 2)
-#define BOTTOM_LINE (SCREEN_HEIGHT - MARGIN_BOTTOM)
-#define LARGE_TEXT_SIZE 3
-#define SAFE_VISIBLE_OPTIONS 5
-
 
 const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::mainMenuEncoder, &MenuManager::mainMenuEncoderButton, &MenuManager::mainMenuConButton, &MenuManager::mainMenuBackButton }, // MAIN_MENU
@@ -859,6 +847,27 @@ void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
     }
     display.display();    
 }
+
+void MenuManager::calibrationStartProgressBar(){
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(OLED_WHITE,OLED_BLACK);
+    centerTextAt(10, "Calibrating...", 2);
+    // Draw empty progress bar
+    display.drawRect(10, 40, SCREEN_WIDTH - 20, 10, OLED_WHITE);
+    display.display();
+}
+
+void MenuManager::calibrationIncrementProgressBar(uint8_t tick){
+    uint8_t progressPercent = constrain(static_cast<int>((static_cast<float>(tick) / NUM_CALIBRATION_STEPS) * 100.0f), 0, 100);
+    // Fill progress bar based on percentage (0-100)
+    int barWidth = (SCREEN_WIDTH - 20) * progressPercent / 100;
+    display.fillRect(11, 41, barWidth - 2, 8, OLED_WHITE);
+    display.display();
+}
+
+
+
 // Set the callback function for ALL NOTES OFF
 void MenuManager::setAllNotesOffCallback(AllNotesOffCallback callback) {
     allNotesOffCallback = callback;

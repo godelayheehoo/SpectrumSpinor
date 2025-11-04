@@ -21,6 +21,8 @@ Also will need a menu functionality that just displays the current color seen.
 
 - add "restore defaults" option for color cal menu
 
+- pretty sure I don't need the SensorCalibration objects
+
 
 */
 #include <Arduino.h>
@@ -425,6 +427,99 @@ Serial.println(sizeof(ColorHelper));
     
 
     if(!calibrationValid){
+      //write the default values to eeprom
+      Serial.println("Writing default calibration values to EEPROM...");
+      //// setup A
+      // EEPROM.put(EEPROM_MAGIC_ADDRESS,EEPROM_MAGIC_VALUE);
+      //dark
+      EEPROM.put(SENSOR_A_RDARK_ADDR, colorHelperA.rDark);
+      EEPROM.put(SENSOR_A_GDARK_ADDR, colorHelperA.gDark);
+      EEPROM.put(SENSOR_A_BDARK_ADDR, colorHelperA.bDark);
+      //gains
+      EEPROM.put(SENSOR_A_RW_ADDR, colorHelperA.rW);
+      EEPROM.put(SENSOR_A_GW_ADDR, colorHelperA.gW);
+      EEPROM.put(SENSOR_A_BW_ADDR, colorHelperA.bW);
+      
+      //calibrations
+      EEPROM.put(SENSOR_A_LIGHT_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[0]);
+      EEPROM.put(SENSOR_A_ORANGE_CAL_ADDR, colorCalibrationDefaultDatabase[1]);
+      EEPROM.put(SENSOR_A_PINK_CAL_ADDR, colorCalibrationDefaultDatabase[2]);
+      EEPROM.put(SENSOR_A_YELLOW_CAL_ADDR, colorCalibrationDefaultDatabase[3]);
+      EEPROM.put(SENSOR_A_GREEN_CAL_ADDR, colorCalibrationDefaultDatabase[4]);
+      EEPROM.put(SENSOR_A_RED_CAL_ADDR, colorCalibrationDefaultDatabase[5]);
+      EEPROM.put(SENSOR_A_BLACK_CAL_ADDR, colorCalibrationDefaultDatabase[6]);
+      EEPROM.put(SENSOR_A_DARK_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[7]);
+      EEPROM.put(SENSOR_A_PURPLE_CAL_ADDR, colorCalibrationDefaultDatabase[8]);
+      EEPROM.put(SENSOR_A_WHITE_CAL_ADDR, colorCalibrationDefaultDatabase[9]);
+      //// setup B
+      //dark
+      EEPROM.put(SENSOR_B_RDARK_ADDR, colorHelperB.rDark);
+      EEPROM.put(SENSOR_B_GDARK_ADDR, colorHelperB.gDark);
+      EEPROM.put(SENSOR_B_BDARK_ADDR, colorHelperB.bDark);
+      //gains
+      EEPROM.put(SENSOR_B_RW_ADDR, colorHelperB.rW);
+
+      EEPROM.put(SENSOR_B_GW_ADDR, colorHelperB.gW);
+      EEPROM.put(SENSOR_B_BW_ADDR, colorHelperB.bW);
+
+      //calibrations
+      EEPROM.put(SENSOR_B_LIGHT_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[0]);
+      EEPROM.put(SENSOR_B_ORANGE_CAL_ADDR, colorCalibrationDefaultDatabase[1]);
+      EEPROM.put(SENSOR_B_PINK_CAL_ADDR, colorCalibrationDefaultDatabase[2]);
+      EEPROM.put(SENSOR_B_YELLOW_CAL_ADDR, colorCalibrationDefaultDatabase[3]);
+      EEPROM.put(SENSOR_B_GREEN_CAL_ADDR, colorCalibrationDefaultDatabase[4]);
+      EEPROM.put(SENSOR_B_RED_CAL_ADDR, colorCalibrationDefaultDatabase[5]);
+      EEPROM.put(SENSOR_B_BLACK_CAL_ADDR, colorCalibrationDefaultDatabase[6]);
+      EEPROM.put(SENSOR_B_DARK_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[7]);
+      EEPROM.put(SENSOR_B_PURPLE_CAL_ADDR, colorCalibrationDefaultDatabase[8]);
+      EEPROM.put(SENSOR_B_WHITE_CAL_ADDR, colorCalibrationDefaultDatabase[9]);
+
+      //// setup C
+      //dark
+      EEPROM.put(SENSOR_C_RDARK_ADDR, colorHelperC.rDark);
+      EEPROM.put(SENSOR_C_GDARK_ADDR, colorHelperC.gDark);
+      EEPROM.put(SENSOR_C_BDARK_ADDR, colorHelperC.bDark);
+      //gains
+      EEPROM.put(SENSOR_C_RW_ADDR, colorHelperC.rW);
+      EEPROM.put(SENSOR_C_GW_ADDR, colorHelperC.gW);
+      EEPROM.put(SENSOR_C_BW_ADDR, colorHelperC.bW);
+
+      //calibrations
+      EEPROM.put(SENSOR_C_LIGHT_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[0]);
+      EEPROM.put(SENSOR_C_ORANGE_CAL_ADDR, colorCalibrationDefaultDatabase[1]);
+      EEPROM.put(SENSOR_C_PINK_CAL_ADDR, colorCalibrationDefaultDatabase[2]);
+      EEPROM.put(SENSOR_C_YELLOW_CAL_ADDR, colorCalibrationDefaultDatabase[3]);
+      EEPROM.put(SENSOR_C_GREEN_CAL_ADDR, colorCalibrationDefaultDatabase[4]);
+      EEPROM.put(SENSOR_C_RED_CAL_ADDR, colorCalibrationDefaultDatabase[5]);
+      EEPROM.put(SENSOR_C_BLACK_CAL_ADDR, colorCalibrationDefaultDatabase[6]);
+      EEPROM.put(SENSOR_C_DARK_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[7]);
+      EEPROM.put(SENSOR_C_PURPLE_CAL_ADDR, colorCalibrationDefaultDatabase[8]);
+      EEPROM.put(SENSOR_C_WHITE_CAL_ADDR, colorCalibrationDefaultDatabase[9]);
+
+
+      //// setup D
+      //dark
+      EEPROM.put(SENSOR_D_RDARK_ADDR, colorHelperD.rDark);
+      EEPROM.put(SENSOR_D_GDARK_ADDR, colorHelperD.gDark);
+      EEPROM.put(SENSOR_D_BDARK_ADDR, colorHelperD.bDark);
+      //gains
+      EEPROM.put(SENSOR_D_RW_ADDR, colorHelperD.rW);
+      EEPROM.put(SENSOR_D_GW_ADDR, colorHelperD.gW);
+      EEPROM.put(SENSOR_D_BW_ADDR, colorHelperD.bW);
+
+      //calibrations
+      EEPROM.put(SENSOR_D_LIGHT_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[0]);
+      EEPROM.put(SENSOR_D_ORANGE_CAL_ADDR, colorCalibrationDefaultDatabase[1]);
+      EEPROM.put(SENSOR_D_PINK_CAL_ADDR, colorCalibrationDefaultDatabase[2]);
+      EEPROM.put(SENSOR_D_YELLOW_CAL_ADDR, colorCalibrationDefaultDatabase[3]);
+      EEPROM.put(SENSOR_D_GREEN_CAL_ADDR, colorCalibrationDefaultDatabase[4]);
+      EEPROM.put(SENSOR_D_RED_CAL_ADDR, colorCalibrationDefaultDatabase[5]);
+      EEPROM.put(SENSOR_D_BLACK_CAL_ADDR, colorCalibrationDefaultDatabase[6]);
+      EEPROM.put(SENSOR_D_DARK_BLUE_CAL_ADDR, colorCalibrationDefaultDatabase[7]);
+      EEPROM.put(SENSOR_D_PURPLE_CAL_ADDR, colorCalibrationDefaultDatabase[8]);
+      EEPROM.put(SENSOR_D_WHITE_CAL_ADDR, colorCalibrationDefaultDatabase[9]);
+
+
       EEPROM.commit();
     }
 
@@ -476,13 +571,11 @@ Serial.println(sizeof(ColorHelper));
     EEPROM.put(OCTAVE_C_ADDR, menu.octaveC);
     EEPROM.put(OCTAVE_D_ADDR, menu.octaveD);
 
-    // EEPROM.put(EEPROM_MAGIC_ADDRESS,EEPROM_MAGIC_VALUE);
+    EEPROM.put(EEPROM_MAGIC_ADDRESS,EEPROM_MAGIC_VALUE);
     EEPROM.commit();
   
 
-    //todo: write magic number
-
-    Serial.println("Default settings now saved to EEPROM");
+    Serial.println("Default menus settings now saved to EEPROM");
   }
   
   // Set up MIDI callback for MenuManager

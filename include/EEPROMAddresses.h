@@ -1,7 +1,7 @@
 #pragma once
 //EEPROM magic number to indicate valid stored settings
 #define EEPROM_MAGIC_ADDRESS 0x00 // don't change this one
-#define EEPROM_MAGIC_VALUE 0x13 //do change this one
+#define EEPROM_MAGIC_VALUE 0x14 //do change this one
 
 /////////////// Calibration Addresses///////////
 //rDarks
@@ -91,12 +91,12 @@
 
 /////////////// Menu Addresses///////////
 
-#define ACTIVE_MIDI_CHANNEL_A_ADDR 546
-#define ACTIVE_MIDI_CHANNEL_B_ADDR 547
-#define ACTIVE_MIDI_CHANNEL_C_ADDR 548
-#define ACTIVE_MIDI_CHANNEL_D_ADDR 549
+#define ACTIVE_MIDI_CHANNEL_A_ADDR 578
+#define ACTIVE_MIDI_CHANNEL_B_ADDR 579
+#define ACTIVE_MIDI_CHANNEL_C_ADDR 580
+#define ACTIVE_MIDI_CHANNEL_D_ADDR 581
 
-#define OCTAVE_A_ADDR 550
-#define OCTAVE_B_ADDR 551
-#define OCTAVE_C_ADDR 552
-#define OCTAVE_D_ADDR 553
+#define OCTAVE_A_ADDR 582
+#define OCTAVE_B_ADDR 583
+#define OCTAVE_C_ADDR 584
+#define OCTAVE_D_ADDR 585

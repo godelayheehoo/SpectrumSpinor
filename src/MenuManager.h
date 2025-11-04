@@ -63,7 +63,8 @@ enum class PendingCalibrationA{
     DARK_BLUE,
     PURPLE,
     WHITE,
-    RESET_DEFAULTS
+    RESET_DEFAULTS,
+    APPLY_TO_BCD
 };
 enum class PendingCalibrationB{
      NONE,

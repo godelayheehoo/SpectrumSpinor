@@ -384,6 +384,8 @@ void MenuManager::render() {
             display.print("Ring ");
             display.print(sensorNames[i]);
         }
+        display.setCursor(10, 5+(5*15));
+        display.print("A->BCD");
         
         display.display(); // Send buffer to screen
     } else if(currentMenu == OCTAVE_MENU) {
@@ -522,7 +524,7 @@ void MenuManager::troubleshootMenuBackButton() {
 
 // CALIBRATION_MENU
 void MenuManager::calibrationMenuEncoder(int turns){
-    calibrationSelectedIdx = constrain(calibrationSelectedIdx + turns, 0, 3);
+    calibrationSelectedIdx = constrain(calibrationSelectedIdx + turns, 0, 4);
 }
 
 void MenuManager::calibrationMenuEncoderButton() {
@@ -547,6 +549,9 @@ void MenuManager::calibrationMenuEncoderButton() {
             currentMenu = CALIBRATION_D_MENU;
             calibrationMenuDSelectedIdx = 0;
             calibrationMenuDScrollIdx = 0;
+            break;
+        case 4:
+            pendingCalibrationA = PendingCalibrationA::APPLY_TO_BCD;
             break;
     }
 }

@@ -1041,6 +1041,38 @@ void loop() {
       Serial.print(", ");
       Serial.println(sensorA->bGain);
     }
+    else if(menu.pendingCalibrationA==PendingCalibrationA::APPLY_TO_BCD){
+      //Apply calibration values from A to B, C, and D
+      ColorHelper* targetHelper;
+      for(int i=1;i<4; i++){
+         targetHelper = colorHelpers[i];
+         //set dark values
+         targetHelper->rDark = colorHelperA.rDark;
+         targetHelper->gDark = colorHelperA.gDark;
+         targetHelper->bDark = colorHelperA.bDark;
+
+         //set gain values
+         targetHelper->rW = colorHelperA.rW;
+         targetHelper->gW = colorHelperA.gW;
+         targetHelper->bW = colorHelperA.bW;
+         targetHelper->rGain = colorHelperA.rGain;
+         targetHelper->gGain = colorHelperA.gGain;
+         targetHelper->bGain = colorHelperA.bGain;
+
+         //set color values
+         for(int j=0; j<NUM_COLORS; j++){
+          menu.display.clearDisplay();
+          menu.display.setCursor(0, 0);
+          menu.display.print(">  ");
+          menu.display.print(colorToString(indexToColor(j)));
+          targetHelper->calibrationDatabase[j] = colorHelperA.calibrationDatabase[j];
+         }
+      }
+      menu.pendingCalibrationA = PendingCalibrationA::NONE;
+      //todo: some kind of menu feedback
+      menu.render();
+
+    }
     else{
     Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::LIGHT_BLUE?Color::LIGHT_BLUE:
                            menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:

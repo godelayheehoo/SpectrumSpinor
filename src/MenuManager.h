@@ -225,11 +225,11 @@ public:
     String currentDetectedColorD = "unknown";
     
     // Current RGB values for troubleshoot menu (mode 1)
-    uint16_t currentRGBA[4] = {0}; // R,G,B,C for sensor A
-    uint16_t currentRGBB[4] = {0}; // R,G,B,C for sensor B  
-    uint16_t currentRGBC[4] = {0}; // R,G,B,C for sensor C
-    uint16_t currentRGBD[4] = {0}; // R,G,B,C for sensor D
-    
+    uint16_t currentRGBA[3] = {0}; // R,G,B for sensor A
+    uint16_t currentRGBB[3] = {0}; // R,G,B for sensor B
+    uint16_t currentRGBC[3] = {0}; // R,G,B for sensor C
+    uint16_t currentRGBD[3] = {0}; // R,G,B for sensor D
+
     // Current MIDI notes for each sensor
     uint8_t currentMIDINoteA = 60;
     uint8_t currentMIDINoteB = 60;
@@ -249,10 +249,10 @@ public:
     void updateCurrentMIDINoteD(uint8_t midiNote);
     
     // Update RGB values for troubleshoot mode 1
-    void updateCurrentRGBA(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
-    void updateCurrentRGBB(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
-    void updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
-    void updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+    void updateCurrentRGBA(float r, float g, float b);
+    void updateCurrentRGBB(float r, float g, float b);
+    void updateCurrentRGBC(float r, float g, float b);
+    void updateCurrentRGBD(float r, float g, float b);
 
     uint8_t octaveA; // Current octave for sensor A
     uint8_t octaveB; // Current octave for sensor B

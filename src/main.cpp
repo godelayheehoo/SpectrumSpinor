@@ -25,6 +25,8 @@ Also will need a menu functionality that just displays the current color seen.
 
 - move defaults into SystemConfig.h (for menu stuff)
 
+- make the first calibration option a noop because of how often I double click by accident.s
+
 
 */
 #include <Arduino.h>
@@ -554,7 +556,7 @@ Serial.println(sizeof(ColorHelper));
   else{
     Serial.println("EEPROM not valid, using default values");
     menu.activeMIDIChannelA = 3; // Default to channel 3
-    menu.activeMIDIChannelB = 2; // Default to channel 2
+    menu.activeMIDIChannelB = 6; // Default to channel 6
     menu.activeMIDIChannelC = 7; // Default to channel 7
     menu.activeMIDIChannelD = 12;// Default to channel 12
 
@@ -605,13 +607,13 @@ Serial.println(sizeof(ColorHelper));
   Serial.print(", ");
   Serial.println(colorHelperA.bGain);
 
-  Serial.print("Yellow RGB:");
-  byte yellowIdx = colorToIndex(Color::YELLOW);
-  Serial.print(colorHelperA.calibrationDatabase[yellowIdx].red);
+  Serial.print("Red RGB:");
+  byte redIdx = colorToIndex(Color::RED);
+  Serial.print(colorHelperA.calibrationDatabase[redIdx].red);
   Serial.print(", ");
-  Serial.print(colorHelperA.calibrationDatabase[yellowIdx].green);
+  Serial.print(colorHelperA.calibrationDatabase[redIdx].green);
   Serial.print(", ");
-  Serial.print(colorHelperA.calibrationDatabase[yellowIdx].blue);
+  Serial.println(colorHelperA.calibrationDatabase[redIdx].blue);
 }
 
 void loop() {
@@ -718,15 +720,15 @@ void loop() {
       tcaSelect(sensorIdx);
       delay(5); // Brief settling time
       
-      uint16_t r, g, b, c;
-      activeColorSensor->getRawData(&r, &g, &b, &c);
+      float r, g, b, c;
+      activeColorSensor->getCalibratedData(&r, &g, &b);
       
       // Update RGB values in menu
       switch (sensorIdx) {
-        case 0: menu.updateCurrentRGBA(r, g, b, c); break;
-        case 1: menu.updateCurrentRGBB(r, g, b, c); break;
-        case 2: menu.updateCurrentRGBC(r, g, b, c); break;
-        case 3: menu.updateCurrentRGBD(r, g, b, c); break;
+        case 0: menu.updateCurrentRGBA(r, g, b); break;
+        case 1: menu.updateCurrentRGBB(r, g, b); break;
+        case 2: menu.updateCurrentRGBC(r, g, b); break;
+        case 3: menu.updateCurrentRGBD(r, g, b); break;
       }
     }
     
@@ -855,16 +857,16 @@ void loop() {
         // Update RGB values if in troubleshoot mode 1 (RGB display) and color changed
         if (menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1 && 
             detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
-          uint16_t r, g, b, c;
-          activeColorSensor->getRawData(&r, &g, &b, &c);
+          float r, g, b;
+          activeColorSensor->getCalibratedData(&r, &g, &b);
           
           
           // Update RGB values in menu for troubleshoot mode
           switch (currentSensorIndex) {
-            case 0: menu.updateCurrentRGBA(r, g, b, c); break;
-            case 1: menu.updateCurrentRGBB(r, g, b, c); break;
-            case 2: menu.updateCurrentRGBC(r, g, b, c); break;
-            case 3: menu.updateCurrentRGBD(r, g, b, c); break;
+            case 0: menu.updateCurrentRGBA(r, g, b); break;
+            case 1: menu.updateCurrentRGBB(r, g, b); break;
+            case 2: menu.updateCurrentRGBC(r, g, b); break;
+            case 3: menu.updateCurrentRGBD(r, g, b); break;
           }
         }
         

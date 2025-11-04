@@ -220,7 +220,7 @@ float ColorHelper::calculateColorDistance(float r1, float g1, float b1,
 }
 
 void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* avgB){
-    uint16_t sumR, sumG, sumB;
+    float sumR, sumG, sumB;
     sumR = 0;
     sumG = 0;
     sumB = 0;
@@ -228,28 +228,23 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
     for(int i = 0; i < NUM_CALIBRATION_STEPS; i++){
         Serial.print("Sample # ");
         Serial.println(i);
-        float r, g, b, c;
+        float r, g, b;
         getCalibratedData(&r, &g, &b);
 
-        // I think maybe I shouldn't be normalizing here.
+        // I think maybe I shouldn't be normalizing here-- I already normalize when I get calibrated data.
 
-        if (this->normalize && c != 0) {  // avoid divide-by-zero
-            sumR += (uint32_t)((float)r / c * 65535);
-            sumG += (uint32_t)((float)g / c * 65535);
-            sumB += (uint32_t)((float)b / c * 65535);
-        } else {
-            sumR += r;
-            sumG += g;
-            sumB += b;
-        }
+        sumR += r;
+        sumG += g;
+        sumB += b;
+        // 
         delay(100);
         Serial.print("sum R:");
         Serial.println(sumR);
     }
     // Compute averages
-    *avgR = sumR / NUM_CALIBRATION_STEPS;
-    *avgG = sumG / NUM_CALIBRATION_STEPS;
-    *avgB = sumB / NUM_CALIBRATION_STEPS;
+    *avgR = (uint16_t)(sumR / NUM_CALIBRATION_STEPS);
+    *avgG = (uint16_t)(sumG / NUM_CALIBRATION_STEPS);
+    *avgB = (uint16_t)(sumB / NUM_CALIBRATION_STEPS);
 }
 
 void ColorHelper::calibrateDark(){
@@ -296,7 +291,7 @@ void ColorHelper::calibrateWhiteGains(){
  
     Serial.println("WARNING: NEEDS TO BE UPDATED");
 
-    Serial.print("Pre Cal: ");
+    Serial.print("Pre Cal Wvals: ");
     Serial.print(rW);
     Serial.print(", ");
     Serial.print(gW);
@@ -334,7 +329,7 @@ void ColorHelper::calibrateWhiteGains(){
     gW = sumGw / NUM_CALIBRATION_STEPS;
     bW = sumBw / NUM_CALIBRATION_STEPS;
 
-    Serial.print("Post Cal: ");
+    Serial.print("Post Cal wVals: ");
     Serial.print(rW);
     Serial.print(", ");
     Serial.print(gW);

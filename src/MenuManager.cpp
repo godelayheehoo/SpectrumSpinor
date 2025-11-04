@@ -51,20 +51,20 @@ void MenuManager::updateCurrentMIDINoteD(uint8_t midiNote) {
     currentMIDINoteD = midiNote;
 }
 
-void MenuManager::updateCurrentRGBA(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
-    currentRGBA[0] = r; currentRGBA[1] = g; currentRGBA[2] = b; currentRGBA[3] = c;
+void MenuManager::updateCurrentRGBA(float r, float g, float b) {
+    currentRGBA[0] = r; currentRGBA[1] = g; currentRGBA[2] = b;
 }
 
-void MenuManager::updateCurrentRGBB(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
-    currentRGBB[0] = r; currentRGBB[1] = g; currentRGBB[2] = b; currentRGBB[3] = c;
+void MenuManager::updateCurrentRGBB(float r, float g, float b) {
+    currentRGBB[0] = r; currentRGBB[1] = g; currentRGBB[2] = b;
 }
 
-void MenuManager::updateCurrentRGBC(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
-    currentRGBC[0] = r; currentRGBC[1] = g; currentRGBC[2] = b; currentRGBC[3] = c;
+void MenuManager::updateCurrentRGBC(float r, float g, float b) {
+    currentRGBC[0] = r; currentRGBC[1] = g; currentRGBC[2] = b;
 }
 
-void MenuManager::updateCurrentRGBD(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
-    currentRGBD[0] = r; currentRGBD[1] = g; currentRGBD[2] = b; currentRGBD[3] = c;
+void MenuManager::updateCurrentRGBD(float r, float g, float b) {
+    currentRGBD[0] = r; currentRGBD[1] = g; currentRGBD[2] = b;
 }
 
 
@@ -852,7 +852,7 @@ void MenuManager::calibrationStartProgressBar(){
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(OLED_WHITE,OLED_BLACK);
-    centerTextAt(10, "Calibrating...", 2);
+    // centerTextAt(10, "Calibrating...", 1);
     // Draw empty progress bar
     display.drawRect(10, 40, SCREEN_WIDTH - 20, 10, OLED_WHITE);
     display.display();

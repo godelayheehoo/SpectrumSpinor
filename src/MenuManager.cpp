@@ -421,6 +421,15 @@ void MenuManager::render() {
     else if(currentMenu == CALIBRATION_A_MENU){
         SharedCalibrationMenuRender(calibrationMenuASelectedIdx, calibrationMenuAScrollIdx);
     }
+    else if(currentMenu == CALIBRATION_B_MENU){
+        SharedCalibrationMenuRender(calibrationMenuBSelectedIdx, calibrationMenuBScrollIdx);
+    }
+    else if(currentMenu == CALIBRATION_C_MENU){
+        SharedCalibrationMenuRender(calibrationMenuCSelectedIdx, calibrationMenuCScrollIdx);
+    }
+    else if(currentMenu == CALIBRATION_D_MENU){
+        SharedCalibrationMenuRender(calibrationMenuDSelectedIdx, calibrationMenuDScrollIdx);
+    }
 }
 
 void MenuManager::startCalibrationCountdown(){

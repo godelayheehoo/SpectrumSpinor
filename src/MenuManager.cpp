@@ -372,7 +372,7 @@ void MenuManager::render() {
         const char* sensorNames[4] = {"A", "B", "C", "D"};
         
         for (int i = 0; i < 4; i++) {
-            display.setCursor(10, 5 + (i * 15)); // Start at y=5 instead of y=20
+            display.setCursor(10, 5 + (i * 10)); // Start at y=5 instead of y=20
             
             // Highlight selected sensor
             if (calibrationSelectedIdx == i) {
@@ -384,7 +384,12 @@ void MenuManager::render() {
             display.print("Ring ");
             display.print(sensorNames[i]);
         }
-        display.setCursor(10, 5+(5*15));
+        if(calibrationSelectedIdx==4){
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
+        } else {
+            display.setTextColor(OLED_WHITE);
+        }
+        display.setCursor(10, 5+(4*10));
         display.print("A->BCD");
         
         display.display(); // Send buffer to screen
@@ -528,30 +533,36 @@ void MenuManager::calibrationMenuEncoder(int turns){
 }
 
 void MenuManager::calibrationMenuEncoderButton() {
+    Serial.println("Encoder button clicked!");
     // Encoder button enters calibration for selected sensor
-    switch(calibrationMenuSelectedIdx){
+    switch(calibrationSelectedIdx){
         case 0:
             currentMenu = CALIBRATION_A_MENU;
             calibrationMenuASelectedIdx = 0;
             calibrationMenuAScrollIdx = 0;
+            Serial.println("Calibration A selected");
             break;
         case 1:
             currentMenu = CALIBRATION_B_MENU;
             calibrationMenuBSelectedIdx = 0;
             calibrationMenuBScrollIdx = 0;
+            Serial.println("Calibration B selected");
             break;
         case 2:
             currentMenu = CALIBRATION_C_MENU;
             calibrationMenuCSelectedIdx = 0;
             calibrationMenuCScrollIdx = 0;
+            Serial.println("Calibration C selected");
             break;
         case 3:
             currentMenu = CALIBRATION_D_MENU;
             calibrationMenuDSelectedIdx = 0;
             calibrationMenuDScrollIdx = 0;
+            Serial.println("Calibration D selected");
             break;
         case 4:
             pendingCalibrationA = PendingCalibrationA::APPLY_TO_BCD;
+            Serial.println("A-> BCD selected");
             break;
     }
 }

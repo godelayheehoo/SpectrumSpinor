@@ -1042,9 +1042,12 @@ void loop() {
       Serial.println(sensorA->bGain);
     }
     else if(menu.pendingCalibrationA==PendingCalibrationA::APPLY_TO_BCD){
+      Serial.println("Inside A->BCD block");
       //Apply calibration values from A to B, C, and D
       ColorHelper* targetHelper;
-      for(int i=1;i<4; i++){
+      for(int i=1; i<4; i++){
+        Serial.print("Sensor# ");
+        Serial.println(i);
          targetHelper = colorHelpers[i];
          //set dark values
          targetHelper->rDark = colorHelperA.rDark;

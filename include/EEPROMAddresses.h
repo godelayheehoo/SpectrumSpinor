@@ -1,7 +1,7 @@
 #pragma once
 //EEPROM magic number to indicate valid stored settings
 #define EEPROM_MAGIC_ADDRESS 0x00 // don't change this one
-#define EEPROM_MAGIC_VALUE 3 //do change this one
+#define EEPROM_MAGIC_VALUE 4 //do change this one
 
 /////////////// Calibration Addresses///////////
 //rDarks

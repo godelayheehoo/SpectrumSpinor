@@ -23,6 +23,7 @@ struct SensorCalibration {
     ColorCalibration calibrationDatabase[NUM_COLORS];
     int numColors;
     bool isCalibrated;
+    byte sensorNum; // 0=A, 1=B, 2=C, 3=D
     char sensorName[2]; // "A", "B", "C", "D" (plus null terminator)
 };
 

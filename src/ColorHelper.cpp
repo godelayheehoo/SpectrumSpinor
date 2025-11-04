@@ -1,6 +1,8 @@
 #include "ColorHelper.h"
 #include "ColorInfo.h"
 #include "SystemConfig.h"
+#include <EEPROM.h>
+#include "EEPROMAddresses.h"
 
 // Default color calibration definitions (define once in this translation unit)
 ColorCalibration pinkDefaultCal = ColorCalibration{26588, 15769, 20923};
@@ -220,8 +222,8 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
     for(int i = 0; i < NUM_CALIBRATION_STEPS; i++){
         Serial.print("Sample # ");
         Serial.println(i);
-        uint16_t r, g, b, c;
-        getRawData(&r, &g, &b, &c);
+        float r, g, b, c;
+        getCalibratedData(&r, &g, &b);
 
         // I think maybe I shouldn't be normalizing here.
 
@@ -242,22 +244,123 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
     *avgB = sumB / NUM_CALIBRATION_STEPS;
 }
 
+void ColorHelper::calibrateDark(){
+    Serial.println("Not currently working, need to install LED off pins");
+    rDark = 0;
+    gDark = 0;
+    bDark = 0;
+
+    // save to EEPROM
+    switch(SensorNum){
+        case 0:
+            EEPROM.put(SENSOR_A_RDARK_ADDR, rDark);
+            EEPROM.put(SENSOR_A_GDARK_ADDR, gDark);
+            EEPROM.put(SENSOR_A_BDARK_ADDR, bDark);
+            break;
+        case 1:
+            EEPROM.put(SENSOR_B_RDARK_ADDR, rDark);
+            EEPROM.put(SENSOR_B_GDARK_ADDR, gDark);
+            EEPROM.put(SENSOR_B_BDARK_ADDR, bDark);
+            break;
+        case 2:
+            EEPROM.put(SENSOR_C_RDARK_ADDR, rDark);
+            EEPROM.put(SENSOR_C_GDARK_ADDR, gDark);
+            EEPROM.put(SENSOR_C_BDARK_ADDR, bDark);
+            break;
+        case 3:
+            EEPROM.put(SENSOR_D_RDARK_ADDR, rDark);
+            EEPROM.put(SENSOR_D_GDARK_ADDR, gDark);
+            EEPROM.put(SENSOR_D_BDARK_ADDR, bDark);
+            break;
+        default:
+            Serial.println("ERROR: Invalid sensor number for dark calibration");
+    }
+    EEPROM.commit();
+}
+
 //white is separate from the colors because it might be treated differently soon.
-void ColorHelper::calibrateWhite(){
+void ColorHelper::calibrateWhiteGains(){
+
+    //todo: menu should tell you what to do and that this should be done AFTER dark offset
  
     Serial.println("WARNING: NEEDS TO BE UPDATED");
-  uint16_t avgR, avgG, avgB;
-  getSamplesAverage(&avgR, &avgG, &avgB);
 
-  Serial.println("Calibration complete!");
-  Serial.print("Average R: "); Serial.println(avgR);
-  Serial.print("Average G: "); Serial.println(avgG);
-  Serial.print("Average B: "); Serial.println(avgB);
+    Serial.print("Pre Cal: ");
+    Serial.print(rW);
+    Serial.print(", ");
+    Serial.print(gW);
+    Serial.print(", ");
+    Serial.println(bW);
+  uint16_t avgRw, avgGw, avgBw;
+  uint16_t sumRw, sumGw, sumBw;
+    sumRw = 0;
+    sumGw = 0;
+    sumBw = 0;
+    delay(50);
+    for(int i = 0; i < NUM_CALIBRATION_STEPS; i++){
+        Serial.print("Sample # ");
+        Serial.println(i);
+        uint16_t r, g, b, c;
+        getRawData(&r, &g, &b, &c);
 
-  byte whiteIndex = colorToIndex(Color::WHITE);
-    this->calibrationDatabase[whiteIndex].red = avgR;
-    this->calibrationDatabase[whiteIndex].green = avgG;
-    this->calibrationDatabase[whiteIndex].blue = avgB;
+        // I think maybe I shouldn't be normalizing here.
+
+        if (this->normalize && c != 0) {  // avoid divide-by-zero
+            sumRw += (uint32_t)((float)r / c * 65535);
+            sumGw += (uint32_t)((float)g / c * 65535);
+            sumBw += (uint32_t)((float)b / c * 65535);
+        } else {
+            sumRw += r;
+            sumGw += g;
+            sumBw += b;
+        }
+        delay(100);
+    }
+    // Compute averages
+    rW = sumRw / NUM_CALIBRATION_STEPS;
+    gW = sumGw / NUM_CALIBRATION_STEPS;
+    bW = sumBw / NUM_CALIBRATION_STEPS;
+
+    Serial.print("Post Cal: ");
+    Serial.print(rW);
+    Serial.print(", ");
+    Serial.print(gW);
+    Serial.print(", ");
+    Serial.println(bW);
+
+
+    float avg = (rW + gW + bW) / 3.0f;
+    rGain = avg / rW;
+    gGain = avg / gW;
+    bGain = avg / bW;
+
+    //save W values
+    switch(SensorNum){
+        case 0:
+            EEPROM.put(SENSOR_A_RW_ADDR, rW);
+            EEPROM.put(SENSOR_A_GW_ADDR, gW);
+            EEPROM.put(SENSOR_A_BW_ADDR, bW);
+            break;
+        case 1:
+            EEPROM.put(SENSOR_B_RW_ADDR, rW);
+            EEPROM.put(SENSOR_B_GW_ADDR, gW);
+            EEPROM.put(SENSOR_B_BW_ADDR, bW);
+            break;
+        case 2:
+            EEPROM.put(SENSOR_C_RW_ADDR, rW);
+            EEPROM.put(SENSOR_C_GW_ADDR, gW);
+            EEPROM.put(SENSOR_C_BW_ADDR, bW);
+            break;
+        case 3:
+            EEPROM.put(SENSOR_D_RW_ADDR, rW);
+            EEPROM.put(SENSOR_D_GW_ADDR, gW);
+            EEPROM.put(SENSOR_D_BW_ADDR, bW);
+            break;
+        default:
+            Serial.println("ERROR: Invalid sensor number for white calibration");
+    }
+    EEPROM.commit();
+    Serial.println("White calibration complete!");
 }
 
 void ColorHelper::calibrateColor(Color color){
@@ -272,8 +375,104 @@ void ColorHelper::calibrateColor(Color color){
   Serial.print("Average B: "); Serial.println(avgB);
 
   byte colorIndex = colorToIndex(color);
-    this->calibrationDatabase[colorIndex].red = avgR;
-    this->calibrationDatabase[colorIndex].green = avgG;
-    this->calibrationDatabase[colorIndex].blue = avgB;
+  ColorCalibration newCal{avgR, avgG, avgB};
+  this->calibrationDatabase[colorIndex] = newCal;
+
+//save result
+
+// #define SENSOR_A_LIGHT_BLUE_CAL_ADDR 98
+// #define SENSOR_A_ORANGE_CAL_ADDR 110
+// #define SENSOR_A_PINK_CAL_ADDR 122
+// #define SENSOR_A_YELLOW_CAL_ADDR 134
+// #define SENSOR_A_GREEN_CAL_ADDR 146
+// #define SENSOR_A_RED_CAL_ADDR 158
+// #define SENSOR_A_BLACK_CAL_ADDR 170
+// #define SENSOR_A_DARK_BLUE_CAL_ADDR 182
+// #define SENSOR_A_PURPLE_CAL_ADDR 194
+#define SENSOR_A_WHITE_CAL_ADDR 206
+uint lightBlueAddr, orangeAddr, pinkAddr, yellowAddr, greenAddr, redAddr, blackAddr, darkBlueAddr, purpleAddr;
+switch(SensorNum){
+    case 0:
+        lightBlueAddr = SENSOR_A_LIGHT_BLUE_CAL_ADDR;
+        orangeAddr = SENSOR_A_ORANGE_CAL_ADDR;
+        pinkAddr = SENSOR_A_PINK_CAL_ADDR;
+        yellowAddr = SENSOR_A_YELLOW_CAL_ADDR;
+        greenAddr = SENSOR_A_GREEN_CAL_ADDR;
+        redAddr = SENSOR_A_RED_CAL_ADDR;
+        blackAddr = SENSOR_A_BLACK_CAL_ADDR;
+        darkBlueAddr = SENSOR_A_DARK_BLUE_CAL_ADDR;
+        purpleAddr = SENSOR_A_PURPLE_CAL_ADDR;
+        break;
+    case 1:
+        lightBlueAddr = SENSOR_B_LIGHT_BLUE_CAL_ADDR;
+        orangeAddr = SENSOR_B_ORANGE_CAL_ADDR;
+        pinkAddr = SENSOR_B_PINK_CAL_ADDR;
+        yellowAddr = SENSOR_B_YELLOW_CAL_ADDR;
+        greenAddr = SENSOR_B_GREEN_CAL_ADDR;
+        redAddr = SENSOR_B_RED_CAL_ADDR;
+        blackAddr = SENSOR_B_BLACK_CAL_ADDR;
+        darkBlueAddr = SENSOR_B_DARK_BLUE_CAL_ADDR;
+        purpleAddr = SENSOR_B_PURPLE_CAL_ADDR;
+        break;
+    case 2:
+        lightBlueAddr = SENSOR_C_LIGHT_BLUE_CAL_ADDR;
+        orangeAddr = SENSOR_C_ORANGE_CAL_ADDR;
+        pinkAddr = SENSOR_C_PINK_CAL_ADDR;
+        yellowAddr = SENSOR_C_YELLOW_CAL_ADDR;
+        greenAddr = SENSOR_C_GREEN_CAL_ADDR;
+        redAddr = SENSOR_C_RED_CAL_ADDR;
+        blackAddr = SENSOR_C_BLACK_CAL_ADDR;
+        darkBlueAddr = SENSOR_C_DARK_BLUE_CAL_ADDR;
+        purpleAddr = SENSOR_C_PURPLE_CAL_ADDR;
+        break;
+    case 3:
+        lightBlueAddr = SENSOR_D_LIGHT_BLUE_CAL_ADDR;
+        orangeAddr = SENSOR_D_ORANGE_CAL_ADDR;
+        pinkAddr = SENSOR_D_PINK_CAL_ADDR;
+        yellowAddr = SENSOR_D_YELLOW_CAL_ADDR;
+        greenAddr = SENSOR_D_GREEN_CAL_ADDR;
+        redAddr = SENSOR_D_RED_CAL_ADDR;
+        blackAddr = SENSOR_D_BLACK_CAL_ADDR;
+        darkBlueAddr = SENSOR_D_DARK_BLUE_CAL_ADDR;
+        purpleAddr = SENSOR_D_PURPLE_CAL_ADDR;
+        break;
+    default:
+        Serial.println("ERROR: Invalid sensor number for color calibration");
+        return;
 }
+    switch(color){
+        case Color::LIGHT_BLUE:
+            EEPROM.put(lightBlueAddr, newCal);
+            break;
+        case Color::ORANGE:
+            EEPROM.put(orangeAddr, newCal);
+            break;
+        case Color::PINK:
+            EEPROM.put(pinkAddr, newCal);
+            break;
+        case Color::YELLOW:
+            EEPROM.put(yellowAddr, newCal);
+            break;
+        case Color::GREEN:
+            EEPROM.put(greenAddr, newCal);
+            break;
+        case Color::RED:
+            EEPROM.put(redAddr, newCal);
+            break;
+        case Color::BLACK:
+            EEPROM.put(blackAddr, newCal);
+            break;
+        case Color::DARK_BLUE:
+            EEPROM.put(darkBlueAddr, newCal);
+            break;
+        case Color::PURPLE:
+            EEPROM.put(purpleAddr, newCal);
+            break; 
+        default:
+            Serial.println("ERROR: Invalid color for calibration");
+            return;
+    }
+    EEPROM.commit();
+}
+
     

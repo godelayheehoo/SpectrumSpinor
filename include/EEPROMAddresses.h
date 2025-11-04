@@ -1,14 +1,95 @@
 #pragma once
 //EEPROM magic number to indicate valid stored settings
 #define EEPROM_MAGIC_ADDRESS 0x00 // don't change this one
-#define EEPROM_MAGIC_VALUE 0x12 //do change this one
+#define EEPROM_MAGIC_VALUE 0x13 //do change this one
 
-//todo: these are only 28 bytes right now, but may change when we rework them to store calibration data.
-#define SENSOR_A_CALIBRATION_ADDR 1
-#define SENSOR_B_CALIBRATION_ADDR 137 //136 + 1 + 1
-#define SENSOR_C_CALIBRATION_ADDR 274 // 2*136 + 1 + 1
-#define SENSOR_D_CALIBRATION_ADDR 410 // 3*136 + 1 + 1
-//Each sensor calibration block is 136 bytes
+/////////////// Calibration Addresses///////////
+//rDarks
+#define SENSOR_A_RDARK_ADDR 2
+#define SENSOR_A_GDARK_ADDR 6
+#define SENSOR_A_BDARK_ADDR 10
+
+#define SENSOR_B_RDARK_ADDR 14
+#define SENSOR_B_GDARK_ADDR 18
+#define SENSOR_B_BDARK_ADDR 22
+
+#define SENSOR_C_RDARK_ADDR 26
+#define SENSOR_C_GDARK_ADDR 30
+#define SENSOR_C_BDARK_ADDR 34
+
+#define SENSOR_D_RDARK_ADDR 38
+#define SENSOR_D_GDARK_ADDR 42
+#define SENSOR_D_BDARK_ADDR 46
+
+//W values -- NOT gains, which need to be recalculated
+#define SENSOR_A_RW_ADDR 50
+#define SENSOR_A_GW_ADDR 54
+#define SENSOR_A_BW_ADDR 58
+
+#define SENSOR_B_RW_ADDR 62
+#define SENSOR_B_GW_ADDR 66
+#define SENSOR_B_BW_ADDR 70
+
+#define SENSOR_C_RW_ADDR 74
+#define SENSOR_C_GW_ADDR 78
+#define SENSOR_C_BW_ADDR 82
+
+#define SENSOR_D_RW_ADDR 86
+#define SENSOR_D_GW_ADDR 90
+#define SENSOR_D_BW_ADDR 94 
+
+//Color calibrations
+#define COLOR_BLOCK_SIZE 12
+
+//Sensor A
+#define SENSOR_A_LIGHT_BLUE_CAL_ADDR 98
+#define SENSOR_A_ORANGE_CAL_ADDR 110
+#define SENSOR_A_PINK_CAL_ADDR 122
+#define SENSOR_A_YELLOW_CAL_ADDR 134
+#define SENSOR_A_GREEN_CAL_ADDR 146
+#define SENSOR_A_RED_CAL_ADDR 158
+#define SENSOR_A_BLACK_CAL_ADDR 170
+#define SENSOR_A_DARK_BLUE_CAL_ADDR 182
+#define SENSOR_A_PURPLE_CAL_ADDR 194
+#define SENSOR_A_WHITE_CAL_ADDR 206
+
+//Sensor B
+#define SENSOR_B_LIGHT_BLUE_CAL_ADDR 218
+#define SENSOR_B_ORANGE_CAL_ADDR 230
+#define SENSOR_B_PINK_CAL_ADDR 242
+#define SENSOR_B_YELLOW_CAL_ADDR 254
+#define SENSOR_B_GREEN_CAL_ADDR 266
+#define SENSOR_B_RED_CAL_ADDR 278
+#define SENSOR_B_BLACK_CAL_ADDR 290
+#define SENSOR_B_DARK_BLUE_CAL_ADDR 302
+#define SENSOR_B_PURPLE_CAL_ADDR 314
+#define SENSOR_B_WHITE_CAL_ADDR 326
+
+//Sensor C
+#define SENSOR_C_LIGHT_BLUE_CAL_ADDR 338
+#define SENSOR_C_ORANGE_CAL_ADDR 350
+#define SENSOR_C_PINK_CAL_ADDR 362
+#define SENSOR_C_YELLOW_CAL_ADDR 374
+#define SENSOR_C_GREEN_CAL_ADDR 386
+#define SENSOR_C_RED_CAL_ADDR 398
+#define SENSOR_C_BLACK_CAL_ADDR 410
+#define SENSOR_C_DARK_BLUE_CAL_ADDR 422
+#define SENSOR_C_PURPLE_CAL_ADDR 434
+#define SENSOR_C_WHITE_CAL_ADDR 446
+
+//Sensor D
+#define SENSOR_D_LIGHT_BLUE_CAL_ADDR 458
+#define SENSOR_D_ORANGE_CAL_ADDR 470
+#define SENSOR_D_PINK_CAL_ADDR 482
+#define SENSOR_D_YELLOW_CAL_ADDR 494
+#define SENSOR_D_GREEN_CAL_ADDR 506
+#define SENSOR_D_RED_CAL_ADDR 518
+#define SENSOR_D_BLACK_CAL_ADDR 530
+#define SENSOR_D_DARK_BLUE_CAL_ADDR 542
+#define SENSOR_D_PURPLE_CAL_ADDR 554
+#define SENSOR_D_WHITE_CAL_ADDR 566
+
+/////////////// Menu Addresses///////////
 
 #define ACTIVE_MIDI_CHANNEL_A_ADDR 546
 #define ACTIVE_MIDI_CHANNEL_B_ADDR 547

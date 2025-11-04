@@ -16,6 +16,7 @@ extern ColorCalibration redDefaultCal;
 extern ColorCalibration lightBlueDefaultCal;
 extern ColorCalibration blackDefaultCal;
 extern ColorCalibration whiteDefaultCal;
+extern ColorCalibration purpleDefaultCal;
 
 extern ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS];
 
@@ -44,7 +45,9 @@ public:
 
     void getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* avgB);
 
-    void calibrateWhite(); // Calibration function prototype
+    void calibrateWhiteGains(); // Calibration function prototype
+
+    void calibrateDark();
     
     void calibrateColor(Color color);
 
@@ -66,6 +69,8 @@ public:
   float rGain = avgW / (float)rW;
   float gGain = avgW / (float)gW;
   float bGain = avgW / (float)bW;
+
+  byte SensorNum;
 
 
     

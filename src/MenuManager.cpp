@@ -585,21 +585,20 @@ void MenuManager::calibrationMenuAEncoder(int turns){
 void MenuManager::calibrationMenuAEncoderButton(){
     switch(calibrationMenuASelectedIdx){
         case 0:
-            pendingCalibrationA = PendingCalibrationA::WHITE;
+            pendingCalibrationA = PendingCalibrationA::DARK_OFFSET;
             break;
         case 1:
-            pendingCalibrationA = PendingCalibrationA::BLACK;
+            pendingCalibrationA = PendingCalibrationA::GAINS;
             break;
         case 2:
-            pendingCalibrationA = PendingCalibrationA::PINK;
+            pendingCalibrationA = PendingCalibrationA::LIGHT_BLUE;
             break;
-
         case 3:
             pendingCalibrationA = PendingCalibrationA::ORANGE;
             break;
         case 4:
-            pendingCalibrationA = PendingCalibrationA::BLUE;
-            break;
+            pendingCalibrationA = PendingCalibrationA::PINK;
+            break;  
         case 5:
             pendingCalibrationA = PendingCalibrationA::YELLOW;
             break;
@@ -610,15 +609,24 @@ void MenuManager::calibrationMenuAEncoderButton(){
             pendingCalibrationA = PendingCalibrationA::RED;
             break;
         case 8:
-            pendingCalibrationA = PendingCalibrationA::PURPLE;
+            pendingCalibrationA = PendingCalibrationA::BLACK;
             break;
         case 9:
-            pendingCalibrationA = PendingCalibrationA::BROWN;
+            pendingCalibrationA = PendingCalibrationA::DARK_BLUE;
             break;
+        case 10:
+            pendingCalibrationA = PendingCalibrationA::PURPLE;
+            break;
+        case 11:
+            pendingCalibrationA = PendingCalibrationA::WHITE;
+            break;
+        default:
+            Serial.println("WARNING: SOMEHOW HIT UNSUPPORTED CALIBRATION CASE");
     }
 }
 
-void MenuManager::calibrationMenuAConButton(){}
+void MenuManager::calibrationMenuAConButton(){
+}
 void MenuManager::calibrationMenuABackButton(){
     currentMenu = CALIBRATION_MENU;
 }
@@ -633,6 +641,46 @@ void MenuManager::calibrationMenuBEncoder(int turns){
         }
 }
 void MenuManager::calibrationMenuBEncoderButton(){
+    switch(calibrationMenuBSelectedIdx){
+        case 0:
+            pendingCalibrationB = PendingCalibrationB::DARK_OFFSET;
+            break;
+        case 1:
+            pendingCalibrationB = PendingCalibrationB::GAINS;
+            break;
+        case 2:
+            pendingCalibrationB = PendingCalibrationB::LIGHT_BLUE;
+            break;
+        case 3:
+            pendingCalibrationB = PendingCalibrationB::ORANGE;
+            break;
+        case 4:
+            pendingCalibrationB = PendingCalibrationB::PINK;
+            break;  
+        case 5:
+            pendingCalibrationB = PendingCalibrationB::YELLOW;
+            break;
+        case 6:
+            pendingCalibrationB = PendingCalibrationB::GREEN;
+            break;
+        case 7:
+            pendingCalibrationB = PendingCalibrationB::RED;
+            break;
+        case 8:
+            pendingCalibrationB = PendingCalibrationB::BLACK;
+            break;
+        case 9:
+            pendingCalibrationB = PendingCalibrationB::DARK_BLUE;
+            break;
+        case 10:
+            pendingCalibrationB = PendingCalibrationB::PURPLE;
+            break;
+        case 11:
+            pendingCalibrationB = PendingCalibrationB::WHITE;
+            break;
+        default:
+            Serial.println("WARNING: SOMEHOW HIT UNSUPPORTED CALIBRATION CASE");
+    }
 }
 void MenuManager::calibrationMenuBConButton(){}
 void MenuManager::calibrationMenuBBackButton(){
@@ -649,6 +697,46 @@ void MenuManager::calibrationMenuCEncoder(int turns){
         }
 }
 void MenuManager::calibrationMenuCEncoderButton(){
+    switch(calibrationMenuCSelectedIdx){
+        case 0:
+            pendingCalibrationC = PendingCalibrationC::DARK_OFFSET;
+            break;
+        case 1:
+            pendingCalibrationC = PendingCalibrationC::GAINS;
+            break;
+        case 2:
+            pendingCalibrationC = PendingCalibrationC::LIGHT_BLUE;
+            break;
+        case 3:
+            pendingCalibrationC = PendingCalibrationC::ORANGE;
+            break;
+        case 4:
+            pendingCalibrationC = PendingCalibrationC::PINK;
+            break;  
+        case 5:
+            pendingCalibrationC = PendingCalibrationC::YELLOW;
+            break;
+        case 6:
+            pendingCalibrationC = PendingCalibrationC::GREEN;
+            break;
+        case 7:
+            pendingCalibrationC = PendingCalibrationC::RED;
+            break;
+        case 8:
+            pendingCalibrationC = PendingCalibrationC::BLACK;
+            break;
+        case 9:
+            pendingCalibrationC = PendingCalibrationC::DARK_BLUE;
+            break;
+        case 10:
+            pendingCalibrationC = PendingCalibrationC::PURPLE;
+            break;
+        case 11:
+            pendingCalibrationC = PendingCalibrationC::WHITE;
+            break;
+        default:
+            Serial.println("WARNING: SOMEHOW HIT UNSUPPORTED CALIBRATION CASE");
+    }
 }
 void MenuManager::calibrationMenuCConButton(){}
 void MenuManager::calibrationMenuCBackButton(){
@@ -665,6 +753,46 @@ void MenuManager::calibrationMenuDEncoder(int turns){
         }
 }
 void MenuManager::calibrationMenuDEncoderButton(){
+    switch(calibrationMenuDSelectedIdx){
+        case 0:
+            pendingCalibrationD = PendingCalibrationD::DARK_OFFSET;
+            break;
+        case 1:
+            pendingCalibrationD = PendingCalibrationD::GAINS;
+            break;
+        case 2:
+            pendingCalibrationD = PendingCalibrationD::LIGHT_BLUE;
+            break;
+        case 3:
+            pendingCalibrationD = PendingCalibrationD::ORANGE;
+            break;
+        case 4:
+            pendingCalibrationD = PendingCalibrationD::PINK;
+            break;  
+        case 5:
+            pendingCalibrationD = PendingCalibrationD::YELLOW;
+            break;
+        case 6:
+            pendingCalibrationD = PendingCalibrationD::GREEN;
+            break;
+        case 7:
+            pendingCalibrationD = PendingCalibrationD::RED;
+            break;
+        case 8:
+            pendingCalibrationD = PendingCalibrationD::BLACK;
+            break;
+        case 9:
+            pendingCalibrationD = PendingCalibrationD::DARK_BLUE;
+            break;
+        case 10:
+            pendingCalibrationD = PendingCalibrationD::PURPLE;
+            break;
+        case 11:
+            pendingCalibrationD = PendingCalibrationD::WHITE;
+            break;
+        default:
+            Serial.println("WARNING: SOMEHOW HIT UNSUPPORTED CALIBRATION CASE");
+    }
 }
 void MenuManager::calibrationMenuDConButton(){}
 void MenuManager::calibrationMenuDBackButton(){
@@ -712,8 +840,7 @@ void MenuManager::octaveMenuBackButton(){
 void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
     display.clearDisplay();
     display.setTextSize(1);
-    const char* menus[10] = {"White Balance", "Dark Offset", "Pink", "Orange", "Blue",
-    "Yellow","Green","Red","Purple","Brown"};
+    const char* menus[12] = {"Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White"};
     int yStart = 10;
     display.setCursor(10,yStart);
     display.setTextColor(OLED_WHITE);

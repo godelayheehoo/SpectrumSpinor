@@ -47,66 +47,67 @@ enum ActiveSensor {
     SENSOR_C,
     SENSOR_D
 };
-
+// {"Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White"};
+    
 enum class PendingCalibrationA{
-    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
-    // "Yellow","Green","Red","Purple","Brown"
     NONE,
-    WHITE,
-    BLACK,
-    PINK,
+    DARK_OFFSET,
+    GAINS,
+    LIGHT_BLUE,
     ORANGE,
-    BLUE,
+    PINK,
     YELLOW,
     GREEN,
     RED,
+    BLACK,
+    DARK_BLUE,
     PURPLE,
-    BROWN
+    WHITE
 };
 enum class PendingCalibrationB{
-    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
-    // "Yellow","Green","Red","Purple","Brown"
-    NONE,
-    WHITE,
-    BLACK,
-    PINK,
+     NONE,
+    DARK_OFFSET,
+    GAINS,
+    LIGHT_BLUE,
     ORANGE,
-    BLUE,
+    PINK,
     YELLOW,
     GREEN,
     RED,
+    BLACK,
+    DARK_BLUE,
     PURPLE,
-    BROWN
+    WHITE
 };
 enum class PendingCalibrationC{
-    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
-    // "Yellow","Green","Red","Purple","Brown"
-    NONE,
-    WHITE,
-    BLACK,
-    PINK,
+      NONE,
+    DARK_OFFSET,
+    GAINS,
+    LIGHT_BLUE,
     ORANGE,
-    BLUE,
+    PINK,
     YELLOW,
     GREEN,
     RED,
+    BLACK,
+    DARK_BLUE,
     PURPLE,
-    BROWN
+    WHITE
 };
 enum class PendingCalibrationD{
-    // "White Balance", "Dark Offset", "Pink", "Orange", "Blue",
-    // "Yellow","Green","Red","Purple","Brown"
     NONE,
-    WHITE,
-    BLACK,
-    PINK,
+    DARK_OFFSET,
+    GAINS,
+    LIGHT_BLUE,
     ORANGE,
-    BLUE,
+    PINK,
     YELLOW,
     GREEN,
     RED,
+    BLACK,
+    DARK_BLUE,
     PURPLE,
-    BROWN
+    WHITE
 };
 
 // Function pointer type for MIDI ALL NOTES OFF callback
@@ -263,7 +264,7 @@ public:
     int calibrationMenuSelectedIdx = 0; //there will only be four so this is fine.
 
     static const int CALIBRATION_SUBMENU_VISIBLE_ITEMS = 5;
-    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 10;
+    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 12;
     int calibrationMenuASelectedIdx = 0;
     int calibrationMenuAScrollIdx = 0;
     int calibrationMenuBSelectedIdx = 0;

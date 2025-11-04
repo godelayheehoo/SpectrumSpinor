@@ -977,65 +977,224 @@ void loop() {
     }
   }
 
-  //check if we're calibrating
+  //check if we're calibrating A
   if(menu.pendingCalibrationA!=PendingCalibrationA::NONE){
-    //unfinished: white balance
     menu.startCalibrationCountdown();
-    Serial.println("A is pending and unsupported");
-    //there has to be a better way to convert between the two. We'll have to add black though.
-    // //for now, need to check that the enums line up right and then add special case handling.
-    // ColorHelper& sensorA = colorHelpers[0];
-    // tcaSelect(0);
-    // if(menu.pendingCalibrationA==PendingCalibrationA::WHITE){
-    //   Serial.print("Initial r,g,b:");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgR);
-    //   Serial.print(", ");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgG);
-    //   Serial.print(", ");
-    //   Serial.println(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgB);
-    //   sensorA.calibrateWhite();
-    //   Serial.print("Adjusted r,g,b:");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgR);
-    //   Serial.print(", ");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgG);
-    //   Serial.print(", ");
-    //   Serial.println(sensorA.colorDatabase[colorToIndex(Color::WHITE)].avgB);
-    // }
-    // else{
+    ColorHelper sensorA = colorHelpers[0];
+    tcaSelect(0);
+    if(menu.pendingCalibrationA == PendingCalibrationA::DARK_OFFSET){
+      Serial.print("Initial r,g,b dark offsets:");
+      Serial.print(sensorA.rDark);
+      Serial.print(", ");
+      Serial.print(sensorA.gDark);
+      Serial.print(", ");
+      Serial.println(sensorA.bDark);
+      sensorA.calibrateDark();
+      Serial.print("Adjusted r,g,b dark offsets:");
+      Serial.print(sensorA.rDark);
+      Serial.print(", ");
+      Serial.print(sensorA.gDark);
+      Serial.print(", ");
+      Serial.println(sensorA.bDark);
+    }
+    else if(menu.pendingCalibrationA==PendingCalibrationA::GAINS){
+      Serial.print("Initial r,g,b gains:");
+      Serial.print(sensorA.rGain);
+      Serial.print(", ");
+      Serial.print(sensorA.gGain);
+      Serial.print(", ");
+      Serial.println(sensorA.bGain);
+      sensorA.calibrateWhiteGains();
+      Serial.print("Adjusted r,g,b gains:");
+      Serial.print(sensorA.rGain);
+      Serial.print(", ");
+      Serial.print(sensorA.gGain);
+      Serial.print(", ");
+      Serial.println(sensorA.bGain);
+    }
+    else{
+    Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::LIGHT_BLUE?Color::LIGHT_BLUE:
+                           menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
+                           menu.pendingCalibrationA==PendingCalibrationA::PINK?Color::PINK:
+                           menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
+                           menu.pendingCalibrationA==PendingCalibrationA::GREEN?Color::GREEN:
+                           menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
+                           menu.pendingCalibrationA==PendingCalibrationA::BLACK?Color::BLACK:
+                           menu.pendingCalibrationA==PendingCalibrationA::DARK_BLUE?Color::DARK_BLUE:
+                           menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
+                           menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:
+                           Color::UNKNOWN;
 
-    //   Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
-    //                          menu.pendingCalibrationA==PendingCalibrationA::BLUE?Color::BLUE:
-    //                          menu.pendingCalibrationA==PendingCalibrationA::GREEN?Color::GREEN:
-    //                          menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
-    //                          menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
-    //                          menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
-    //                          menu.pendingCalibrationA==PendingCalibrationA::PINK?Color::PINK:
-    //                          Color::UNKNOWN;
-    //   Serial.print("Initial r,g,b");
-    //   Serial.print(colorToString(selectedColor));
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgR);
-    //   Serial.print(", ");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgG);
-    //   Serial.print(", ");
-    //   Serial.println(sensorA.colorDatabase[colorToIndex(selectedColor)].avgB);
-    //  sensorA.calibrateColor(selectedColor); //safety
-
-    //   Serial.print("Adjusted r,g,b FOR ");
-    //   Serial.print(colorToString(selectedColor));
-    //   Serial.print(":");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgR);
-    //   Serial.print(", ");
-    //   Serial.print(sensorA.colorDatabase[colorToIndex(selectedColor)].avgG);
-    //   Serial.print(", ");
-    //   Serial.println(sensorA.colorDatabase[colorToIndex(selectedColor)].avgB);
-    // }
-    // else{
-    //   Serial.println("Shouldn't be able tor each this.....");
-    // }
-    menu.render();
-    menu.pendingCalibrationA = PendingCalibrationA::NONE;
+    sensorA.calibrateColor(selectedColor); //safety  
+    
   }
+  menu.pendingCalibrationA = PendingCalibrationA::NONE;
+  menu.render();
 }
+  //check if we're calibrating B
+  if(menu.pendingCalibrationB!=PendingCalibrationB::NONE){
+    menu.startCalibrationCountdown();
+    ColorHelper sensorB = colorHelpers[1];
+    tcaSelect(1);
+    if(menu.pendingCalibrationB == PendingCalibrationB::DARK_OFFSET){
+      Serial.print("Initial r,g,b dark offsets:");
+      Serial.print(sensorB.rDark);
+      Serial.print(", ");
+      Serial.print(sensorB.gDark);
+      Serial.print(", ");
+      Serial.println(sensorB.bDark);
+      sensorB.calibrateDark();
+      Serial.print("Adjusted r,g,b dark offsets:");
+      Serial.print(sensorB.rDark);
+      Serial.print(", ");
+      Serial.print(sensorB.gDark);
+      Serial.print(", ");
+      Serial.println(sensorB.bDark);
+    }
+    else if(menu.pendingCalibrationB==PendingCalibrationB::GAINS){
+      Serial.print("Initial r,g,b gains:");
+      Serial.print(sensorB.rGain);
+      Serial.print(", ");
+      Serial.print(sensorB.gGain);
+      Serial.print(", ");
+      Serial.println(sensorB.bGain);
+      sensorB.calibrateWhiteGains();
+      Serial.print("Adjusted r,g,b gains:");
+      Serial.print(sensorB.rGain);
+      Serial.print(", ");
+      Serial.print(sensorB.gGain);
+      Serial.print(", ");
+      Serial.println(sensorB.bGain);
+    }
+    else{
+    Color selectedColor = menu.pendingCalibrationB==PendingCalibrationB::LIGHT_BLUE?Color::LIGHT_BLUE:
+                           menu.pendingCalibrationB==PendingCalibrationB::ORANGE?Color::ORANGE:
+                           menu.pendingCalibrationB==PendingCalibrationB::PINK?Color::PINK:
+                           menu.pendingCalibrationB==PendingCalibrationB::YELLOW?Color::YELLOW:
+                           menu.pendingCalibrationB==PendingCalibrationB::GREEN?Color::GREEN:
+                           menu.pendingCalibrationB==PendingCalibrationB::RED?Color::RED:
+                           menu.pendingCalibrationB==PendingCalibrationB::BLACK?Color::BLACK:
+                           menu.pendingCalibrationB==PendingCalibrationB::DARK_BLUE?Color::DARK_BLUE:
+                           menu.pendingCalibrationB==PendingCalibrationB::PURPLE?Color::PURPLE:
+                           menu.pendingCalibrationB==PendingCalibrationB::WHITE?Color::WHITE:
+                           Color::UNKNOWN;
+
+    sensorB.calibrateColor(selectedColor); //safety
+    
+  }
+  menu.pendingCalibrationB = PendingCalibrationB::NONE;
+  menu.render();
+  }
+  //check if we're calibrating C
+  if(menu.pendingCalibrationC!=PendingCalibrationC::NONE){
+    menu.startCalibrationCountdown();
+    ColorHelper sensorC = colorHelpers[2];
+    tcaSelect(2);
+    if(menu.pendingCalibrationC == PendingCalibrationC::DARK_OFFSET){
+      Serial.print("Initial r,g,b dark offsets:");
+      Serial.print(sensorC.rDark);
+      Serial.print(", ");
+      Serial.print(sensorC.gDark);
+      Serial.print(", ");
+      Serial.println(sensorC.bDark);
+      sensorC.calibrateDark();
+      Serial.print("Adjusted r,g,b dark offsets:");
+      Serial.print(sensorC.rDark);
+      Serial.print(", ");
+      Serial.print(sensorC.gDark);
+      Serial.print(", ");
+      Serial.println(sensorC.bDark);
+    }
+    else if(menu.pendingCalibrationC==PendingCalibrationC::GAINS){
+      Serial.print("Initial r,g,b gains:");
+      Serial.print(sensorC.rGain);
+      Serial.print(", ");
+      Serial.print(sensorC.gGain);
+      Serial.print(", ");
+      Serial.println(sensorC.bGain);
+      sensorC.calibrateWhiteGains();
+      Serial.print("Adjusted r,g,b gains:");
+      Serial.print(sensorC.rGain);
+      Serial.print(", ");
+      Serial.print(sensorC.gGain);
+      Serial.print(", ");
+      Serial.println(sensorC.bGain);
+    }
+    else{
+    Color selectedColor = menu.pendingCalibrationC==PendingCalibrationC::LIGHT_BLUE?Color::LIGHT_BLUE:
+                           menu.pendingCalibrationC==PendingCalibrationC::ORANGE?Color::ORANGE:
+                           menu.pendingCalibrationC==PendingCalibrationC::PINK?Color::PINK:
+                           menu.pendingCalibrationC==PendingCalibrationC::YELLOW?Color::YELLOW:
+                           menu.pendingCalibrationC==PendingCalibrationC::GREEN?Color::GREEN:
+                           menu.pendingCalibrationC==PendingCalibrationC::RED?Color::RED:
+                           menu.pendingCalibrationC==PendingCalibrationC::BLACK?Color::BLACK:
+                           menu.pendingCalibrationC==PendingCalibrationC::DARK_BLUE?Color::DARK_BLUE:
+                           menu.pendingCalibrationC==PendingCalibrationC::PURPLE?Color::PURPLE:
+                           menu.pendingCalibrationC==PendingCalibrationC::WHITE?Color::WHITE:
+                           Color::UNKNOWN;
+
+    sensorC.calibrateColor(selectedColor); //safety
+    
+  }
+  menu.pendingCalibrationC = PendingCalibrationC::NONE;
+  menu.render();
+}
+
+  //check if we're calibrating D
+  if(menu.pendingCalibrationD!=PendingCalibrationD::NONE){
+    menu.startCalibrationCountdown();
+    ColorHelper sensorD = colorHelpers[3];
+    tcaSelect(3);
+    if(menu.pendingCalibrationD == PendingCalibrationD::DARK_OFFSET){
+      Serial.print("Initial r,g,b dark offsets:");
+      Serial.print(sensorD.rDark);
+      Serial.print(", ");
+      Serial.print(sensorD.gDark);
+      Serial.print(", ");
+      Serial.println(sensorD.bDark);
+      sensorD.calibrateDark();
+      Serial.print("Adjusted r,g,b dark offsets:");
+      Serial.print(sensorD.rDark);
+      Serial.print(", ");
+      Serial.print(sensorD.gDark);
+      Serial.print(", ");
+      Serial.println(sensorD.bDark);
+    }
+    else if(menu.pendingCalibrationD==PendingCalibrationD::GAINS){
+      Serial.print("Initial r,g,b gains:");
+      Serial.print(sensorD.rGain);
+      Serial.print(", ");
+      Serial.print(sensorD.gGain);
+      Serial.print(", ");
+      Serial.println(sensorD.bGain);
+      sensorD.calibrateWhiteGains();
+      Serial.print("Adjusted r,g,b gains:");
+      Serial.print(sensorD.rGain);
+      Serial.print(", ");
+      Serial.print(sensorD.gGain);
+      Serial.print(", ");
+      Serial.println(sensorD.bGain);
+    }
+    else{
+    Color selectedColor = menu.pendingCalibrationD==PendingCalibrationD::LIGHT_BLUE?Color::LIGHT_BLUE:
+                           menu.pendingCalibrationD==PendingCalibrationD::ORANGE?Color::ORANGE:
+                           menu.pendingCalibrationD==PendingCalibrationD::PINK?Color::PINK:
+                           menu.pendingCalibrationD==PendingCalibrationD::YELLOW?Color::YELLOW:
+                           menu.pendingCalibrationD==PendingCalibrationD::GREEN?Color::GREEN:
+                           menu.pendingCalibrationD==PendingCalibrationD::RED?Color::RED:
+                           menu.pendingCalibrationD==PendingCalibrationD::BLACK?Color::BLACK:
+                           menu.pendingCalibrationD==PendingCalibrationD::DARK_BLUE?Color::DARK_BLUE:
+                           menu.pendingCalibrationD==PendingCalibrationD::PURPLE?Color::PURPLE:
+                           menu.pendingCalibrationD==PendingCalibrationD::WHITE?Color::WHITE:
+                           Color::UNKNOWN;
+
+    sensorD.calibrateColor(selectedColor); //safety
+    
+  }
+  menu.pendingCalibrationD = PendingCalibrationD::NONE;
+  menu.render();
+}
+  }
 
 
 

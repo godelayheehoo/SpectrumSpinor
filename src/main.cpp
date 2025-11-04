@@ -23,6 +23,8 @@ Also will need a menu functionality that just displays the current color seen.
 
 - pretty sure I don't need the SensorCalibration objects
 
+- move defaults into SystemConfig.h (for menu stuff)
+
 
 */
 #include <Arduino.h>
@@ -587,7 +589,7 @@ Serial.println(sizeof(ColorHelper));
   Serial.println("Setup complete");
 
 
-  Serial.print("---------- DEBUG -----------");
+  Serial.println("---------- DEBUG -----------");
   //print out the saved dark offset, gain, and yellow cal values for sensor A
   Serial.print("dark R,G,B: ");
   Serial.print(colorHelperA.rDark);
@@ -604,12 +606,12 @@ Serial.println(sizeof(ColorHelper));
   Serial.println(colorHelperA.bGain);
 
   Serial.print("Yellow RGB:");
-  byte yellowIdx = colorToIndex(COLOR::YELLOW);
-  Serial.print(colorHelperA.colorDatabase[yellowIdx].red);
+  byte yellowIdx = colorToIndex(Color::YELLOW);
+  Serial.print(colorHelperA.calibrationDatabase[yellowIdx].red);
   Serial.print(", ");
-  Serial.print(colorHelperA.colorDatabase[yellowIdx].green);
+  Serial.print(colorHelperA.calibrationDatabase[yellowIdx].green);
   Serial.print(", ");
-  Serial.print(colorHelperA.colorDatabase[yellowIdx].blue);
+  Serial.print(colorHelperA.calibrationDatabase[yellowIdx].blue);
 }
 
 void loop() {
@@ -1005,37 +1007,37 @@ void loop() {
   //check if we're calibrating A
   if(menu.pendingCalibrationA!=PendingCalibrationA::NONE){
     menu.startCalibrationCountdown();
-    ColorHelper sensorA = colorHelpers[0];
+    ColorHelper* sensorA = colorHelpers[0];
     tcaSelect(0);
     if(menu.pendingCalibrationA == PendingCalibrationA::DARK_OFFSET){
       Serial.print("Initial r,g,b dark offsets:");
-      Serial.print(sensorA.rDark);
+      Serial.print(sensorA->rDark);
       Serial.print(", ");
-      Serial.print(sensorA.gDark);
+      Serial.print(sensorA->gDark);
       Serial.print(", ");
-      Serial.println(sensorA.bDark);
-      sensorA.calibrateDark();
+      Serial.println(sensorA->bDark);
+      sensorA->calibrateDark();
       Serial.print("Adjusted r,g,b dark offsets:");
-      Serial.print(sensorA.rDark);
+      Serial.print(sensorA->rDark);
       Serial.print(", ");
-      Serial.print(sensorA.gDark);
+      Serial.print(sensorA->gDark);
       Serial.print(", ");
-      Serial.println(sensorA.bDark);
+      Serial.println(sensorA->bDark);
     }
     else if(menu.pendingCalibrationA==PendingCalibrationA::GAINS){
       Serial.print("Initial r,g,b gains:");
-      Serial.print(sensorA.rGain);
+      Serial.print(sensorA->rGain);
       Serial.print(", ");
-      Serial.print(sensorA.gGain);
+      Serial.print(sensorA->gGain);
       Serial.print(", ");
-      Serial.println(sensorA.bGain);
-      sensorA.calibrateWhiteGains();
+      Serial.println(sensorA->bGain);
+      sensorA->calibrateWhiteGains();
       Serial.print("Adjusted r,g,b gains:");
-      Serial.print(sensorA.rGain);
+      Serial.print(sensorA->rGain);
       Serial.print(", ");
-      Serial.print(sensorA.gGain);
+      Serial.print(sensorA->gGain);
       Serial.print(", ");
-      Serial.println(sensorA.bGain);
+      Serial.println(sensorA->bGain);
     }
     else{
     Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::LIGHT_BLUE?Color::LIGHT_BLUE:
@@ -1050,7 +1052,7 @@ void loop() {
                            menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
-    sensorA.calibrateColor(selectedColor); //safety  
+    colorHelperA.calibrateColor(selectedColor); //safety
     
   }
   menu.pendingCalibrationA = PendingCalibrationA::NONE;
@@ -1059,37 +1061,37 @@ void loop() {
   //check if we're calibrating B
   if(menu.pendingCalibrationB!=PendingCalibrationB::NONE){
     menu.startCalibrationCountdown();
-    ColorHelper sensorB = colorHelpers[1];
+    ColorHelper* sensorB = colorHelpers[1];
     tcaSelect(1);
     if(menu.pendingCalibrationB == PendingCalibrationB::DARK_OFFSET){
       Serial.print("Initial r,g,b dark offsets:");
-      Serial.print(sensorB.rDark);
+      Serial.print(sensorB->rDark);
       Serial.print(", ");
-      Serial.print(sensorB.gDark);
+      Serial.print(sensorB->gDark);
       Serial.print(", ");
-      Serial.println(sensorB.bDark);
-      sensorB.calibrateDark();
+      Serial.println(sensorB->bDark);
+      sensorB->calibrateDark();
       Serial.print("Adjusted r,g,b dark offsets:");
-      Serial.print(sensorB.rDark);
+      Serial.print(sensorB->rDark);
       Serial.print(", ");
-      Serial.print(sensorB.gDark);
+      Serial.print(sensorB->gDark);
       Serial.print(", ");
-      Serial.println(sensorB.bDark);
+      Serial.println(sensorB->bDark);
     }
     else if(menu.pendingCalibrationB==PendingCalibrationB::GAINS){
       Serial.print("Initial r,g,b gains:");
-      Serial.print(sensorB.rGain);
+      Serial.print(sensorB->rGain);
       Serial.print(", ");
-      Serial.print(sensorB.gGain);
+      Serial.print(sensorB->gGain);
       Serial.print(", ");
-      Serial.println(sensorB.bGain);
-      sensorB.calibrateWhiteGains();
+      Serial.println(sensorB->bGain);
+      sensorB->calibrateWhiteGains();
       Serial.print("Adjusted r,g,b gains:");
-      Serial.print(sensorB.rGain);
+      Serial.print(sensorB->rGain);
       Serial.print(", ");
-      Serial.print(sensorB.gGain);
+      Serial.print(sensorB->gGain);
       Serial.print(", ");
-      Serial.println(sensorB.bGain);
+      Serial.println(sensorB->bGain);
     }
     else{
     Color selectedColor = menu.pendingCalibrationB==PendingCalibrationB::LIGHT_BLUE?Color::LIGHT_BLUE:
@@ -1104,7 +1106,7 @@ void loop() {
                            menu.pendingCalibrationB==PendingCalibrationB::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
-    sensorB.calibrateColor(selectedColor); //safety
+    sensorB->calibrateColor(selectedColor); //safety
     
   }
   menu.pendingCalibrationB = PendingCalibrationB::NONE;
@@ -1113,37 +1115,37 @@ void loop() {
   //check if we're calibrating C
   if(menu.pendingCalibrationC!=PendingCalibrationC::NONE){
     menu.startCalibrationCountdown();
-    ColorHelper sensorC = colorHelpers[2];
+    ColorHelper* sensorC = colorHelpers[2];
     tcaSelect(2);
     if(menu.pendingCalibrationC == PendingCalibrationC::DARK_OFFSET){
       Serial.print("Initial r,g,b dark offsets:");
-      Serial.print(sensorC.rDark);
+      Serial.print(sensorC->rDark);
       Serial.print(", ");
-      Serial.print(sensorC.gDark);
+      Serial.print(sensorC->gDark);
       Serial.print(", ");
-      Serial.println(sensorC.bDark);
-      sensorC.calibrateDark();
+      Serial.println(sensorC->bDark);
+      sensorC->calibrateDark();
       Serial.print("Adjusted r,g,b dark offsets:");
-      Serial.print(sensorC.rDark);
+      Serial.print(sensorC->rDark);
       Serial.print(", ");
-      Serial.print(sensorC.gDark);
+      Serial.print(sensorC->gDark);
       Serial.print(", ");
-      Serial.println(sensorC.bDark);
+      Serial.println(sensorC->bDark);
     }
     else if(menu.pendingCalibrationC==PendingCalibrationC::GAINS){
       Serial.print("Initial r,g,b gains:");
-      Serial.print(sensorC.rGain);
+      Serial.print(sensorC->rGain);
       Serial.print(", ");
-      Serial.print(sensorC.gGain);
+      Serial.print(sensorC->gGain);
       Serial.print(", ");
-      Serial.println(sensorC.bGain);
-      sensorC.calibrateWhiteGains();
+      Serial.println(sensorC->bGain);
+      sensorC->calibrateWhiteGains();
       Serial.print("Adjusted r,g,b gains:");
-      Serial.print(sensorC.rGain);
+      Serial.print(sensorC->rGain);
       Serial.print(", ");
-      Serial.print(sensorC.gGain);
+      Serial.print(sensorC->gGain);
       Serial.print(", ");
-      Serial.println(sensorC.bGain);
+      Serial.println(sensorC->bGain);
     }
     else{
     Color selectedColor = menu.pendingCalibrationC==PendingCalibrationC::LIGHT_BLUE?Color::LIGHT_BLUE:
@@ -1158,7 +1160,7 @@ void loop() {
                            menu.pendingCalibrationC==PendingCalibrationC::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
-    sensorC.calibrateColor(selectedColor); //safety
+    sensorC->calibrateColor(selectedColor); //safety
     
   }
   menu.pendingCalibrationC = PendingCalibrationC::NONE;
@@ -1168,37 +1170,37 @@ void loop() {
   //check if we're calibrating D
   if(menu.pendingCalibrationD!=PendingCalibrationD::NONE){
     menu.startCalibrationCountdown();
-    ColorHelper sensorD = colorHelpers[3];
+    ColorHelper* sensorD = colorHelpers[3];
     tcaSelect(3);
     if(menu.pendingCalibrationD == PendingCalibrationD::DARK_OFFSET){
       Serial.print("Initial r,g,b dark offsets:");
-      Serial.print(sensorD.rDark);
+      Serial.print(sensorD->rDark);
       Serial.print(", ");
-      Serial.print(sensorD.gDark);
+      Serial.print(sensorD->gDark);
       Serial.print(", ");
-      Serial.println(sensorD.bDark);
-      sensorD.calibrateDark();
+      Serial.println(sensorD->bDark);
+      sensorD->calibrateDark();
       Serial.print("Adjusted r,g,b dark offsets:");
-      Serial.print(sensorD.rDark);
+      Serial.print(sensorD->rDark);
       Serial.print(", ");
-      Serial.print(sensorD.gDark);
+      Serial.print(sensorD->gDark);
       Serial.print(", ");
-      Serial.println(sensorD.bDark);
+      Serial.println(sensorD->bDark);
     }
     else if(menu.pendingCalibrationD==PendingCalibrationD::GAINS){
       Serial.print("Initial r,g,b gains:");
-      Serial.print(sensorD.rGain);
+      Serial.print(sensorD->rGain);
       Serial.print(", ");
-      Serial.print(sensorD.gGain);
+      Serial.print(sensorD->gGain);
       Serial.print(", ");
-      Serial.println(sensorD.bGain);
-      sensorD.calibrateWhiteGains();
+      Serial.println(sensorD->bGain);
+      sensorD->calibrateWhiteGains();
       Serial.print("Adjusted r,g,b gains:");
-      Serial.print(sensorD.rGain);
+      Serial.print(sensorD->rGain);
       Serial.print(", ");
-      Serial.print(sensorD.gGain);
+      Serial.print(sensorD->gGain);
       Serial.print(", ");
-      Serial.println(sensorD.bGain);
+      Serial.println(sensorD->bGain);
     }
     else{
     Color selectedColor = menu.pendingCalibrationD==PendingCalibrationD::LIGHT_BLUE?Color::LIGHT_BLUE:
@@ -1213,7 +1215,7 @@ void loop() {
                            menu.pendingCalibrationD==PendingCalibrationD::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
-    sensorD.calibrateColor(selectedColor); //safety
+    sensorD->calibrateColor(selectedColor); //safety
     
   }
   menu.pendingCalibrationD = PendingCalibrationD::NONE;

@@ -585,6 +585,31 @@ Serial.println(sizeof(ColorHelper));
   menu.render();
   
   Serial.println("Setup complete");
+
+
+  Serial.print("---------- DEBUG -----------");
+  //print out the saved dark offset, gain, and yellow cal values for sensor A
+  Serial.print("dark R,G,B: ");
+  Serial.print(colorHelperA.rDark);
+  Serial.print(", ");
+  Serial.print(colorHelperA.gDark);
+  Serial.print(", ");
+  Serial.println(colorHelperA.bDark);
+  
+  Serial.print("gain RGB: ");
+  Serial.print(colorHelperA.rGain);
+  Serial.print(", ");
+  Serial.print(colorHelperA.gGain);
+  Serial.print(", ");
+  Serial.println(colorHelperA.bGain);
+
+  Serial.print("Yellow RGB:");
+  byte yellowIdx = colorToIndex(COLOR::YELLOW);
+  Serial.print(colorHelperA.colorDatabase[yellowIdx].red);
+  Serial.print(", ");
+  Serial.print(colorHelperA.colorDatabase[yellowIdx].green);
+  Serial.print(", ");
+  Serial.print(colorHelperA.colorDatabase[yellowIdx].blue);
 }
 
 void loop() {

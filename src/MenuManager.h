@@ -62,7 +62,8 @@ enum class PendingCalibrationA{
     BLACK,
     DARK_BLUE,
     PURPLE,
-    WHITE
+    WHITE,
+    RESET_DEFAULTS
 };
 enum class PendingCalibrationB{
      NONE,
@@ -77,7 +78,8 @@ enum class PendingCalibrationB{
     BLACK,
     DARK_BLUE,
     PURPLE,
-    WHITE
+    WHITE,
+    RESET_DEFAULTS
 };
 enum class PendingCalibrationC{
       NONE,
@@ -92,7 +94,8 @@ enum class PendingCalibrationC{
     BLACK,
     DARK_BLUE,
     PURPLE,
-    WHITE
+    WHITE,
+    RESET_DEFAULTS
 };
 enum class PendingCalibrationD{
     NONE,
@@ -107,7 +110,8 @@ enum class PendingCalibrationD{
     BLACK,
     DARK_BLUE,
     PURPLE,
-    WHITE
+    WHITE,
+    RESET_DEFAULTS
 };
 
 // Function pointer type for MIDI ALL NOTES OFF callback
@@ -264,7 +268,7 @@ public:
     int calibrationMenuSelectedIdx = 0; //there will only be four so this is fine.
 
     static const int CALIBRATION_SUBMENU_VISIBLE_ITEMS = 5;
-    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 12;
+    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 13;
     int calibrationMenuASelectedIdx = 0;
     int calibrationMenuAScrollIdx = 0;
     int calibrationMenuBSelectedIdx = 0;

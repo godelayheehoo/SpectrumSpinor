@@ -243,6 +243,8 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
             sumB += b;
         }
         delay(100);
+        Serial.print("sum R:");
+        Serial.println(sumR);
     }
     // Compute averages
     *avgR = sumR / NUM_CALIBRATION_STEPS;
@@ -376,7 +378,15 @@ void ColorHelper::calibrateWhiteGains(){
 
 void ColorHelper::calibrateColor(Color color){
 
-  Serial.println("WARNING: NEEDS TO BE UPDATED");
+    byte colorIndex = colorToIndex(color);
+  
+    Serial.print("Initial vals: r: ");
+    Serial.print(this->calibrationDatabase[colorIndex].red);
+    Serial.print(", g: ");
+    Serial.print(this->calibrationDatabase[colorIndex].green);
+    Serial.print(", b: ");
+    Serial.println(this->calibrationDatabase[colorIndex].blue);
+    Serial.println("Starting color calibration...");
   uint16_t avgR, avgG, avgB;
   getSamplesAverage(&avgR, &avgG, &avgB);
 
@@ -385,9 +395,16 @@ void ColorHelper::calibrateColor(Color color){
   Serial.print("Average G: "); Serial.println(avgG);
   Serial.print("Average B: "); Serial.println(avgB);
 
-  byte colorIndex = colorToIndex(color);
+  
   ColorCalibration newCal{avgR, avgG, avgB};
   this->calibrationDatabase[colorIndex] = newCal;
+
+    Serial.print("new vals: r: ");
+    Serial.print(this->calibrationDatabase[colorIndex].red);
+    Serial.print(", g: ");
+    Serial.print(this->calibrationDatabase[colorIndex].green);
+    Serial.print(", b: ");
+    Serial.println(this->calibrationDatabase[colorIndex].blue);
 
 //save result
 

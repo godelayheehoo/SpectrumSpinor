@@ -828,7 +828,7 @@ void MenuManager::octaveMenuBackButton(){
 void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
     display.clearDisplay();
     display.setTextSize(1);
-    const char* menus[12] = {"Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White"};
+    const char* menus[13] = {"Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White", "Reset Defaults"};
     int yStart = 10;
     display.setCursor(10,yStart);
     display.setTextColor(OLED_WHITE);

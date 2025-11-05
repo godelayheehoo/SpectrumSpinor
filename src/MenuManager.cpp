@@ -865,8 +865,8 @@ void MenuManager::octaveMenuBackButton(){
 void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
     display.clearDisplay();
     display.setTextSize(1);
-    const char* menus[13] = {"No-Op""Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White", "Reset Defaults"};
-    int yStart = 10;
+    const char* menus[13] = {"No-Op","Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White", "Reset Defaults"};
+    int yStart = 5;
     display.setCursor(10,yStart);
     display.setTextColor(OLED_WHITE);
 
@@ -880,7 +880,7 @@ void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
             display.setTextColor(OLED_WHITE, OLED_BLACK);
         }
         display.print(menus[itemIdx]);
-    y+=10;
+    y+=9;
     }
     display.display();    
 }

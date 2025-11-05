@@ -1,12 +1,5 @@
 /*
 TODO:
-- when we have multiple rings and sensors, we'll replace each number in the menu grid with the assigned letter.
-The current working letter will be in the top left color, aux button will cycle through them.
-
-- Way down the road, we need to work in a way to auto-calibrate, or at least speed up the process.
-Maybe a menu called "calibrate colors" and then have calibrate orange, calibrate blue, etc.
-Also will need a menu functionality that just displays the current color seen.
-
 - Improve encoder turns, make it match detents. Naive dividing by two does not work.. 
 
 - Forcing sensor update for troubleshoot menu 2 on startup and switch doesn't work i think.
@@ -27,6 +20,17 @@ Also will need a menu functionality that just displays the current color seen.
  - calibrated black basically reads as calibrated white, so maybe remove black as a color (give its slot to purple)
 
  - think about where to place white in the distance checking, since it's first match-counts
+
+ - black seems to be read on either side of any other color oftentimes.
+
+ - red often gets read as pink, either totally or momentarily
+
+ - maybe try tweaking color distance?
+
+ - maybe gate the color change speed, so that we need to have seen a color for <short> milliseconds before we change,
+ - or don't change if we just changed within the last <short> milliseconds for that sensor (then update as normal, so that white still gets captured).
+ - maybe both?
+ - you should first try seeing how many times the wrong color gets red before the right one.
 
 */
 #include <Arduino.h>

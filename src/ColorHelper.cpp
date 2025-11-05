@@ -14,20 +14,21 @@ ColorCalibration greenDefaultCal = ColorCalibration{9516, 32877, 23031};
 ColorCalibration redDefaultCal = ColorCalibration{45099, 8233, 13700};
 ColorCalibration lightBlueDefaultCal = ColorCalibration{11127, 18437, 46838};
 ColorCalibration blackDefaultCal = ColorCalibration{8374, 22792, 22171};
-ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199}; //this is the background, not the white disk
 ColorCalibration purpleDefaultCal = ColorCalibration{21200, 21179, 22199}; // need to update this
+ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199}; //this is the background, not the white disk
+
 
 ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS] = {
-    pinkDefaultCal,
+    lightBlueDefaultCal,
     orangeDefaultCal,
-    darkBlueDefaultCal,
+    pinkDefaultCal,
     yellowDefaultCal,
     greenDefaultCal,
     redDefaultCal,
     blackDefaultCal,
-    lightBlueDefaultCal,
+    darkBlueDefaultCal,
+    purpleDefaultCal,
     whiteDefaultCal,
-    purpleDefaultCal
 };
 
 //todo: maybe do sample counts in the menu as well.
@@ -374,7 +375,11 @@ void ColorHelper::calibrateWhiteGains(){
 
 void ColorHelper::calibrateColor(Color color){
 
+    Serial.print("Calibrating color ");
+    Serial.println(colorToString(color));
     byte colorIndex = colorToIndex(color);
+    Serial.print("Color index: ");
+    Serial.println(colorIndex);
   
     Serial.print("Initial vals: r: ");
     Serial.print(this->calibrationDatabase[colorIndex].red);
@@ -415,7 +420,7 @@ void ColorHelper::calibrateColor(Color color){
 // #define SENSOR_A_DARK_BLUE_CAL_ADDR 182
 // #define SENSOR_A_PURPLE_CAL_ADDR 194
 #define SENSOR_A_WHITE_CAL_ADDR 206
-uint lightBlueAddr, orangeAddr, pinkAddr, yellowAddr, greenAddr, redAddr, blackAddr, darkBlueAddr, purpleAddr;
+uint lightBlueAddr, orangeAddr, pinkAddr, yellowAddr, greenAddr, redAddr, blackAddr, darkBlueAddr, purpleAddr, whiteAddr;
 switch(SensorNum){
     case 0:
         lightBlueAddr = SENSOR_A_LIGHT_BLUE_CAL_ADDR;
@@ -427,6 +432,7 @@ switch(SensorNum){
         blackAddr = SENSOR_A_BLACK_CAL_ADDR;
         darkBlueAddr = SENSOR_A_DARK_BLUE_CAL_ADDR;
         purpleAddr = SENSOR_A_PURPLE_CAL_ADDR;
+        whiteAddr = SENSOR_A_WHITE_CAL_ADDR;
         break;
     case 1:
         lightBlueAddr = SENSOR_B_LIGHT_BLUE_CAL_ADDR;
@@ -438,6 +444,7 @@ switch(SensorNum){
         blackAddr = SENSOR_B_BLACK_CAL_ADDR;
         darkBlueAddr = SENSOR_B_DARK_BLUE_CAL_ADDR;
         purpleAddr = SENSOR_B_PURPLE_CAL_ADDR;
+        whiteAddr = SENSOR_B_WHITE_CAL_ADDR;
         break;
     case 2:
         lightBlueAddr = SENSOR_C_LIGHT_BLUE_CAL_ADDR;
@@ -449,6 +456,7 @@ switch(SensorNum){
         blackAddr = SENSOR_C_BLACK_CAL_ADDR;
         darkBlueAddr = SENSOR_C_DARK_BLUE_CAL_ADDR;
         purpleAddr = SENSOR_C_PURPLE_CAL_ADDR;
+        whiteAddr = SENSOR_C_WHITE_CAL_ADDR;
         break;
     case 3:
         lightBlueAddr = SENSOR_D_LIGHT_BLUE_CAL_ADDR;
@@ -460,10 +468,13 @@ switch(SensorNum){
         blackAddr = SENSOR_D_BLACK_CAL_ADDR;
         darkBlueAddr = SENSOR_D_DARK_BLUE_CAL_ADDR;
         purpleAddr = SENSOR_D_PURPLE_CAL_ADDR;
+        whiteAddr = SENSOR_D_WHITE_CAL_ADDR;
         break;
     default:
         Serial.println("ERROR: Invalid sensor number for color calibration");
         return;
+    Serial.print("Saving for sensor #");
+    Serial.println(SensorNum);
 }
     switch(color){
         case Color::LIGHT_BLUE:
@@ -492,10 +503,15 @@ switch(SensorNum){
             break;
         case Color::PURPLE:
             EEPROM.put(purpleAddr, newCal);
+            break;
+        case Color::WHITE:
+            EEPROM.put(whiteAddr, newCal);
             break; 
         default:
             Serial.println("ERROR: Invalid color for calibration");
             return;
+    Serial.print("Color: ");
+    Serial.println(colorToString(color));
     }
     EEPROM.commit();
 }

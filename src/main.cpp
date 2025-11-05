@@ -715,7 +715,7 @@ void loop() {
   
   // Handle RGB update request for all sensors when switching to troubleshoot mode 1
   if (menu.requestRGBUpdate && menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1) {
-    Serial.println("Force updating RGB for all sensors...");
+    // Serial.println("Force updating RGB for all sensors...");
     
     // Update RGB for all four sensors
     for (int sensorIdx = 0; sensorIdx < 4; sensorIdx++) {
@@ -727,7 +727,14 @@ void loop() {
       
       // Update RGB values in menu
       switch (sensorIdx) {
-        case 0: menu.updateCurrentRGBA(r, g, b); break;
+        case 0: menu.updateCurrentRGBA(r, g, b); 
+          Serial.print("A[tbsht]: ");
+          Serial.print(r);
+          Serial.print(", ");
+          Serial.print(g);
+          Serial.print(", ");
+          Serial.println(b);
+          break;
         case 1: menu.updateCurrentRGBB(r, g, b); break;
         case 2: menu.updateCurrentRGBC(r, g, b); break;
         case 3: menu.updateCurrentRGBD(r, g, b); break;
@@ -735,7 +742,7 @@ void loop() {
     }
     
     // Clear the flag and restore current sensor
-    menu.requestRGBUpdate = false;
+    // menu.requestRGBUpdate = false;
     tcaSelect(currentSensorIndex);
   }
 
@@ -858,7 +865,7 @@ void loop() {
 
         // Update RGB values if in troubleshoot mode 1 (RGB display) and color changed
         if (menu.currentMenu == TROUBLESHOOT_MENU && menu.troubleshootMode == 1 && 
-            detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
+            detectedColor != Color::UNKNOWN && currentColorPtr != nullptr) {
           float r, g, b;
           activeColorSensor->getCalibratedData(&r, &g, &b);
           
@@ -869,14 +876,16 @@ void loop() {
             case 1: menu.updateCurrentRGBB(r, g, b); break;
             case 2: menu.updateCurrentRGBC(r, g, b); break;
             case 3: menu.updateCurrentRGBD(r, g, b); break;
+            Serial.print("updating ");
+            Serial.println(sensorName);
           }
         }
         
         
         // Process color change if detected and valid
         if (detectedColor != Color::UNKNOWN && detectedColor != *currentColorPtr && currentColorPtr != nullptr) {
-         Serial.print("New color:");
-          Serial.println(colorToString(detectedColor));
+        //  Serial.print("New color:");
+        //   Serial.println(colorToString(detectedColor));
           switch(currentSensorIndex){
             case 0:
               oldMidiNote = lastNoteA;
@@ -894,15 +903,15 @@ void loop() {
          
           // Send note off for previous color
          MIDI.sendNoteOff(oldMidiNote, 0, activeMIDIChannel);
-         Serial.print("Sending note off to note ");
-         Serial.print(oldMidiNote);
-         Serial.print("on channel ");
-         Serial.println(activeMIDIChannel);
+        //  Serial.print("Sending note off to note ");
+        //  Serial.print(oldMidiNote);
+        //  Serial.print("on channel ");
+        //  Serial.println(activeMIDIChannel);
           
           // Send note on for new color
           int newMidiNote = menu.scaleManager.colorToMIDINote(detectedColor);
-          Serial.print("new midi note (pre-octave):");
-          Serial.println(newMidiNote);
+          // Serial.print("new midi note (pre-octave):");
+          // Serial.println(newMidiNote);
           // Adjust based on octave using signed arithmetic to allow negative offsets
           int offset;
           switch (currentSensorIndex){
@@ -944,23 +953,23 @@ void loop() {
           switch(currentSensorIndex){
             case 0:
               lastNoteA = newMidiNote;
-              Serial.print("Set last note A to ");
-              Serial.println(lastNoteA);
+              // Serial.print("Set last note A to ");
+              // Serial.println(lastNoteA);
               break;
             case 1:
               lastNoteB = newMidiNote;
-              Serial.print("Set last note B to ");
-              Serial.println(lastNoteB);
+              // Serial.print("Set last note B to ");
+              // Serial.println(lastNoteB);
               break;  
             case 2:
               lastNoteC = newMidiNote;
-              Serial.print("Set last note C to ");
-              Serial.println(lastNoteC);
+              // Serial.print("Set last note C to ");
+              // Serial.println(lastNoteC);
               break;
             case 3:
               lastNoteD = newMidiNote;
-              Serial.print("Set last note D to ");
-              Serial.println(lastNoteD);
+              // Serial.print("Set last note D to ");
+              // Serial.println(lastNoteD);
               break;
           }
           

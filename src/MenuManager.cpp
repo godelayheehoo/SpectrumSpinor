@@ -51,21 +51,7 @@ void MenuManager::updateCurrentMIDINoteD(uint8_t midiNote) {
     currentMIDINoteD = midiNote;
 }
 
-void MenuManager::updateCurrentRGBA(float r, float g, float b) {
-    currentRGBA[0] = r; currentRGBA[1] = g; currentRGBA[2] = b;
-}
 
-void MenuManager::updateCurrentRGBB(float r, float g, float b) {
-    currentRGBB[0] = r; currentRGBB[1] = g; currentRGBB[2] = b;
-}
-
-void MenuManager::updateCurrentRGBC(float r, float g, float b) {
-    currentRGBC[0] = r; currentRGBC[1] = g; currentRGBC[2] = b;
-}
-
-void MenuManager::updateCurrentRGBD(float r, float g, float b) {
-    currentRGBD[0] = r; currentRGBD[1] = g; currentRGBD[2] = b;
-}
 
 
 // Text centering helper functions
@@ -982,4 +968,25 @@ void MenuManager::saveOctaves(){
     }
     EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);
     EEPROM.commit();
+}
+
+
+void MenuManager::updateCurrentRGBA(float r, float g, float b) {
+    currentRGBA[0] = r; currentRGBA[1] = g; currentRGBA[2] = b;
+    render();
+}
+
+void MenuManager::updateCurrentRGBB(float r, float g, float b) {
+    currentRGBB[0] = r; currentRGBB[1] = g; currentRGBB[2] = b;
+    render();
+}
+
+void MenuManager::updateCurrentRGBC(float r, float g, float b) {
+    currentRGBC[0] = r; currentRGBC[1] = g; currentRGBC[2] = b;
+    render();
+}
+
+void MenuManager::updateCurrentRGBD(float r, float g, float b) {
+    currentRGBD[0] = r; currentRGBD[1] = g; currentRGBD[2] = b;
+    render();
 }

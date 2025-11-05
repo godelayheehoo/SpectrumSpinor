@@ -229,6 +229,7 @@ void ColorHelper::getSamplesAverage(uint16_t* avgR, uint16_t* avgG, uint16_t* av
         Serial.print("Sample # ");
         Serial.println(i);
         float r, g, b;
+        menu->calibrationIncrementProgressBar(i);
         getCalibratedData(&r, &g, &b);
 
         // I think maybe I shouldn't be normalizing here-- I already normalize when I get calibrated data.
@@ -383,6 +384,7 @@ void ColorHelper::calibrateColor(Color color){
     Serial.println(this->calibrationDatabase[colorIndex].blue);
     Serial.println("Starting color calibration...");
   uint16_t avgR, avgG, avgB;
+  menu->calibrationStartProgressBar();
   getSamplesAverage(&avgR, &avgG, &avgB);
 
   Serial.println("Calibration complete!");

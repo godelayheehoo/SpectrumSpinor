@@ -439,7 +439,7 @@ void MenuManager::startCalibrationCountdown(){
         display.clearDisplay();
         centerTextInContent(String(i), 5);
         display.display();
-        delay(500);
+        delay(50);
     }
 }
 
@@ -865,7 +865,7 @@ void MenuManager::octaveMenuBackButton(){
 void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
     display.clearDisplay();
     display.setTextSize(1);
-    const char* menus[13] = {"No-Op","Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White", "Reset Defaults"};
+    const char* menus[CALIBRATION_SUBMENU_TOTAL_ITEMS] = {"No-Op","Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White", "Reset Defaults"};
     int yStart = 5;
     display.setCursor(10,yStart);
     display.setTextColor(OLED_WHITE);

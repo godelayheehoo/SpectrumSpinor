@@ -24,9 +24,9 @@ Also will need a menu functionality that just displays the current color seen.
 - pretty sure I don't need the SensorCalibration objects
 
 - move defaults into SystemConfig.h (for menu stuff)
+ - calibrated black basically reads as calibrated white, so maybe remove black as a color (give its slot to purple)
 
-- make the first calibration option a noop because of how often I double click by accident.
-
+ - think about where to place white in the distance checking, since it's first match-counts
 
 */
 #include <Arduino.h>
@@ -727,14 +727,7 @@ void loop() {
       
       // Update RGB values in menu
       switch (sensorIdx) {
-        case 0: menu.updateCurrentRGBA(r, g, b); 
-          Serial.print("A[tbsht]: ");
-          Serial.print(r);
-          Serial.print(", ");
-          Serial.print(g);
-          Serial.print(", ");
-          Serial.println(b);
-          break;
+        case 0: menu.updateCurrentRGBA(r, g, b); break;
         case 1: menu.updateCurrentRGBB(r, g, b); break;
         case 2: menu.updateCurrentRGBC(r, g, b); break;
         case 3: menu.updateCurrentRGBD(r, g, b); break;

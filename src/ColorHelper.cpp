@@ -6,17 +6,28 @@
 #include "MenuManager.h"
 
 // Default color calibration definitions (define once in this translation unit)
-ColorCalibration pinkDefaultCal = ColorCalibration{26588, 15769, 20923};
-ColorCalibration orangeDefaultCal = ColorCalibration{33937, 14220, 10201};
-ColorCalibration darkBlueDefaultCal = ColorCalibration{6808, 17916, 56515};
-ColorCalibration yellowDefaultCal = ColorCalibration{27469, 20655, 9679};
-ColorCalibration greenDefaultCal = ColorCalibration{9516, 32877, 23031};
-ColorCalibration redDefaultCal = ColorCalibration{45099, 8233, 13700};
-ColorCalibration lightBlueDefaultCal = ColorCalibration{11127, 18437, 46838};
-ColorCalibration blackDefaultCal = ColorCalibration{8374, 22792, 22171};
-ColorCalibration purpleDefaultCal = ColorCalibration{21840, 17000, 32700}; // Eyeballed from live readings from sensor A
-ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199}; //this is the background, not the white magnetic disk
+// old database
+// ColorCalibration pinkDefaultCal = ColorCalibration{26588, 15769, 20923};
+// ColorCalibration orangeDefaultCal = ColorCalibration{33937, 14220, 10201};
+// ColorCalibration darkBlueDefaultCal = ColorCalibration{6808, 17916, 56515};
+// ColorCalibration yellowDefaultCal = ColorCalibration{27469, 20655, 9679};
+// ColorCalibration greenDefaultCal = ColorCalibration{9516, 32877, 23031};
+// ColorCalibration redDefaultCal = ColorCalibration{45099, 8233, 13700};
+// ColorCalibration lightBlueDefaultCal = ColorCalibration{11127, 18437, 46838};
+// ColorCalibration blackDefaultCal = ColorCalibration{8374, 22792, 22171};
+// ColorCalibration purpleDefaultCal = ColorCalibration{21840, 17000, 32700}; // Eyeballed from live readings from sensor A
+// ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199}; //this is the background, not the white magnetic disk
 
+ColorCalibration lightBlueDefaultCal = ColorCalibration{15272, 20981, 34636};
+ColorCalibration orangeDefaultCal = ColorCalibration{30074,15874,16549};
+ColorCalibration pinkDefaultCal = ColorCalibration{25312,16914,23405};
+ColorCalibration yellowDefaultCal = ColorCalibration{24152,20656,17206};
+ColorCalibration greenDefaultCal = ColorCalibration{15636,24826,25987};
+ColorCalibration redDefaultCal = ColorCalibration{27164,16750,21408};
+ColorCalibration blackDefaultCal = ColorCalibration{18363,20993,26637};
+ColorCalibration darkBlueDefaultCal = ColorCalibration{16044,20189,33758};
+ColorCalibration purpleDefaultCal = ColorCalibration{19642,19137,30248};
+ColorCalibration whiteDefaultCal = ColorCalibration{20164,20587,24986};
 
 ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS] = {
     lightBlueDefaultCal,
@@ -401,11 +412,11 @@ void ColorHelper::calibrateColor(Color color){
   ColorCalibration newCal{avgR, avgG, avgB};
   this->calibrationDatabase[colorIndex] = newCal;
 
-    Serial.print("new vals: r: ");
+    Serial.print("new vals r,g,b: ");
     Serial.print(this->calibrationDatabase[colorIndex].red);
-    Serial.print(", g: ");
+    Serial.print(",");
     Serial.print(this->calibrationDatabase[colorIndex].green);
-    Serial.print(", b: ");
+    Serial.print(",");
     Serial.println(this->calibrationDatabase[colorIndex].blue);
 
 //save result

@@ -14,8 +14,8 @@ ColorCalibration greenDefaultCal = ColorCalibration{9516, 32877, 23031};
 ColorCalibration redDefaultCal = ColorCalibration{45099, 8233, 13700};
 ColorCalibration lightBlueDefaultCal = ColorCalibration{11127, 18437, 46838};
 ColorCalibration blackDefaultCal = ColorCalibration{8374, 22792, 22171};
-ColorCalibration purpleDefaultCal = ColorCalibration{21200, 21179, 22199}; // need to update this
-ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199}; //this is the background, not the white disk
+ColorCalibration purpleDefaultCal = ColorCalibration{21840, 17000, 32700}; // Eyeballed from live readings from sensor A
+ColorCalibration whiteDefaultCal = ColorCalibration{21200, 21179, 22199}; //this is the background, not the white magnetic disk
 
 
 ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS] = {

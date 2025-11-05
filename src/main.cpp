@@ -641,7 +641,7 @@ void loop() {
   //check encoder and pass in turns if turns!=0
   int newEncoderPos =  enc.getCount();
   int encoderTurns = newEncoderPos - lastEncoderPos;
-  if(encoderTurns!=0){Serial.println(encoderTurns);};
+  // if(encoderTurns!=0){Serial.println(encoderTurns);};
   if (encoderTurns != 0) {
     lastEncoderPos = newEncoderPos;
     menu.handleEncoder(encoderTurns); 

@@ -271,8 +271,9 @@ Serial.println(sizeof(ColorHelper));
   //encoder startup
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
   //putting these backwards to get the correct direction
-  enc.attachHalfQuad(ENCODER_B, ENCODER_A);
+  enc.attachSingleEdge(ENCODER_B, ENCODER_A);
   enc.setCount(0);
+
   
   // Initialize encoder pins
   pinMode(ENCODER_A, INPUT_PULLUP);
@@ -640,6 +641,7 @@ void loop() {
   //check encoder and pass in turns if turns!=0
   int newEncoderPos =  enc.getCount();
   int encoderTurns = newEncoderPos - lastEncoderPos;
+  if(encoderTurns!=0){Serial.println(encoderTurns);};
   if (encoderTurns != 0) {
     lastEncoderPos = newEncoderPos;
     menu.handleEncoder(encoderTurns); 

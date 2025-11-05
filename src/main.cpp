@@ -27,8 +27,6 @@ Also will need a menu functionality that just displays the current color seen.
 
 - make the first calibration option a noop because of how often I double click by accident.
 
-- saving on A->BCD
-
 
 */
 #include <Arduino.h>

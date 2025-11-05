@@ -201,8 +201,8 @@ public:
     
     // Active MIDI Grid Sensor (A, B, C, or D) - which sensor we're configuring
     ActiveSensor activeMIDIGridSensor = SENSOR_A; // Default to sensor A
-    
-    // Calibration menu selection (0-3 = A, B, C, D, 4=A->BCD)
+
+    // Calibration menu selection (0 =NONE, 1-4 = A, B, C, D, 5=A->BCD)
     int calibrationSelectedIdx = 0; // Default to sensor A
     
     // Active MIDI channels (1-16) for each sensor
@@ -269,7 +269,7 @@ public:
     // int calibrationMenuSelectedIdx = 0; //there will only be four so this is fine.
 
     static const int CALIBRATION_SUBMENU_VISIBLE_ITEMS = 5;
-    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 13;
+    static const int CALIBRATION_SUBMENU_TOTAL_ITEMS = 14;
     int calibrationMenuASelectedIdx = 0;
     int calibrationMenuAScrollIdx = 0;
     int calibrationMenuBSelectedIdx = 0;

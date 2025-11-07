@@ -26,3 +26,6 @@
 
 #define NUM_CALIBRATION_STEPS 20
 #define NUM_COLORS 10
+
+// I2C addresses
+#define TCA_ADDR 0x70

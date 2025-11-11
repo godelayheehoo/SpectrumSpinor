@@ -581,6 +581,16 @@ void MenuManager::calibrationMenuAEncoder(int turns){
             calibrationMenuAScrollIdx = calibrationMenuASelectedIdx - CALIBRATION_SUBMENU_VISIBLE_ITEMS + 1;
         }
 }
+
+/*      EEPROM.put(SENSOR_B_RED_CAL_ADDR, colorHelperB.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_B_GREEN_CAL_ADDR, colorHelperB.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_B_PURPLE_CAL_ADDR, colorHelperB.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_B_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_B_ORANGE_CAL_ADDR, colorHelperB.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_B_YELLOW_CAL_ADDR, colorHelperB.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_B_SILVER_CAL_ADDR, colorHelperB.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_B_WHITE_CAL_ADDR, colorHelperB.calibrationDatabase[7]);
+*/
 void MenuManager::calibrationMenuAEncoderButton(){
     switch(calibrationMenuASelectedIdx){
         case 0:
@@ -593,33 +603,27 @@ void MenuManager::calibrationMenuAEncoderButton(){
             pendingCalibrationA = PendingCalibrationA::GAINS;
             break;
         case 3:
-            pendingCalibrationA = PendingCalibrationA::LIGHT_BLUE;
-            break;
-        case 4:
-            pendingCalibrationA = PendingCalibrationA::ORANGE;
-            break;
-        case 5:
-            pendingCalibrationA = PendingCalibrationA::PINK;
-            break;  
-        case 6:
-            pendingCalibrationA = PendingCalibrationA::YELLOW;
-            break;
-        case 7:
-            pendingCalibrationA = PendingCalibrationA::GREEN;
-            break;
-        case 8:
             pendingCalibrationA = PendingCalibrationA::RED;
             break;
-        case 9:
-            pendingCalibrationA = PendingCalibrationA::BLACK;
+        case 4:
+            pendingCalibrationA = PendingCalibrationA::GREEN;
             break;
-        case 10:
-            pendingCalibrationA = PendingCalibrationA::DARK_BLUE;
-            break;
-        case 11:
+        case 5:
             pendingCalibrationA = PendingCalibrationA::PURPLE;
             break;
-        case 12:
+        case 6:
+            pendingCalibrationA = PendingCalibrationA::BLUE;
+            break;
+        case 7:
+            pendingCalibrationA = PendingCalibrationA::ORANGE;
+            break;
+        case 8:
+            pendingCalibrationA = PendingCalibrationA::YELLOW;
+            break;
+        case 9:
+            pendingCalibrationA = PendingCalibrationA::SILVER;
+            break;
+        case 10:
             pendingCalibrationA = PendingCalibrationA::WHITE;
             break;
         default:
@@ -644,7 +648,7 @@ void MenuManager::calibrationMenuBEncoder(int turns){
 }
 void MenuManager::calibrationMenuBEncoderButton(){
     switch(calibrationMenuBSelectedIdx){
-        case 0:
+          case 0:
             pendingCalibrationB = PendingCalibrationB::NONE;
             break;
         case 1:
@@ -654,33 +658,27 @@ void MenuManager::calibrationMenuBEncoderButton(){
             pendingCalibrationB = PendingCalibrationB::GAINS;
             break;
         case 3:
-            pendingCalibrationB = PendingCalibrationB::LIGHT_BLUE;
-            break;
-        case 4:
-            pendingCalibrationB = PendingCalibrationB::ORANGE;
-            break;
-        case 5:
-            pendingCalibrationB = PendingCalibrationB::PINK;
-            break;  
-        case 6:
-            pendingCalibrationB = PendingCalibrationB::YELLOW;
-            break;
-        case 7:
-            pendingCalibrationB = PendingCalibrationB::GREEN;
-            break;
-        case 8:
             pendingCalibrationB = PendingCalibrationB::RED;
             break;
-        case 9:
-            pendingCalibrationB = PendingCalibrationB::BLACK;
+        case 4:
+            pendingCalibrationB = PendingCalibrationB::GREEN;
             break;
-        case 10:
-            pendingCalibrationB = PendingCalibrationB::DARK_BLUE;
-            break;
-        case 11:
+        case 5:
             pendingCalibrationB = PendingCalibrationB::PURPLE;
             break;
-        case 12:
+        case 6:
+            pendingCalibrationB = PendingCalibrationB::BLUE;
+            break;
+        case 7:
+            pendingCalibrationB = PendingCalibrationB::ORANGE;
+            break;
+        case 8:
+            pendingCalibrationB = PendingCalibrationB::YELLOW;
+            break;
+        case 9:
+            pendingCalibrationB = PendingCalibrationB::SILVER;
+            break;
+        case 10:
             pendingCalibrationB = PendingCalibrationB::WHITE;
             break;
         default:
@@ -703,7 +701,7 @@ void MenuManager::calibrationMenuCEncoder(int turns){
 }
 void MenuManager::calibrationMenuCEncoderButton(){
     switch(calibrationMenuCSelectedIdx){
-        case 0:
+          case 0:
             pendingCalibrationC = PendingCalibrationC::NONE;
             break;
         case 1:
@@ -713,33 +711,27 @@ void MenuManager::calibrationMenuCEncoderButton(){
             pendingCalibrationC = PendingCalibrationC::GAINS;
             break;
         case 3:
-            pendingCalibrationC = PendingCalibrationC::LIGHT_BLUE;
-            break;
-        case 4:
-            pendingCalibrationC = PendingCalibrationC::ORANGE;
-            break;
-        case 5:
-            pendingCalibrationC = PendingCalibrationC::PINK;
-            break;  
-        case 6:
-            pendingCalibrationC = PendingCalibrationC::YELLOW;
-            break;
-        case 7:
-            pendingCalibrationC = PendingCalibrationC::GREEN;
-            break;
-        case 8:
             pendingCalibrationC = PendingCalibrationC::RED;
             break;
-        case 9:
-            pendingCalibrationC = PendingCalibrationC::BLACK;
+        case 4:
+            pendingCalibrationC = PendingCalibrationC::GREEN;
             break;
-        case 10:
-            pendingCalibrationC = PendingCalibrationC::DARK_BLUE;
-            break;
-        case 11:
+        case 5:
             pendingCalibrationC = PendingCalibrationC::PURPLE;
             break;
-        case 12:
+        case 6:
+            pendingCalibrationC = PendingCalibrationC::BLUE;
+            break;
+        case 7:
+            pendingCalibrationC = PendingCalibrationC::ORANGE;
+            break;
+        case 8:
+            pendingCalibrationC = PendingCalibrationC::YELLOW;
+            break;
+        case 9:
+            pendingCalibrationC = PendingCalibrationC::SILVER;
+            break;
+        case 10:
             pendingCalibrationC = PendingCalibrationC::WHITE;
             break;
         default:
@@ -762,7 +754,7 @@ void MenuManager::calibrationMenuDEncoder(int turns){
 }
 void MenuManager::calibrationMenuDEncoderButton(){
     switch(calibrationMenuDSelectedIdx){
-        case 0:
+          case 0:
             pendingCalibrationD = PendingCalibrationD::NONE;
             break;
         case 1:
@@ -772,33 +764,27 @@ void MenuManager::calibrationMenuDEncoderButton(){
             pendingCalibrationD = PendingCalibrationD::GAINS;
             break;
         case 3:
-            pendingCalibrationD = PendingCalibrationD::LIGHT_BLUE;
-            break;
-        case 4:
-            pendingCalibrationD = PendingCalibrationD::ORANGE;
-            break;
-        case 5:
-            pendingCalibrationD = PendingCalibrationD::PINK;
-            break;  
-        case 6:
-            pendingCalibrationD = PendingCalibrationD::YELLOW;
-            break;
-        case 7:
-            pendingCalibrationD = PendingCalibrationD::GREEN;
-            break;
-        case 8:
             pendingCalibrationD = PendingCalibrationD::RED;
             break;
-        case 9:
-            pendingCalibrationD = PendingCalibrationD::BLACK;
+        case 4:
+            pendingCalibrationD = PendingCalibrationD::GREEN;
             break;
-        case 10:
-            pendingCalibrationD = PendingCalibrationD::DARK_BLUE;
-            break;
-        case 11:
+        case 5:
             pendingCalibrationD = PendingCalibrationD::PURPLE;
             break;
-        case 12:
+        case 6:
+            pendingCalibrationD = PendingCalibrationD::BLUE;
+            break;
+        case 7:
+            pendingCalibrationD = PendingCalibrationD::ORANGE;
+            break;
+        case 8:
+            pendingCalibrationD = PendingCalibrationD::YELLOW;
+            break;
+        case 9:
+            pendingCalibrationD = PendingCalibrationD::SILVER;
+            break;
+        case 10:
             pendingCalibrationD = PendingCalibrationD::WHITE;
             break;
         default:
@@ -851,7 +837,7 @@ void MenuManager::octaveMenuBackButton(){
 void MenuManager::SharedCalibrationMenuRender(int selectedIdx, int scrollIdx){
     display.clearDisplay();
     display.setTextSize(1);
-    const char* menus[CALIBRATION_SUBMENU_TOTAL_ITEMS] = {"No-Op","Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White", "Reset Defaults"};
+    const char* menus[CALIBRATION_SUBMENU_TOTAL_ITEMS] = {"No-Op","Dark Offset", "Gains", "Red", "Green", "Purple", "Blue", "Orange", "Yellow", "Silver", "White", "Reset Defaults"};
     int yStart = 5;
     display.setCursor(10,yStart);
     display.setTextColor(OLED_WHITE);

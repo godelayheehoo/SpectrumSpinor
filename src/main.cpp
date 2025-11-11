@@ -53,7 +53,7 @@ TODO:
 
 
 // TCA9548A I2C Multiplexer setup
-#define TCA_ADDR 0x70
+
 
 // MIDI setup
 HardwareSerial MIDIserial(1);
@@ -333,18 +333,28 @@ Serial.println(sizeof(ColorHelper));
       
       //new calibration database
       ColorCalibration calibrationDatabaseA[NUM_COLORS];
-     
-      EEPROM.get(SENSOR_A_LIGHT_BLUE_CAL_ADDR, calibrationDatabaseA[0]);
-      EEPROM.get(SENSOR_A_ORANGE_CAL_ADDR, calibrationDatabaseA[1]);
-      EEPROM.get(SENSOR_A_PINK_CAL_ADDR, calibrationDatabaseA[2]);
-      EEPROM.get(SENSOR_A_YELLOW_CAL_ADDR, calibrationDatabaseA[3]);
-      EEPROM.get(SENSOR_A_GREEN_CAL_ADDR, calibrationDatabaseA[4]);
-      EEPROM.get(SENSOR_A_RED_CAL_ADDR, calibrationDatabaseA[5]);
-      EEPROM.get(SENSOR_A_BLACK_CAL_ADDR, calibrationDatabaseA[6]);
-      EEPROM.get(SENSOR_A_DARK_BLUE_CAL_ADDR, calibrationDatabaseA[7]);
-      EEPROM.get(SENSOR_A_PURPLE_CAL_ADDR, calibrationDatabaseA[8]);
-      EEPROM.get(SENSOR_A_WHITE_CAL_ADDR, calibrationDatabaseA[9]);
 
+//       enum class Color : uint8_t {
+//     RED = 0,
+//     GREEN = 1,
+//     PURPLE = 2,
+//     BLUE = 3,
+//     ORANGE = 4,
+//     YELLOW = 5,
+//     SILVER = 6,
+//     WHITE = 7,      // Special color - ignore this
+//     UNKNOWN = 255   // Special value for unrecognized colors
+// };
+
+      EEPROM.get(SENSOR_A_RED_CAL_ADDR,calibrationDatabaseA[0]);
+      EEPROM.get(SENSOR_A_GREEN_CAL_ADDR, calibrationDatabaseA[1]);
+      EEPROM.get(SENSOR_A_PURPLE_CAL_ADDR, calibrationDatabaseA[2]);
+      EEPROM.get(SENSOR_A_BLUE_CAL_ADDR, calibrationDatabaseA[3]);
+      EEPROM.get(SENSOR_A_ORANGE_CAL_ADDR, calibrationDatabaseA[4]);
+      EEPROM.get(SENSOR_A_YELLOW_CAL_ADDR, calibrationDatabaseA[5]);
+      EEPROM.get(SENSOR_A_SILVER_CAL_ADDR, calibrationDatabaseA[6]);
+      EEPROM.get(SENSOR_A_WHITE_CAL_ADDR, calibrationDatabaseA[7]);
+      
       colorHelperA.setColorDatabase(calibrationDatabaseA, NUM_COLORS);
 
       //// setup B
@@ -363,16 +373,14 @@ Serial.println(sizeof(ColorHelper));
       colorHelperB.bGain = avgW / (float)colorHelperB.bW;
       //new calibration database
       ColorCalibration calibrationDatabaseB[NUM_COLORS];
-      EEPROM.get(SENSOR_B_LIGHT_BLUE_CAL_ADDR, calibrationDatabaseB[0]);
-      EEPROM.get(SENSOR_B_ORANGE_CAL_ADDR, calibrationDatabaseB[1]);
-      EEPROM.get(SENSOR_B_PINK_CAL_ADDR, calibrationDatabaseB[2]);
-      EEPROM.get(SENSOR_B_YELLOW_CAL_ADDR, calibrationDatabaseB[3]);
-      EEPROM.get(SENSOR_B_GREEN_CAL_ADDR, calibrationDatabaseB[4]);
-      EEPROM.get(SENSOR_B_RED_CAL_ADDR, calibrationDatabaseB[5]);
-      EEPROM.get(SENSOR_B_BLACK_CAL_ADDR, calibrationDatabaseB[6]);
-      EEPROM.get(SENSOR_B_DARK_BLUE_CAL_ADDR, calibrationDatabaseB[7]);
-      EEPROM.get(SENSOR_B_PURPLE_CAL_ADDR, calibrationDatabaseB[8]);
-      EEPROM.get(SENSOR_B_WHITE_CAL_ADDR, calibrationDatabaseB[9]);
+      EEPROM.get(SENSOR_B_RED_CAL_ADDR,calibrationDatabaseB[0]);
+      EEPROM.get(SENSOR_B_GREEN_CAL_ADDR, calibrationDatabaseB[1]);
+      EEPROM.get(SENSOR_B_PURPLE_CAL_ADDR, calibrationDatabaseB[2]);
+      EEPROM.get(SENSOR_B_BLUE_CAL_ADDR, calibrationDatabaseB[3]);
+      EEPROM.get(SENSOR_B_ORANGE_CAL_ADDR, calibrationDatabaseB[4]);
+      EEPROM.get(SENSOR_B_YELLOW_CAL_ADDR, calibrationDatabaseB[5]);
+      EEPROM.get(SENSOR_B_SILVER_CAL_ADDR, calibrationDatabaseB[6]);
+      EEPROM.get(SENSOR_B_WHITE_CAL_ADDR, calibrationDatabaseB[7]);
 
       colorHelperB.setColorDatabase(calibrationDatabaseB, NUM_COLORS);
 
@@ -392,17 +400,15 @@ Serial.println(sizeof(ColorHelper));
       colorHelperC.bGain = avgW / (float)colorHelperC.bW;
       //new calibration database
       ColorCalibration calibrationDatabaseC[NUM_COLORS];
-      EEPROM.get(SENSOR_C_LIGHT_BLUE_CAL_ADDR, calibrationDatabaseC[0]);
-      EEPROM.get(SENSOR_C_ORANGE_CAL_ADDR, calibrationDatabaseC[1]);
-      EEPROM.get(SENSOR_C_PINK_CAL_ADDR, calibrationDatabaseC[2]);
-      EEPROM.get(SENSOR_C_YELLOW_CAL_ADDR, calibrationDatabaseC[3]);
-      EEPROM.get(SENSOR_C_GREEN_CAL_ADDR, calibrationDatabaseC[4]);
-      EEPROM.get(SENSOR_C_RED_CAL_ADDR, calibrationDatabaseC[5]);
-      EEPROM.get(SENSOR_C_BLACK_CAL_ADDR, calibrationDatabaseC[6]);
-      EEPROM.get(SENSOR_C_DARK_BLUE_CAL_ADDR, calibrationDatabaseC[7]);
-      EEPROM.get(SENSOR_C_PURPLE_CAL_ADDR, calibrationDatabaseC[8]);
-      EEPROM.get(SENSOR_C_WHITE_CAL_ADDR, calibrationDatabaseC[9]);
-      
+      EEPROM.get(SENSOR_C_RED_CAL_ADDR,calibrationDatabaseC[0]);
+      EEPROM.get(SENSOR_C_GREEN_CAL_ADDR, calibrationDatabaseC[1]);
+      EEPROM.get(SENSOR_C_PURPLE_CAL_ADDR, calibrationDatabaseC[2]);
+      EEPROM.get(SENSOR_C_BLUE_CAL_ADDR, calibrationDatabaseC[3]);
+      EEPROM.get(SENSOR_C_ORANGE_CAL_ADDR, calibrationDatabaseC[4]);
+      EEPROM.get(SENSOR_C_YELLOW_CAL_ADDR, calibrationDatabaseC[5]);
+      EEPROM.get(SENSOR_C_SILVER_CAL_ADDR, calibrationDatabaseC[6]);
+      EEPROM.get(SENSOR_C_WHITE_CAL_ADDR, calibrationDatabaseC[7]);
+
       colorHelperC.setColorDatabase(calibrationDatabaseC, NUM_COLORS);
 
       //// setup D
@@ -421,16 +427,14 @@ Serial.println(sizeof(ColorHelper));
       colorHelperD.bGain = avgW / (float)colorHelperD.bW;
       //new calibration database
       ColorCalibration calibrationDatabaseD[NUM_COLORS];
-      EEPROM.get(SENSOR_D_LIGHT_BLUE_CAL_ADDR, calibrationDatabaseD[0]);
-      EEPROM.get(SENSOR_D_ORANGE_CAL_ADDR, calibrationDatabaseD[1]);
-      EEPROM.get(SENSOR_D_PINK_CAL_ADDR, calibrationDatabaseD[2]);
-      EEPROM.get(SENSOR_D_YELLOW_CAL_ADDR, calibrationDatabaseD[3]);
-      EEPROM.get(SENSOR_D_GREEN_CAL_ADDR, calibrationDatabaseD[4]);
-      EEPROM.get(SENSOR_D_RED_CAL_ADDR, calibrationDatabaseD[5]);
-      EEPROM.get(SENSOR_D_BLACK_CAL_ADDR, calibrationDatabaseD[6]);
-      EEPROM.get(SENSOR_D_DARK_BLUE_CAL_ADDR, calibrationDatabaseD[7]);
-      EEPROM.get(SENSOR_D_PURPLE_CAL_ADDR, calibrationDatabaseD[8]);
-      EEPROM.get(SENSOR_D_WHITE_CAL_ADDR, calibrationDatabaseD[9]);
+      EEPROM.get(SENSOR_D_RED_CAL_ADDR,calibrationDatabaseD[0]);
+      EEPROM.get(SENSOR_D_GREEN_CAL_ADDR, calibrationDatabaseD[1]);
+      EEPROM.get(SENSOR_D_PURPLE_CAL_ADDR, calibrationDatabaseD[2]);
+      EEPROM.get(SENSOR_D_BLUE_CAL_ADDR, calibrationDatabaseD[3]);
+      EEPROM.get(SENSOR_D_ORANGE_CAL_ADDR, calibrationDatabaseD[4]);
+      EEPROM.get(SENSOR_D_YELLOW_CAL_ADDR, calibrationDatabaseD[5]);
+      EEPROM.get(SENSOR_D_SILVER_CAL_ADDR, calibrationDatabaseD[6]);
+      EEPROM.get(SENSOR_D_WHITE_CAL_ADDR, calibrationDatabaseD[7]);
 
       colorHelperD.setColorDatabase(calibrationDatabaseD, NUM_COLORS);
       Serial.println("color calibrations hopefully restored");
@@ -451,17 +455,26 @@ Serial.println(sizeof(ColorHelper));
       EEPROM.put(SENSOR_A_GW_ADDR, colorHelperA.gW);
       EEPROM.put(SENSOR_A_BW_ADDR, colorHelperA.bW);
       
+
+      /*
+      EEPROM.get(SENSOR_A_RED_CAL_ADDR,calibrationDatabaseA[0]);
+      EEPROM.get(SENSOR_A_GREEN_CAL_ADDR, calibrationDatabaseA[1]);
+      EEPROM.get(SENSOR_A_PURPLE_CAL_ADDR, calibrationDatabaseA[2]);
+      EEPROM.get(SENSOR_A_BLUE_CAL_ADDR, calibrationDatabaseA[3]);
+      EEPROM.get(SENSOR_A_ORANGE_CAL_ADDR, calibrationDatabaseA[4]);
+      EEPROM.get(SENSOR_A_YELLOW_CAL_ADDR, calibrationDatabaseA[5]);
+      EEPROM.get(SENSOR_A_SILVER_CAL_ADDR, calibrationDatabaseA[6]);
+      EEPROM.get(SENSOR_A_WHITE_CAL_ADDR, calibrationDatabaseA[7]);
+      */
       //calibrations
-      EEPROM.put(SENSOR_A_LIGHT_BLUE_CAL_ADDR, colorHelperA.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_A_ORANGE_CAL_ADDR, colorHelperA.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_A_PINK_CAL_ADDR, colorHelperA.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_A_YELLOW_CAL_ADDR, colorHelperA.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_A_GREEN_CAL_ADDR, colorHelperA.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_A_RED_CAL_ADDR, colorHelperA.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_A_BLACK_CAL_ADDR, colorHelperA.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_A_DARK_BLUE_CAL_ADDR, colorHelperA.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_A_PURPLE_CAL_ADDR, colorHelperA.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_A_WHITE_CAL_ADDR, colorHelperA.calibrationDatabase[9]);
+      EEPROM.put(SENSOR_A_RED_CAL_ADDR, colorHelperA.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_A_GREEN_CAL_ADDR, colorHelperA.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_A_PURPLE_CAL_ADDR, colorHelperA.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_A_BLUE_CAL_ADDR, colorHelperA.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_A_ORANGE_CAL_ADDR, colorHelperA.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_A_YELLOW_CAL_ADDR, colorHelperA.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_A_SILVER_CAL_ADDR, colorHelperA.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_A_WHITE_CAL_ADDR, colorHelperA.calibrationDatabase[7]);
       //// setup B
       //dark
       EEPROM.put(SENSOR_B_RDARK_ADDR, colorHelperB.rDark);
@@ -474,16 +487,14 @@ Serial.println(sizeof(ColorHelper));
       EEPROM.put(SENSOR_B_BW_ADDR, colorHelperB.bW);
 
       //calibrations
-      EEPROM.put(SENSOR_B_LIGHT_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_B_ORANGE_CAL_ADDR, colorHelperB.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_B_PINK_CAL_ADDR, colorHelperB.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_B_YELLOW_CAL_ADDR, colorHelperB.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_B_GREEN_CAL_ADDR, colorHelperB.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_B_RED_CAL_ADDR, colorHelperB.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_B_BLACK_CAL_ADDR, colorHelperB.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_B_DARK_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_B_PURPLE_CAL_ADDR, colorHelperB.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_B_WHITE_CAL_ADDR, colorHelperB.calibrationDatabase[9]);
+      EEPROM.put(SENSOR_B_RED_CAL_ADDR, colorHelperB.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_B_GREEN_CAL_ADDR, colorHelperB.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_B_PURPLE_CAL_ADDR, colorHelperB.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_B_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_B_ORANGE_CAL_ADDR, colorHelperB.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_B_YELLOW_CAL_ADDR, colorHelperB.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_B_SILVER_CAL_ADDR, colorHelperB.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_B_WHITE_CAL_ADDR, colorHelperB.calibrationDatabase[7]);
 
       //// setup C
       //dark
@@ -496,16 +507,14 @@ Serial.println(sizeof(ColorHelper));
       EEPROM.put(SENSOR_C_BW_ADDR, colorHelperC.bW);
 
       //calibrations
-      EEPROM.put(SENSOR_C_LIGHT_BLUE_CAL_ADDR, colorHelperC.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_C_ORANGE_CAL_ADDR, colorHelperC.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_C_PINK_CAL_ADDR, colorHelperC.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_C_YELLOW_CAL_ADDR, colorHelperC.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_C_GREEN_CAL_ADDR, colorHelperC.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_C_RED_CAL_ADDR, colorHelperC.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_C_BLACK_CAL_ADDR, colorHelperC.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_C_DARK_BLUE_CAL_ADDR, colorHelperC.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_C_PURPLE_CAL_ADDR, colorHelperC.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_C_WHITE_CAL_ADDR, colorHelperC.calibrationDatabase[9]);
+      EEPROM.put(SENSOR_C_RED_CAL_ADDR, colorHelperC.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_C_GREEN_CAL_ADDR, colorHelperC.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_C_PURPLE_CAL_ADDR, colorHelperC.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_C_BLUE_CAL_ADDR, colorHelperC.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_C_ORANGE_CAL_ADDR, colorHelperC.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_C_YELLOW_CAL_ADDR, colorHelperC.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_C_SILVER_CAL_ADDR, colorHelperC.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_C_WHITE_CAL_ADDR, colorHelperC.calibrationDatabase[7]);
 
 
       //// setup D
@@ -519,16 +528,14 @@ Serial.println(sizeof(ColorHelper));
       EEPROM.put(SENSOR_D_BW_ADDR, colorHelperD.bW);
 
       //calibrations
-      EEPROM.put(SENSOR_D_LIGHT_BLUE_CAL_ADDR, colorHelperD.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_D_ORANGE_CAL_ADDR, colorHelperD.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_D_PINK_CAL_ADDR, colorHelperD.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_D_YELLOW_CAL_ADDR, colorHelperD.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_D_GREEN_CAL_ADDR, colorHelperD.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_D_RED_CAL_ADDR, colorHelperD.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_D_BLACK_CAL_ADDR, colorHelperD.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_D_DARK_BLUE_CAL_ADDR, colorHelperD.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_D_PURPLE_CAL_ADDR, colorHelperD.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_D_WHITE_CAL_ADDR, colorHelperD.calibrationDatabase[9]);
+      EEPROM.put(SENSOR_D_RED_CAL_ADDR, colorHelperD.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_D_GREEN_CAL_ADDR, colorHelperD.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_D_PURPLE_CAL_ADDR, colorHelperD.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_D_BLUE_CAL_ADDR, colorHelperD.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_D_ORANGE_CAL_ADDR, colorHelperD.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_D_YELLOW_CAL_ADDR, colorHelperD.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_D_SILVER_CAL_ADDR, colorHelperD.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_D_WHITE_CAL_ADDR, colorHelperD.calibrationDatabase[7]);
 
 
       EEPROM.commit();
@@ -1088,19 +1095,26 @@ void loop() {
       menu.render();
 
     }
+    /*
+    EEPROM.put(SENSOR_A_RED_CAL_ADDR, colorHelperA.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_A_GREEN_CAL_ADDR, colorHelperA.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_A_PURPLE_CAL_ADDR, colorHelperA.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_A_BLUE_CAL_ADDR, colorHelperA.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_A_ORANGE_CAL_ADDR, colorHelperA.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_A_YELLOW_CAL_ADDR, colorHelperA.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_A_SILVER_CAL_ADDR, colorHelperA.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_A_WHITE_CAL_ADDR, colorHelperA.calibrationDatabase[7]);
+      */
     else{
-    Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::LIGHT_BLUE?Color::LIGHT_BLUE:
-                           menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
-                           menu.pendingCalibrationA==PendingCalibrationA::PINK?Color::PINK:
-                           menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
+    Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
                            menu.pendingCalibrationA==PendingCalibrationA::GREEN?Color::GREEN:
-                           menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
-                           menu.pendingCalibrationA==PendingCalibrationA::BLACK?Color::BLACK:
-                           menu.pendingCalibrationA==PendingCalibrationA::DARK_BLUE?Color::DARK_BLUE:
-                           menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
-                           menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:
+                            menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
+                            menu.pendingCalibrationA==PendingCalibrationA::BLUE?Color::BLUE:
+                            menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
+                            menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
+                            menu.pendingCalibrationA==PendingCalibrationA::SILVER?Color::SILVER:
+                            menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:                          menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:
                            Color::UNKNOWN;
-
     colorHelperA.calibrateColor(selectedColor); //safety
     
   }
@@ -1143,16 +1157,14 @@ void loop() {
       Serial.println(sensorB->bGain);
     }
     else{
-    Color selectedColor = menu.pendingCalibrationB==PendingCalibrationB::LIGHT_BLUE?Color::LIGHT_BLUE:
-                           menu.pendingCalibrationB==PendingCalibrationB::ORANGE?Color::ORANGE:
-                           menu.pendingCalibrationB==PendingCalibrationB::PINK?Color::PINK:
-                           menu.pendingCalibrationB==PendingCalibrationB::YELLOW?Color::YELLOW:
+    Color selectedColor = menu.pendingCalibrationB==PendingCalibrationB::RED?Color::RED:
                            menu.pendingCalibrationB==PendingCalibrationB::GREEN?Color::GREEN:
-                           menu.pendingCalibrationB==PendingCalibrationB::RED?Color::RED:
-                           menu.pendingCalibrationB==PendingCalibrationB::BLACK?Color::BLACK:
-                           menu.pendingCalibrationB==PendingCalibrationB::DARK_BLUE?Color::DARK_BLUE:
-                           menu.pendingCalibrationB==PendingCalibrationB::PURPLE?Color::PURPLE:
-                           menu.pendingCalibrationB==PendingCalibrationB::WHITE?Color::WHITE:
+                            menu.pendingCalibrationB==PendingCalibrationB::PURPLE?Color::PURPLE:
+                            menu.pendingCalibrationB==PendingCalibrationB::BLUE?Color::BLUE:
+                            menu.pendingCalibrationB==PendingCalibrationB::ORANGE?Color::ORANGE:
+                            menu.pendingCalibrationB==PendingCalibrationB::YELLOW?Color::YELLOW:
+                            menu.pendingCalibrationB==PendingCalibrationB::SILVER?Color::SILVER:
+                            menu.pendingCalibrationB==PendingCalibrationB::WHITE?Color::WHITE:                          menu.pendingCalibrationB==PendingCalibrationB::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
     sensorB->calibrateColor(selectedColor); //safety
@@ -1197,16 +1209,14 @@ void loop() {
       Serial.println(sensorC->bGain);
     }
     else{
-    Color selectedColor = menu.pendingCalibrationC==PendingCalibrationC::LIGHT_BLUE?Color::LIGHT_BLUE:
-                           menu.pendingCalibrationC==PendingCalibrationC::ORANGE?Color::ORANGE:
-                           menu.pendingCalibrationC==PendingCalibrationC::PINK?Color::PINK:
-                           menu.pendingCalibrationC==PendingCalibrationC::YELLOW?Color::YELLOW:
+ Color selectedColor = menu.pendingCalibrationC==PendingCalibrationC::RED?Color::RED:
                            menu.pendingCalibrationC==PendingCalibrationC::GREEN?Color::GREEN:
-                           menu.pendingCalibrationC==PendingCalibrationC::RED?Color::RED:
-                           menu.pendingCalibrationC==PendingCalibrationC::BLACK?Color::BLACK:
-                           menu.pendingCalibrationC==PendingCalibrationC::DARK_BLUE?Color::DARK_BLUE:
-                           menu.pendingCalibrationC==PendingCalibrationC::PURPLE?Color::PURPLE:
-                           menu.pendingCalibrationC==PendingCalibrationC::WHITE?Color::WHITE:
+                            menu.pendingCalibrationC==PendingCalibrationC::PURPLE?Color::PURPLE:
+                            menu.pendingCalibrationC==PendingCalibrationC::BLUE?Color::BLUE:
+                            menu.pendingCalibrationC==PendingCalibrationC::ORANGE?Color::ORANGE:
+                            menu.pendingCalibrationC==PendingCalibrationC::YELLOW?Color::YELLOW:
+                            menu.pendingCalibrationC==PendingCalibrationC::SILVER?Color::SILVER:
+                            menu.pendingCalibrationC==PendingCalibrationC::WHITE?Color::WHITE:                          menu.pendingCalibrationC==PendingCalibrationC::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
     sensorC->calibrateColor(selectedColor); //safety
@@ -1252,16 +1262,14 @@ void loop() {
       Serial.println(sensorD->bGain);
     }
     else{
-    Color selectedColor = menu.pendingCalibrationD==PendingCalibrationD::LIGHT_BLUE?Color::LIGHT_BLUE:
-                           menu.pendingCalibrationD==PendingCalibrationD::ORANGE?Color::ORANGE:
-                           menu.pendingCalibrationD==PendingCalibrationD::PINK?Color::PINK:
-                           menu.pendingCalibrationD==PendingCalibrationD::YELLOW?Color::YELLOW:
+Color selectedColor = menu.pendingCalibrationD==PendingCalibrationD::RED?Color::RED:
                            menu.pendingCalibrationD==PendingCalibrationD::GREEN?Color::GREEN:
-                           menu.pendingCalibrationD==PendingCalibrationD::RED?Color::RED:
-                           menu.pendingCalibrationD==PendingCalibrationD::BLACK?Color::BLACK:
-                           menu.pendingCalibrationD==PendingCalibrationD::DARK_BLUE?Color::DARK_BLUE:
-                           menu.pendingCalibrationD==PendingCalibrationD::PURPLE?Color::PURPLE:
-                           menu.pendingCalibrationD==PendingCalibrationD::WHITE?Color::WHITE:
+                            menu.pendingCalibrationD==PendingCalibrationD::PURPLE?Color::PURPLE:
+                            menu.pendingCalibrationD==PendingCalibrationD::BLUE?Color::BLUE:
+                            menu.pendingCalibrationD==PendingCalibrationD::ORANGE?Color::ORANGE:
+                            menu.pendingCalibrationD==PendingCalibrationD::YELLOW?Color::YELLOW:
+                            menu.pendingCalibrationD==PendingCalibrationD::SILVER?Color::SILVER:
+                            menu.pendingCalibrationD==PendingCalibrationD::WHITE?Color::WHITE:                          menu.pendingCalibrationD==PendingCalibrationD::WHITE?Color::WHITE:
                            Color::UNKNOWN;
 
     sensorD->calibrateColor(selectedColor); //safety
@@ -1285,17 +1293,27 @@ void saveBCD(){
       EEPROM.put(SENSOR_B_GW_ADDR, colorHelperB.gW);
       EEPROM.put(SENSOR_B_BW_ADDR, colorHelperB.bW);
 
+
+      /*
+      Color selectedColor = menu.pendingCalibrationA==PendingCalibrationA::RED?Color::RED:
+                           menu.pendingCalibrationA==PendingCalibrationA::GREEN?Color::GREEN:
+                            menu.pendingCalibrationA==PendingCalibrationA::PURPLE?Color::PURPLE:
+                            menu.pendingCalibrationA==PendingCalibrationA::BLUE?Color::BLUE:
+                            menu.pendingCalibrationA==PendingCalibrationA::ORANGE?Color::ORANGE:
+                            menu.pendingCalibrationA==PendingCalibrationA::YELLOW?Color::YELLOW:
+                            menu.pendingCalibrationA==PendingCalibrationA::SILVER?Color::SILVER:
+                            menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:                          menu.pendingCalibrationA==PendingCalibrationA::WHITE?Color::WHITE:
+                           Color::UNKNOWN;
+      */
       //calibrations
-      EEPROM.put(SENSOR_B_LIGHT_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_B_ORANGE_CAL_ADDR, colorHelperB.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_B_PINK_CAL_ADDR, colorHelperB.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_B_YELLOW_CAL_ADDR, colorHelperB.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_B_GREEN_CAL_ADDR, colorHelperB.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_B_RED_CAL_ADDR, colorHelperB.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_B_BLACK_CAL_ADDR, colorHelperB.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_B_DARK_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_B_PURPLE_CAL_ADDR, colorHelperB.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_B_WHITE_CAL_ADDR, colorHelperB.calibrationDatabase[9]);
+      EEPROM.put(SENSOR_B_RED_CAL_ADDR, colorHelperB.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_B_GREEN_CAL_ADDR, colorHelperB.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_B_PURPLE_CAL_ADDR, colorHelperB.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_B_BLUE_CAL_ADDR, colorHelperB.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_B_ORANGE_CAL_ADDR, colorHelperB.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_B_YELLOW_CAL_ADDR, colorHelperB.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_B_SILVER_CAL_ADDR, colorHelperB.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_B_WHITE_CAL_ADDR, colorHelperB.calibrationDatabase[7]);
 
       //// setup C
       //dark
@@ -1308,16 +1326,14 @@ void saveBCD(){
       EEPROM.put(SENSOR_C_BW_ADDR, colorHelperC.bW);
 
       //calibrations
-      EEPROM.put(SENSOR_C_LIGHT_BLUE_CAL_ADDR, colorHelperC.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_C_ORANGE_CAL_ADDR, colorHelperC.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_C_PINK_CAL_ADDR, colorHelperC.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_C_YELLOW_CAL_ADDR, colorHelperC.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_C_GREEN_CAL_ADDR, colorHelperC.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_C_RED_CAL_ADDR, colorHelperC.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_C_BLACK_CAL_ADDR, colorHelperC.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_C_DARK_BLUE_CAL_ADDR, colorHelperC.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_C_PURPLE_CAL_ADDR, colorHelperC.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_C_WHITE_CAL_ADDR, colorHelperC.calibrationDatabase[9]);
+       EEPROM.put(SENSOR_C_RED_CAL_ADDR, colorHelperC.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_C_GREEN_CAL_ADDR, colorHelperC.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_C_PURPLE_CAL_ADDR, colorHelperC.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_C_BLUE_CAL_ADDR, colorHelperC.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_C_ORANGE_CAL_ADDR, colorHelperC.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_C_YELLOW_CAL_ADDR, colorHelperC.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_C_SILVER_CAL_ADDR, colorHelperC.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_C_WHITE_CAL_ADDR, colorHelperC.calibrationDatabase[7]);
 
 
       //// setup D
@@ -1331,16 +1347,14 @@ void saveBCD(){
       EEPROM.put(SENSOR_D_BW_ADDR, colorHelperD.bW);
 
       //calibrations
-      EEPROM.put(SENSOR_D_LIGHT_BLUE_CAL_ADDR, colorHelperD.calibrationDatabase[0]);
-      EEPROM.put(SENSOR_D_ORANGE_CAL_ADDR, colorHelperD.calibrationDatabase[1]);
-      EEPROM.put(SENSOR_D_PINK_CAL_ADDR, colorHelperD.calibrationDatabase[2]);
-      EEPROM.put(SENSOR_D_YELLOW_CAL_ADDR, colorHelperD.calibrationDatabase[3]);
-      EEPROM.put(SENSOR_D_GREEN_CAL_ADDR, colorHelperD.calibrationDatabase[4]);
-      EEPROM.put(SENSOR_D_RED_CAL_ADDR, colorHelperD.calibrationDatabase[5]);
-      EEPROM.put(SENSOR_D_BLACK_CAL_ADDR, colorHelperD.calibrationDatabase[6]);
-      EEPROM.put(SENSOR_D_DARK_BLUE_CAL_ADDR, colorHelperD.calibrationDatabase[7]);
-      EEPROM.put(SENSOR_D_PURPLE_CAL_ADDR, colorHelperD.calibrationDatabase[8]);
-      EEPROM.put(SENSOR_D_WHITE_CAL_ADDR, colorHelperD.calibrationDatabase[9]);
+      EEPROM.put(SENSOR_D_RED_CAL_ADDR, colorHelperD.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_D_GREEN_CAL_ADDR, colorHelperD.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_D_PURPLE_CAL_ADDR, colorHelperD.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_D_BLUE_CAL_ADDR, colorHelperD.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_D_ORANGE_CAL_ADDR, colorHelperD.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_D_YELLOW_CAL_ADDR, colorHelperD.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_D_SILVER_CAL_ADDR, colorHelperD.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_D_WHITE_CAL_ADDR, colorHelperD.calibrationDatabase[7]);
 
 
       EEPROM.commit();

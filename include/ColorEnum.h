@@ -6,26 +6,23 @@
  * Order matches the color database in ColorInfo.h
  */
 
-    // pinkCal,
-    // orangeCal,
-    // darkBlueCal,
-    // yellowCal,
-    // greenCal,
-    // redCal,
-    // blackCal,
-    // lightBlueCal,
-    // whiteCal
+// ColorCalibration redDefaultCal = ColorCalibration{36600, 11350, 14950};
+// ColorCalibration greenDefaultCal = ColorCalibration{12650, 27100,25400};
+// ColorCalibration purpleDefaultCal = ColorCalibration{18490, 18100, 32300};
+// ColorCalibration blueDefaultCal = ColorCalibration{11800, 21000,38700};
+// ColorCalibration orangeDefaultCal = ColorCalibration{33100,14400,13900};
+// ColorCalibration yellowDefaultCal = ColorCalibration{24700, 21600, 13500};
+// ColorCalibration silverDefaultCal = ColorCalibration{21320, 20500, 22290};
+// ColorCalibration whiteDefaultCal = ColorCalibration{20800, 20820, 21900};
 enum class Color : uint8_t {
-    LIGHT_BLUE  = 0,
-    ORANGE = 1,
-    PINK = 2,
-    YELLOW = 3,
-    GREEN = 4,
-    RED = 5,
-    BLACK = 6,
-    DARK_BLUE = 7,
-    PURPLE = 8,
-    WHITE = 9,      // Special color - ignore this
+    RED = 0,
+    GREEN = 1,
+    PURPLE = 2,
+    BLUE = 3,
+    ORANGE = 4,
+    YELLOW = 5,
+    SILVER = 6,
+    WHITE = 7,      // Special color - ignore this
     UNKNOWN = 255   // Special value for unrecognized colors
 };
 

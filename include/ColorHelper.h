@@ -6,17 +6,64 @@
 #include "ColorEnum.h"
 #include "ColorInfo.h"
 
-// Default color calibrations (defined in one .cpp file)
-extern ColorCalibration pinkDefaultCal;
-extern ColorCalibration orangeDefaultCal;
-extern ColorCalibration darkBlueDefaultCal;
-extern ColorCalibration yellowDefaultCal;
-extern ColorCalibration greenDefaultCal;
+/*
+      case 0:
+            pendingCalibrationA = PendingCalibrationA::NONE;
+            break;
+        case 1:
+            pendingCalibrationA = PendingCalibrationA::DARK_OFFSET;
+            break;
+        case 2:
+            pendingCalibrationA = PendingCalibrationA::GAINS;
+            break;
+        case 3:
+            pendingCalibrationA = PendingCalibrationA::RED;
+            break;
+        case 4:
+            pendingCalibrationA = PendingCalibrationA::GREEN;
+            break;
+        case 5:
+            pendingCalibrationA = PendingCalibrationA::PURPLE;
+            break;
+        case 6:
+            pendingCalibrationA = PendingCalibrationA::BLUE;
+            break;
+        case 7:
+            pendingCalibrationA = PendingCalibrationA::ORANGE;
+            break;
+        case 8:
+            pendingCalibrationA = PendingCalibrationA::YELLOW;
+            break;
+        case 9:
+            pendingCalibrationA = PendingCalibrationA::SILVER;
+            break;
+        case 10:
+            pendingCalibrationA = PendingCalibrationA::WHITE;
+            break;
+        default:
+            Serial.println("WARNING: SOMEHOW HIT UNSUPPORTED CALIBRATION CASE");
+            break;
+*/
 extern ColorCalibration redDefaultCal;
-extern ColorCalibration lightBlueDefaultCal;
-extern ColorCalibration blackDefaultCal;
-extern ColorCalibration whiteDefaultCal;
+extern ColorCalibration greenDefaultCal;
 extern ColorCalibration purpleDefaultCal;
+extern ColorCalibration blueDefaultCal;
+extern ColorCalibration orangeDefaultCal;
+extern ColorCalibration yellowDefaultCal;
+extern ColorCalibration silverDefaultCal;
+extern ColorCalibration whiteDefautlCal;
+
+// Default color calibrations (defined in one .cpp file)
+// extern ColorCalibration pinkDefaultCal;
+// extern ColorCalibration orangeDefaultCal;
+// extern ColorCalibration darkBlueDefaultCal;
+// extern ColorCalibration yellowDefaultCal;
+// extern ColorCalibration greenDefaultCal;
+// extern ColorCalibration redDefaultCal;
+// extern ColorCalibration lightBlueDefaultCal;
+// extern ColorCalibration blackDefaultCal;
+// extern ColorCalibration whiteDefaultCal;
+// extern ColorCalibration purpleDefaultCal;
 
 extern ColorCalibration colorCalibrationDefaultDatabase[NUM_COLORS];
 

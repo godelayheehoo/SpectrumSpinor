@@ -47,21 +47,27 @@ enum ActiveSensor {
     SENSOR_C,
     SENSOR_D
 };
-// {"Dark Offset", "Gains", "LightBlue","Orange", "Pink", "Yellow", "Green", "Red", "Black","DarkBlue", "Purple", "White"};
-    
+/*
+      EEPROM.put(SENSOR_A_RED_CAL_ADDR, colorHelperA.calibrationDatabase[0]);
+      EEPROM.put(SENSOR_A_GREEN_CAL_ADDR, colorHelperA.calibrationDatabase[1]);
+      EEPROM.put(SENSOR_A_PURPLE_CAL_ADDR, colorHelperA.calibrationDatabase[2]);
+      EEPROM.put(SENSOR_A_BLUE_CAL_ADDR, colorHelperA.calibrationDatabase[3]);
+      EEPROM.put(SENSOR_A_ORANGE_CAL_ADDR, colorHelperA.calibrationDatabase[4]);
+      EEPROM.put(SENSOR_A_YELLOW_CAL_ADDR, colorHelperA.calibrationDatabase[5]);
+      EEPROM.put(SENSOR_A_SILVER_CAL_ADDR, colorHelperA.calibrationDatabase[6]);
+      EEPROM.put(SENSOR_A_WHITE_CAL_ADDR, colorHelperA.calibrationDatabase[7]);
+*/
 enum class PendingCalibrationA{
     NONE,
     DARK_OFFSET,
     GAINS,
-    LIGHT_BLUE,
-    ORANGE,
-    PINK,
-    YELLOW,
-    GREEN,
     RED,
-    BLACK,
-    DARK_BLUE,
+    GREEN,
     PURPLE,
+    BLUE,
+    ORANGE,
+    YELLOW,
+    SILVER,
     WHITE,
     RESET_DEFAULTS,
     APPLY_TO_BCD
@@ -70,15 +76,13 @@ enum class PendingCalibrationB{
      NONE,
     DARK_OFFSET,
     GAINS,
-    LIGHT_BLUE,
-    ORANGE,
-    PINK,
-    YELLOW,
-    GREEN,
     RED,
-    BLACK,
-    DARK_BLUE,
+    GREEN,
     PURPLE,
+    BLUE,
+    ORANGE,
+    YELLOW,
+    SILVER,
     WHITE,
     RESET_DEFAULTS
 };
@@ -86,15 +90,13 @@ enum class PendingCalibrationC{
       NONE,
     DARK_OFFSET,
     GAINS,
-    LIGHT_BLUE,
-    ORANGE,
-    PINK,
-    YELLOW,
-    GREEN,
     RED,
-    BLACK,
-    DARK_BLUE,
+    GREEN,
     PURPLE,
+    BLUE,
+    ORANGE,
+    YELLOW,
+    SILVER,
     WHITE,
     RESET_DEFAULTS
 };
@@ -102,15 +104,13 @@ enum class PendingCalibrationD{
     NONE,
     DARK_OFFSET,
     GAINS,
-    LIGHT_BLUE,
-    ORANGE,
-    PINK,
-    YELLOW,
-    GREEN,
     RED,
-    BLACK,
-    DARK_BLUE,
+    GREEN,
     PURPLE,
+    BLUE,
+    ORANGE,
+    YELLOW,
+    SILVER,
     WHITE,
     RESET_DEFAULTS
 };

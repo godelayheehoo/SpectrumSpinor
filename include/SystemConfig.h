@@ -25,7 +25,7 @@
 // #define TFT_WHITE, TFT_BLACK, TFT_RED, etc.
 
 #define NUM_CALIBRATION_STEPS 20
-#define NUM_COLORS 10
+#define NUM_COLORS 8 // includes white
 
 // I2C addresses
 #define TCA_ADDR 0x70

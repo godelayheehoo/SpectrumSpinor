@@ -7,14 +7,20 @@ const uint8_t MIDI_NOTE_OFF = 0xFF;
 
 // Major scale intervals (semitones from root)
 // Maps to Color enum order: PINK, ORANGE, BLUE, YELLOW, GREEN, RED, PURPLE, BROWN, WHITE
-// C=0, D=2, E=4, F=5, G=7, A=9, B=11, C(next)=12, WHITE=special
+// C=0, D=2, E=4, F=5, G=7, A=9, B=11, WHITE=special
 static const uint8_t majorScaleOffsets[] = {
-    0, 2, 4, 5, 7, 9, 11, 12, 14, MIDI_NOTE_OFF  // Maps to: C, D, E, F, G, A, B, C, D,  OFF
+    0, 2, 4, 5, 7, 9, 11, MIDI_NOTE_OFF  // Maps to: C, D, E, F, G, A, B, OFF
 };
 
+static_assert(sizeof(majorScaleOffsets) / sizeof(majorScaleOffsets[0]) == NUM_COLORS,
+              "majorScaleOffsets must have NUM_COLORS entries");
+
 static const uint8_t minorScaleOffsets[] = {
-    0, 2, 3, 5, 7, 8, 10, 12, 14, MIDI_NOTE_OFF  // Maps to: C, D, D#, F, G, G#, A#, C, D<  OFF
+    0, 2, 3, 5, 7, 8, 10, MIDI_NOTE_OFF  // Maps to: C, D, D#, F, G, G#, A#,  OFF
 };
+
+static_assert(sizeof(minorScaleOffsets) / sizeof(majorScaleOffsets[0]) == NUM_COLORS,
+              "majorScaleOffsets must have NUM_COLORS entries");
 
 ScaleManager::ScaleManager(ScaleType initialScale, uint8_t initialOctave, uint8_t initialRootNote)
     : currentScale(initialScale), baseOctave(initialOctave), rootNote(initialRootNote) {

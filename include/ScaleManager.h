@@ -2,6 +2,21 @@
 #include <Arduino.h>
 #include "ColorEnum.h"
 
+enum RootNote : uint8_t {
+    C4  = 60,
+    Csharp4 = 61, // C#4 / Db4
+    D4 = 62,
+    Dsharp4 = 63, // D#4 / Eb4
+    E4 = 64,
+    F4 = 65,
+    Fsharp4 = 66, // F#4 / Gb4
+    G4 = 67,
+    Gsharp4 = 68, // G#4 / Ab4
+    A4 = 69,
+    Asharp4 = 70, // A#4 / Bb4
+    B4 = 71
+};
+
 class ScaleManager {
 public:
     enum ScaleType: uint8_t {
@@ -21,7 +36,9 @@ public:
     // Scale/key management
     void setScale(ScaleType scale);
     // void setOctave(uint8_t octave);
-    void setRootNote(uint8_t rootNote); // MIDI note number for root (60 = C4)
+    void setRootNote(RootNote rootNote); // MIDI note number for root (60 = C4)
+
+    void saveRootNote();
     
     // Getters
     ScaleType getCurrentScale() const;

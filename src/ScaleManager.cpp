@@ -1,5 +1,7 @@
 #include "ScaleManager.h"
 #include "ColorEnum.h"
+#include "EEPROMAddresses.h"
+#include <EEPROM.h>
 
 // Special sentinel value used in scale offset tables to indicate "no note / note-off"
 // Must NOT be 0 because 0 is a valid offset (root). Use 0xFF (255) as an out-of-band sentinel.
@@ -86,10 +88,14 @@ void ScaleManager::setScale(ScaleType scale) {
 //     baseOctave = octave;
 // }
 
-// void ScaleManager::setRootNote(uint8_t newRootNote) {
-//     rootNote = newRootNote;
+void ScaleManager::setRootNote(RootNote newRootNote) {
+    rootNote = static_cast<uint8_t>(newRootNote);
 //     baseOctave = newRootNote / 12;
-// }
+}
+
+void ScaleManager::saveRootNote(){
+    EEPROM.put(ROOT_NOTE_ADDR, static_cast<uint8_t>(rootNote));
+}
 
 ScaleManager::ScaleType ScaleManager::getCurrentScale() const {
     return currentScale;

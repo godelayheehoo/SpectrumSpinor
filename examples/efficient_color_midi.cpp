@@ -23,7 +23,7 @@ void setup() {
     
     // Set up scale (C Major in 4th octave)
     scaleManager.setScale(ScaleManager::MAJOR);
-    scaleManager.setRootNote(60); // C4 = MIDI note 60
+    scaleManager.setRootNote(RootNote::C4); // C4 = MIDI note 60
 }
 
 void loop() {

@@ -7,7 +7,7 @@ public:
     enum ScaleType {
         MAJOR,
         MINOR,
-        // Future: MINOR, PENTATONIC, BLUES, etc.
+        // Future: PENTATONIC, BLUES, etc.
     };
     
     ScaleManager(ScaleType initialScale = MAJOR, uint8_t initialOctave = 4, uint8_t initialRootNote = 60); // Default to C4
@@ -20,12 +20,12 @@ public:
     
     // Scale/key management
     void setScale(ScaleType scale);
-    void setOctave(uint8_t octave);
+    // void setOctave(uint8_t octave);
     void setRootNote(uint8_t rootNote); // MIDI note number for root (60 = C4)
     
     // Getters
     ScaleType getCurrentScale() const;
-    uint8_t getCurrentOctave() const;
+    // uint8_t getCurrentOctave() const;
     uint8_t getRootNote() const;
     
     // Get scale name as string for display
@@ -39,7 +39,7 @@ public:
     
 private:
     ScaleType currentScale;
-    uint8_t baseOctave;
+    // uint8_t baseOctave;
     uint8_t rootNote;
     
     // Get MIDI note offset for color index in current scale

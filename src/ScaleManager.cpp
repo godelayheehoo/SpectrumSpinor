@@ -23,7 +23,9 @@ static_assert(sizeof(minorScaleOffsets) / sizeof(majorScaleOffsets[0]) == NUM_CO
               "majorScaleOffsets must have NUM_COLORS entries");
 
 ScaleManager::ScaleManager(ScaleType initialScale, uint8_t initialOctave, uint8_t initialRootNote)
-    : currentScale(initialScale), baseOctave(initialOctave), rootNote(initialRootNote) {
+    : currentScale(initialScale), 
+    // baseOctave(initialOctave), 
+    rootNote(initialRootNote) {
 }
 
 uint8_t ScaleManager::colorToMIDINote(Color color) {
@@ -77,25 +79,25 @@ void ScaleManager::setScale(ScaleType scale) {
     currentScale = scale;
 }
 
-void ScaleManager::setOctave(uint8_t octave) {
-    // Adjust root note to new octave (each octave is 12 semitones)
-    uint8_t noteWithinOctave = rootNote % 12;
-    rootNote = (octave * 12) + noteWithinOctave;
-    baseOctave = octave;
-}
+// void ScaleManager::setOctave(uint8_t octave) {
+//     // Adjust root note to new octave (each octave is 12 semitones)
+//     uint8_t noteWithinOctave = rootNote % 12;
+//     rootNote = (octave * 12) + noteWithinOctave;
+//     baseOctave = octave;
+// }
 
-void ScaleManager::setRootNote(uint8_t newRootNote) {
-    rootNote = newRootNote;
-    baseOctave = newRootNote / 12;
-}
+// void ScaleManager::setRootNote(uint8_t newRootNote) {
+//     rootNote = newRootNote;
+//     baseOctave = newRootNote / 12;
+// }
 
 ScaleManager::ScaleType ScaleManager::getCurrentScale() const {
     return currentScale;
 }
 
-uint8_t ScaleManager::getCurrentOctave() const {
-    return baseOctave;
-}
+// uint8_t ScaleManager::getCurrentOctave() const {
+//     return baseOctave;
+// }
 
 uint8_t ScaleManager::getRootNote() const {
     return rootNote;
@@ -105,6 +107,8 @@ const char* ScaleManager::getScaleName() const {
     switch (currentScale) {
         case MAJOR:
             return "Major";
+        case MINOR:
+            return "Minor";
         default:
             return "Unknown";
     }

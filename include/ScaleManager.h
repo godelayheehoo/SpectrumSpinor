@@ -4,9 +4,9 @@
 
 class ScaleManager {
 public:
-    enum ScaleType {
-        MAJOR,
-        MINOR,
+    enum ScaleType: uint8_t {
+        MAJOR = 0,
+        MINOR = 1,
         // Future: PENTATONIC, BLUES, etc.
     };
     

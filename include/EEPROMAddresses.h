@@ -102,3 +102,5 @@
 #define OCTAVE_B_ADDR 487
 #define OCTAVE_C_ADDR 488
 #define OCTAVE_D_ADDR 489
+
+#define SCALE_ADDR 490

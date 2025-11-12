@@ -28,9 +28,10 @@ enum MenuState {
     CALIBRATION_A_MENU,
     CALIBRATION_B_MENU,
     CALIBRATION_C_MENU,
-    CALIBRATION_D_MENU
+    CALIBRATION_D_MENU, 
+    SCALE_MENU
 };
-static const int NUM_MAIN_MENU_ITEMS = 5;
+static const int NUM_MAIN_MENU_ITEMS = 6;
 
 enum MenuButton {
     BUTTON_NONE,
@@ -160,6 +161,14 @@ public:
     void calibrationMenuConButton();
     void calibrationMenuBackButton();
 
+    // Handler functions for SCALE_MENU
+    void scaleMenuEncoder(int turns);
+    void scaleMenuEncoderButton();
+    void scaleMenuConButton();
+    void scaleMenuBackButton();
+    void saveScale();
+
+    // Handler functions for calibration submenus
     void calibrationMenuAEncoder(int turns);
     void calibrationMenuAEncoderButton();
     void calibrationMenuAConButton();
@@ -283,16 +292,24 @@ public:
     PendingCalibrationB pendingCalibrationB;
     PendingCalibrationC pendingCalibrationC;
     PendingCalibrationD pendingCalibrationD;
-
     
     void SharedCalibrationMenuRender(int selectedIdx, int scrollIdx);
     void startCalibrationCountdown();
     void calibrationStartProgressBar(); 
     void calibrationIncrementProgressBar(uint8_t i);
 
+    uint8_t scaleSelectedIdx = 0;
+    uint8_t scaleActiveIdx = 0;
+    //one scale for all sensors
+    // uint8_t scaleActiveSensor = SENSOR_A;
+    uint8_t NUM_SCALES=2;
     ScaleManager scaleManager = ScaleManager(ScaleManager::MAJOR, 4, 60);
 private:
     // Callback for sending ALL NOTES OFF messages
     AllNotesOffCallback allNotesOffCallback = nullptr;
+
+    void showCenteredMessage(const char* msg, uint8_t textSize = 2,
+                                     uint8_t padX = 8, uint8_t padY = 6,
+                                     uint16_t durMs = 200);
 
 };

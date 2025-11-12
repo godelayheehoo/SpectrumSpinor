@@ -2,6 +2,8 @@
 #include "SystemConfig.h"
 #include <EEPROM.h>
 #include "EEPROMAddresses.h"
+#include "ScaleManager.h"
+
 
 
 const MenuHandlers menuHandlersTable[] = {
@@ -13,10 +15,54 @@ const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::calibrationMenuAEncoder, &MenuManager::calibrationMenuAEncoderButton, &MenuManager::calibrationMenuAConButton, &MenuManager::calibrationMenuABackButton }, // CALIBRATION_A_MENU
     { &MenuManager::calibrationMenuBEncoder, &MenuManager::calibrationMenuBEncoderButton, &MenuManager::calibrationMenuBConButton, &MenuManager::calibrationMenuBBackButton }, // CALIBRATION_B_MENU
     { &MenuManager::calibrationMenuCEncoder, &MenuManager::calibrationMenuCEncoderButton, &MenuManager::calibrationMenuCConButton, &MenuManager::calibrationMenuCBackButton }, // CALIBRATION_C_MENU
-    { &MenuManager::calibrationMenuDEncoder, &MenuManager::calibrationMenuDEncoderButton, &MenuManager::calibrationMenuDConButton, &MenuManager::calibrationMenuDBackButton }  // CALIBRATION_D_MENU
+    { &MenuManager::calibrationMenuDEncoder, &MenuManager::calibrationMenuDEncoderButton, &MenuManager::calibrationMenuDConButton, &MenuManager::calibrationMenuDBackButton },  // CALIBRATION_D_MENU
+    { &MenuManager::scaleMenuEncoder, &MenuManager::scaleMenuEncoderButton, &MenuManager::scaleMenuConButton, &MenuManager::scaleMenuBackButton }  // SCALE_MENU
 };
 
 MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(TROUBLESHOOT_MENU) {
+}
+
+void MenuManager::showCenteredMessage(const char* msg, uint8_t textSize,
+                                     uint8_t padX, uint8_t padY,
+                                     uint16_t durMs)
+{
+    // Option A: overlay on top of existing screen contents (no clear)
+    // Option B: clear the screen first (uncomment if you want)
+    display.clearDisplay();
+
+    display.setTextSize(textSize);
+
+    int16_t x1, y1;
+    uint16_t textW, textH;
+    display.getTextBounds(msg, 0, 0, &x1, &y1, &textW, &textH);
+
+    int boxW = textW + padX * 2;
+    int boxH = textH + padY * 2;
+
+    int boxX = (SCREEN_WIDTH - boxW) / 2;
+    int boxY = (SCREEN_HEIGHT - boxH) / 2;
+
+    // Draw white outline
+    display.drawRect(boxX, boxY, boxW, boxH, OLED_WHITE);
+
+    // Fill interior black so text stands out (works even if background isn't black)
+    display.fillRect(boxX + 1, boxY + 1, boxW - 2, boxH - 2, OLED_BLACK);
+
+    // Draw text centered inside box
+    int textX = boxX + (boxW - textW) / 2;
+    int textY = boxY + (boxH - textH) / 2;
+
+    display.setCursor(textX, textY);
+    display.setTextColor(OLED_WHITE, OLED_BLACK); // white text on black background
+    display.print(msg);
+
+    // Show on display
+    display.display();
+
+    delay(durMs);
+
+    // Optionally restore previous screen by re-rendering your menu
+    render();
 }
 
 void MenuManager::updateCurrentColorA(const char* color) {
@@ -416,6 +462,38 @@ void MenuManager::render() {
     else if(currentMenu == CALIBRATION_D_MENU){
         SharedCalibrationMenuRender(calibrationMenuDSelectedIdx, calibrationMenuDScrollIdx);
     }
+    else if(currentMenu == SCALE_MENU){
+        display.clearDisplay();
+    display.setTextSize(1);
+
+    const char* options[] = {"Major Scale", "Minor Scale"};
+    const int numOptions = 2;
+    int yStart = 10;
+    int lineHeight = 12;
+
+    for (int i = 0; i < numOptions; ++i) {
+        int y = yStart + i * lineHeight;
+        display.setCursor(10, y);
+
+        // highlight the selection (encoder focus)
+        if (i == scaleSelectedIdx) {
+            display.setTextColor(OLED_BLACK, OLED_WHITE);
+        } else {
+            display.setTextColor(OLED_WHITE, OLED_BLACK);
+        }
+
+        // arrow prefix for the active scale
+        if (i == scaleActiveIdx) {
+            display.print("-> ");
+        } else {
+            display.print("   "); // keep columns aligned
+        }
+
+        display.print(options[i]);
+    }
+
+    display.display();
+    }
 }
 
 void MenuManager::startCalibrationCountdown(){
@@ -570,6 +648,41 @@ void MenuManager::calibrationMenuBackButton() {
     // Back button returns to main menu
     currentMenu = MAIN_MENU;
 }
+
+//TODO: need to redo all of this. I think I'll make a 2x2 grid for the sensors.
+//Turnign the encoder will change the selected sensor.  Encoder press will cycle through
+//scales for that sensor. Lock in scales as we select them.  CON saves?
+void MenuManager::scaleMenuEncoder(int turns){
+    scaleSelectedIdx = constrain(scaleSelectedIdx + turns, 0, NUM_SCALES - 1);
+}
+void MenuManager::scaleMenuEncoderButton(){
+        scaleActiveIdx = scaleSelectedIdx;
+    switch(scaleActiveIdx){
+        case 0:
+            scaleManager.setScale(ScaleManager::ScaleType::MAJOR);
+            Serial.println("Scale set to major");
+            break;
+        case 1:
+            scaleManager.setScale(ScaleManager::ScaleType::MINOR);
+            Serial.println("Scale set to minor");
+            break;
+        default:
+            Serial.println("ERROR: Scale setting hit default!");
+            break;
+    }
+
+}
+
+void MenuManager::scaleMenuConButton(){
+
+    showCenteredMessage("Scale saved!", 2, 8, 6, 150);
+    saveScale();
+}
+
+void MenuManager::scaleMenuBackButton(){
+    currentMenu = MAIN_MENU;
+}
+
 
 //// Calibration submenu commands
 void MenuManager::calibrationMenuAEncoder(int turns){
@@ -954,6 +1067,12 @@ void MenuManager::saveOctaves(){
     }
     EEPROM.write(EEPROM_MAGIC_ADDRESS, EEPROM_MAGIC_VALUE);
     EEPROM.commit();
+}
+
+void MenuManager::saveScale() {
+    uint8_t v = static_cast<uint8_t>(scaleManager.getCurrentScale());
+    EEPROM.put(SCALE_ADDR, v);   // stores 1 byte
+    EEPROM.commit();       // required for ESP32 emulated EEPROM
 }
 
 

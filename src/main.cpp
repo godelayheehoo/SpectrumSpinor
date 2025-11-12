@@ -438,6 +438,8 @@ Serial.println(sizeof(ColorHelper));
 
       colorHelperD.setColorDatabase(calibrationDatabaseD, NUM_COLORS);
       Serial.println("color calibrations hopefully restored");
+
+      menu.scaleManager.setScale(static_cast<ScaleManager::ScaleType>(EEPROM.read(SCALE_ADDR)));
     }
     
 
@@ -537,7 +539,7 @@ Serial.println(sizeof(ColorHelper));
       EEPROM.put(SENSOR_D_SILVER_CAL_ADDR, colorHelperD.calibrationDatabase[6]);
       EEPROM.put(SENSOR_D_WHITE_CAL_ADDR, colorHelperD.calibrationDatabase[7]);
 
-
+      EEPROM.put(SCALE_ADDR, static_cast<uint8_t>(ScaleManager::ScaleType::MAJOR));
       EEPROM.commit();
     }
 

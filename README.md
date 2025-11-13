@@ -1,8 +1,6 @@
-README TODO
-- mention octave menu
-- - include mention that changing octaves doesn't come into affect until the next note.
-- - octave changes happen immediately (no con), con saves it. 
-- Con for grid, autosaves
+README
+- Octave menu, Scale menu, and Root Note menu have been added.
+- Octave changes take effect on the next played note; use CON to save persistent values where noted.
 
 # SpectrumSpinor ESP32 Project
 
@@ -54,6 +52,9 @@ The project features a table-driven menu system optimized for the OLED display:
 - **Grid View**: Access MIDI channel selection
 - **Troubleshoot**: View current color detection and system status (default on startup)
 - **Calibration**: Access sensor calibration options
+- **Octave**: Per-sensor octave selection (change takes effect on next note)
+- **Scale**: Select musical scale (Major / Minor) used for color→note mapping
+- **Root Notes**: Select the root note (C, C#, D, ... B) for the scale
 - Navigate with rotary encoder (CW/CCW)
 - Select with encoder button
 - **Back button**: Always returns to main menu from any submenu
@@ -89,7 +90,7 @@ The project features a table-driven menu system optimized for the OLED display:
 
 The system continuously monitors the color sensor and generates MIDI notes:
 
-- **Color Enum System**: Efficient integer-based color identification (9 colors: PINK through WHITE)
+- **Color Enum System**: Efficient integer-based color identification (8 colors: RED, GREEN, PURPLE, BLUE, ORANGE, YELLOW, SILVER, WHITE)
 - **Scale Management**: Converts colors to MIDI notes based on musical scales
 - **MIDI Output**: Hardware serial MIDI at 31250 baud on GPIO 17
 - **Note Handling**: 
@@ -97,6 +98,26 @@ The system continuously monitors the color sensor and generates MIDI notes:
   - WHITE color acts as note-off signal
   - Configurable velocity and channel selection
 - **Panic Function**: Emergency all-notes-off on all channels (panic button)
+
+### Color → Note Mapping (defaults)
+
+By default the project starts with the root note set to `C4` (MIDI 60) and the **Major** scale selected. The table below shows which MIDI note each detected color maps to for the default root/scale and for the Minor scale (also rooted at C4) so you can see how the mapping changes when the scale is switched.
+
+| Color  | Index | Major (root=C4) | Minor (root=C4) |
+|--------|:-----:|:---------------:|:---------------:|
+| RED    | 0     | C4 (60)         | C4 (60)         |
+| GREEN  | 1     | D4 (62)         | D4 (62)         |
+| PURPLE | 2     | E4 (64)         | D#4 (63)        |
+| BLUE   | 3     | F4 (65)         | F4 (65)         |
+| ORANGE | 4     | G4 (67)         | G4 (67)         |
+| YELLOW | 5     | A4 (69)         | G#4 (68)        |
+| SILVER | 6     | B4 (71)         | A#4 (70)        |
+| WHITE  | 7     | Note-off        | Note-off        |
+
+Notes:
+- The mapping uses the current `root note` and `scale` selected in the menu. Changing the root note or scale updates what MIDI note each color produces.
+- `WHITE` is treated specially as a note-off / silent color and does not produce a MIDI note.
+
 
 ## Features
 
@@ -124,8 +145,9 @@ The system continuously monitors the color sensor and generates MIDI notes:
   - **Calibration**: Menu framework for future sensor calibration
 - **Multi-sensor MIDI generation**: Independent channel assignment per sensor
 - Real-time color detection and MIDI note generation for all four sensors
-- Color enum system (PINK, RED, ORANGE, YELLOW, GREEN, CYAN, BLUE, PURPLE, WHITE)
+- Color enum system (RED, GREEN, PURPLE, BLUE, ORANGE, YELLOW, SILVER, WHITE)
 - Scale management system for color-to-MIDI conversion
+ - Root note selection menu (per-project root note saved to EEPROM)
 - ALL NOTES OFF functionality when changing channels
 - **Advanced troubleshooting**: Live RGB value monitoring with encoder mode switching
 - **Interrupt-based input system**: Responsive encoder/button handling with proper debouncing

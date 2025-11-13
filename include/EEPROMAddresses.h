@@ -104,4 +104,4 @@
 #define OCTAVE_D_ADDR 489
 
 #define SCALE_ADDR 490
-#define ROOT_NOTE_ADDR_ 491
+#define ROOT_NOTE_ADDR 491

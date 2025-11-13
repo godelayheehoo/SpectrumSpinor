@@ -29,9 +29,10 @@ enum MenuState {
     CALIBRATION_B_MENU,
     CALIBRATION_C_MENU,
     CALIBRATION_D_MENU, 
-    SCALE_MENU
+    SCALE_MENU,
+    ROOT_NOTE_MENU
 };
-static const int NUM_MAIN_MENU_ITEMS = 6;
+static const int NUM_MAIN_MENU_ITEMS = 6; //don't count main menu or calibration_x_menus
 
 enum MenuButton {
     BUTTON_NONE,
@@ -196,6 +197,17 @@ public:
     void octaveMenuConButton();
     void octaveMenuBackButton();   
     void saveOctaves();
+
+    // Handler functions for ROOT_NOTE_MENU
+    void rootNoteMenuEncoder(int turns);
+    void rootNoteMenuEncoderButton();
+    void rootNoteMenuConButton();
+    void rootNoteMenuBackButton();
+    uint8_t rootNoteSelectedIdx = 0;
+    uint8_t rootNoteActiveIdx = 0;
+    uint8_t rootNoteScrollIdx = 0;
+    const uint8_t NUM_ROOT_NOTES = 12;
+    static const uint8_t ROOT_MENU_VISIBLE_ITEMS = 5;
 
     MenuState currentMenu;
     Adafruit_SH1106G& display;

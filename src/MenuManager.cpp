@@ -16,7 +16,8 @@ const MenuHandlers menuHandlersTable[] = {
     { &MenuManager::calibrationMenuBEncoder, &MenuManager::calibrationMenuBEncoderButton, &MenuManager::calibrationMenuBConButton, &MenuManager::calibrationMenuBBackButton }, // CALIBRATION_B_MENU
     { &MenuManager::calibrationMenuCEncoder, &MenuManager::calibrationMenuCEncoderButton, &MenuManager::calibrationMenuCConButton, &MenuManager::calibrationMenuCBackButton }, // CALIBRATION_C_MENU
     { &MenuManager::calibrationMenuDEncoder, &MenuManager::calibrationMenuDEncoderButton, &MenuManager::calibrationMenuDConButton, &MenuManager::calibrationMenuDBackButton },  // CALIBRATION_D_MENU
-    { &MenuManager::scaleMenuEncoder, &MenuManager::scaleMenuEncoderButton, &MenuManager::scaleMenuConButton, &MenuManager::scaleMenuBackButton }  // SCALE_MENU
+    { &MenuManager::scaleMenuEncoder, &MenuManager::scaleMenuEncoderButton, &MenuManager::scaleMenuConButton, &MenuManager::scaleMenuBackButton },  // SCALE_MENU
+    { &MenuManager::rootNoteMenuEncoder, &MenuManager::rootNoteMenuEncoderButton, &MenuManager::rootNoteMenuConButton, &MenuManager::rootNoteMenuBackButton }  // ROOT_NOTE_MENU
 };
 
 MenuManager::MenuManager(Adafruit_SH1106G& disp) : display(disp), currentMenu(TROUBLESHOOT_MENU) {
@@ -165,44 +166,26 @@ void MenuManager::handleEncoder(int turns){
 
 void MenuManager::render() {
     if (currentMenu == MAIN_MENU) {
-        display.clearDisplay();
         display.setTextSize(1);
-        display.setTextColor(OLED_WHITE);
-        display.setCursor(10, 0);
-        // Menu item 1: Grid View
-        if (mainMenuSelectedIdx == 0) {
+    const char* menus[NUM_MAIN_MENU_ITEMS] = {"Grid View", "Troubleshoot", "Calibration", "Octave", "Scale","Root Notes"};
+    int yStart = 5;
+    display.setCursor(10,yStart);
+    display.setTextColor(OLED_WHITE);
+
+    int itemIdx = mainMenuScrollIdx;
+    int y = yStart;
+    for(int visible = 0; visible < MAIN_MENU_VISIBLE_ITEMS; ++visible,++itemIdx){
+        display.setCursor(10,y);
+        if(itemIdx == mainMenuSelectedIdx){
             display.setTextColor(OLED_BLACK, OLED_WHITE);
         } else {
-            display.setTextColor(OLED_WHITE);
+            display.setTextColor(OLED_WHITE, OLED_BLACK);
         }
-        display.print("Grid View");
-        // Menu item 2: Troubleshoot
-        display.setCursor(10, 15);
-        if (mainMenuSelectedIdx == 1) {
-            display.setTextColor(OLED_BLACK, OLED_WHITE);
-        } else {
-            display.setTextColor(OLED_WHITE);
-        }
-        display.print("Troubleshoot");
-        // Menu item 3: Calibration
-        display.setCursor(10, 30);
-        if (mainMenuSelectedIdx == 2) {
-            display.setTextColor(OLED_BLACK, OLED_WHITE);
-        } else {
-            display.setTextColor(OLED_WHITE);
-        }
-        display.print("Calibration");
-        // Menu item 4: Octave
-        display.setCursor(10,45);
-        if (mainMenuSelectedIdx == 3) {
-            display.setTextColor(OLED_BLACK, OLED_WHITE);
-        } else {
-            display.setTextColor(OLED_WHITE);
-        }
-        display.print("Octave");
-        
-        display.display(); // Send buffer to screen
-        
+        display.print(menus[itemIdx]);
+    y+=9;
+    }
+    display.display();
+
     } else if (currentMenu == MIDI_GRID_MENU) {
         display.clearDisplay();
         display.setTextSize(1);
@@ -680,6 +663,32 @@ void MenuManager::scaleMenuConButton(){
 }
 
 void MenuManager::scaleMenuBackButton(){
+    currentMenu = MAIN_MENU;
+}
+
+void MenuManager::rootNoteMenuEncoder(int turns){
+    rootNoteSelectedIdx = constrain(rootNoteSelectedIdx + turns, 0, NUM_ROOT_NOTES - 1);
+    if (rootNoteSelectedIdx < rootNoteScrollIdx) {
+        rootNoteScrollIdx = rootNoteSelectedIdx;
+    } else if (rootNoteSelectedIdx > rootNoteScrollIdx + ROOT_MENU_VISIBLE_ITEMS - 1) {
+        rootNoteScrollIdx = rootNoteSelectedIdx - ROOT_MENU_VISIBLE_ITEMS + 1;
+    }
+
+}
+
+void MenuManager::rootNoteMenuEncoderButton(){
+    rootNoteActiveIdx = rootNoteSelectedIdx;
+    Serial.print("Root note set to: ");
+    Serial.println(rootNoteActiveIdx);
+    scaleManager.setRootNote(RootNote(rootNoteActiveIdx));
+}
+
+void MenuManager::rootNoteMenuConButton(){
+    showCenteredMessage("Root Note saved!", 2, 8, 6, 150);
+    scaleManager.saveRootNote();
+}
+
+void MenuManager::rootNoteMenuBackButton(){
     currentMenu = MAIN_MENU;
 }
 

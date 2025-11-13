@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "ColorEnum.h"
 
-enum RootNote : uint8_t {
+enum class RootNote : uint8_t {
     C4  = 60,
     Csharp4 = 61, // C#4 / Db4
     D4 = 62,
